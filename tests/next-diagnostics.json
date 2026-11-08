@@ -1,0 +1,67 @@
+{
+  "status": "passed",
+  "scope": "Development gate: exact compiler diagnostics for typos, borrow misuse and misplaced control flow.",
+  "compiler_sha256": "69a39b1bc44769767e1a4054b0994e55fcfc9640a9e9810b1fcc88b88f7d3993",
+  "cases": [
+    {
+      "case": "unknown field suggests the real one",
+      "code": "E200",
+      "message": "unknown field cuont on Row, did you mean 'count'?",
+      "stderr": "main.aw:7:13: error[E200]: unknown field cuont on Row, did you mean 'count'?"
+    },
+    {
+      "case": "unknown function suggests the real one",
+      "code": "E200",
+      "message": "unknown function helpr, did you mean 'helper'?",
+      "stderr": "main.aw:5:11: error[E200]: unknown function helpr, did you mean 'helper'?"
+    },
+    {
+      "case": "unknown local suggests the real one",
+      "code": "E200",
+      "message": "unknown local cuonter, did you mean 'counter'?",
+      "stderr": "main.aw:3:11: error[E200]: unknown local cuonter, did you mean 'counter'?"
+    },
+    {
+      "case": "unknown variant suggests the real one",
+      "code": "E200",
+      "message": "unknown variant Kind.C, did you mean 'A'?",
+      "stderr": "main.aw:6:9: error[E200]: unknown variant Kind.C, did you mean 'A'?"
+    },
+    {
+      "case": "mutable borrow of a temporary",
+      "code": "E229",
+      "message": "@m arguments must be an existing local, field or element",
+      "stderr": "main.aw:9:5: error[E229]: @m arguments must be an existing local, field or element, found a temporary value"
+    },
+    {
+      "case": "mutable borrow of a scalar",
+      "code": "E229",
+      "message": "@m parameters must be a struct type, not i64",
+      "stderr": "main.aw:5:17: error[E229]: @m parameters must be a struct type, not i64"
+    },
+    {
+      "case": "mutable borrow type mismatch",
+      "code": "E200",
+      "message": "argument types ['Row', 'string'] do not match ['Row', 'i64']",
+      "stderr": "main.aw:10:5: error[E200]: argument types ['Row', 'string'] do not match ['Row', 'i64']"
+    },
+    {
+      "case": "break outside a loop",
+      "code": "E226",
+      "message": "break outside for/while loop",
+      "stderr": "main.aw:2:5: error[E226]: break outside for/while loop"
+    },
+    {
+      "case": "bare return in a value function",
+      "code": "E200",
+      "message": "return without a value in a function returning i64",
+      "stderr": "main.aw:2:5: error[E200]: return without a value in a function returning i64"
+    },
+    {
+      "case": "use after move",
+      "code": "E221",
+      "message": "use of moved builder b",
+      "stderr": "main.aw:4:33: error[E221]: use of moved builder b"
+    }
+  ]
+}

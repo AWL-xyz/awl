@@ -1,0 +1,6 @@
+format: 1
+kind: package
+name: fsp
+version: 0.1.0
+entry: fsp.aw
+syntax: next

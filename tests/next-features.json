@@ -1,0 +1,42 @@
+{
+  "status": "passed",
+  "scope": "Development gate: build and run the struct, loop and container examples with the bundled SDK, compare exact stdout.",
+  "compiler_sha256": "69a39b1bc44769767e1a4054b0994e55fcfc9640a9e9810b1fcc88b88f7d3993",
+  "cases": [
+    {
+      "example": "structs",
+      "sources": [
+        "Shape.aw",
+        "main.aw"
+      ],
+      "source_sha256": {
+        "Shape.aw": "c5259c5a46330576c9b92e693f50f0c7cf7a2357ff6d8327f788fe0176563df2",
+        "main.aw": "cbe548c45dd10742d509b4985376f1e0ef263fb0f4ed7fee0ca6d8b4c765d4b1"
+      },
+      "stdout_lines": 18,
+      "exit": 0
+    },
+    {
+      "example": "loops",
+      "sources": [
+        "main.aw"
+      ],
+      "source_sha256": {
+        "main.aw": "46e0bd3e1986e20ca66c59a067b37aa2d0debd0dbffdba7e4cfcc77f784bb45d"
+      },
+      "stdout_lines": 23,
+      "exit": 0
+    },
+    {
+      "example": "containers",
+      "sources": [
+        "main.aw"
+      ],
+      "source_sha256": {
+        "main.aw": "ac36b6fb8f4263bc3516e5cd54810897c4de166aaa0d054529246e8ab1d71a25"
+      },
+      "stdout_lines": 29,
+      "exit": 0
+    }
+  ]
+}

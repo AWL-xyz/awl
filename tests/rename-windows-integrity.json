@@ -1,0 +1,29 @@
+{
+  "status": "archive integrity passed; NOT Windows runtime acceptance",
+  "sha256": "50d6a7a914b2c75639c95be645cfb36555996e906dee718178b8bf72ccc565ec",
+  "bytes": 57905784,
+  "archive_members": 19637,
+  "source_hashes_verified_against_manifest_and_current_source": 49,
+  "examples_verified_against_current_source": 43,
+  "kcc_and_zig_hashes_verified": true,
+  "unmodified_full_upstream_files_content_verified": 18105,
+  "compiler_DLL_imports": [
+    "bcrypt.dll",
+    "ADVAPI32.dll",
+    "api-ms-win-crt-heap-l1-1-0.dll",
+    "api-ms-win-crt-private-l1-1-0.dll",
+    "api-ms-win-crt-runtime-l1-1-0.dll",
+    "api-ms-win-crt-stdio-l1-1-0.dll",
+    "api-ms-win-crt-string-l1-1-0.dll",
+    "KERNEL32.dll",
+    "api-ms-win-crt-math-l1-1-0.dll",
+    "api-ms-win-crt-environment-l1-1-0.dll",
+    "api-ms-win-crt-locale-l1-1-0.dll",
+    "api-ms-win-crt-time-l1-1-0.dll",
+    "api-ms-win-crt-multibyte-l1-1-0.dll",
+    "api-ms-win-crt-convert-l1-1-0.dll"
+  ],
+  "DLL_qualification": "Windows OS/UCRT API sets only; stock real-Windows execution still pending",
+  "installed_backend_acceptance": false,
+  "real_windows_execution": false
+}

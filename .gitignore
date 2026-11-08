@@ -1,0 +1,19 @@
+__pycache__/
+*.pyc
+*.exe
+*.o
+*.obj
+hello
+hello.c
+hello.kir.json
+core
+core.*
+
+compiler/native/bin/
+
+# Private planning and local working notes, never publish these
+[Rr][Oo][Aa][Dd][Mm][Aa][Pp].[Mm][Dd]
+/agents.md
+/memory.md
+/to-do.md
+/history/

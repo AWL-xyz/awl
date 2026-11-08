@@ -1,0 +1,7 @@
+{
+  "hello.aw": "1\n2\n6\n24\n120\n720\n5040\n40320\n362880\n3628800\n",
+  "integers.aw": "4097\n-128\n32767\n2147483647\n255\n",
+  "logic.aw": "true\n",
+  "results.aw": "7\ntrue\n6\nfalse\nfalse\n-1\n",
+  "values.aw": "10\n15\n1\ntrue\n18446744073709551615\n"
+}

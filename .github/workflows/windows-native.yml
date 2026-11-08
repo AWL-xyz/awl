@@ -1,0 +1,38 @@
+name: Complete native Windows bundle
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  installed-bundle:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Build full Windows-host bundle with pinned bundled toolchain
+        run: python compiler/package_windows.py --download-toolchain
+      - name: Extract exact full archive (not staged directory)
+        shell: pwsh
+        run: |
+          python -c "import tarfile; tarfile.open('build/Awl-0.24.0-dev-windows-x86_64-preview.tar.xz').extractall('C:/Awl-acceptance',filter='data')"
+      - name: Exact archive, source, backend resource and system-DLL integrity
+        run: python tests/windows_preview_integrity.py --archive build/Awl-0.24.0-dev-windows-x86_64-preview.tar.xz --bundle C:/Awl-acceptance/Awl --report tests/windows-real-host-integrity.json
+      - name: Native installed compiler with no development tools PATH
+        run: python tests/windows_bundle_smoke.py --expected-version 0.24.0-dev --bundle C:/Awl-acceptance/Awl --report tests/windows-real-host-smoke.json
+      - name: Experimental next production syntax on native Windows host
+        run: python tests/next_production.py --kcc C:/Awl-acceptance/Awl/bin/kcc.exe --report tests/windows-real-host-next-production.json
+      - name: Module variables, numeric literals and math on native Windows host
+        run: python tests/module_numeric.py --kcc C:/Awl-acceptance/Awl/bin/kcc.exe --report tests/windows-real-host-module-numeric.json
+      - name: Win32 process and staging failure fixtures (not backend acceptance)
+        run: python tests/windows_driver_fixtures.py --bundle C:/Awl-acceptance/Awl --compiler C:/Awl-acceptance/Awl/libexec/zig/zig.exe --report tests/windows-real-host-driver-fixtures.json
+      - name: Real USER32/GDI windows and Awl Pixelboard application
+        run: python tests/win32_gui.py --resume-from C:/Awl-acceptance/Awl/examples/apps/pixelboard/sample.kpb --bundle C:/Awl-acceptance/Awl --compiler C:/Awl-acceptance/Awl/libexec/zig/zig.exe --report tests/windows-real-host-gui.json
+      - name: Real Windows file IO, Unicode arguments, binary apps and drawing format
+        run: python tests/files_windows.py --frontend C:/Awl-acceptance/Awl/bin/kcc.exe --examples C:/Awl-acceptance/Awl/examples --report tests/windows-real-host-files.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: windows-native-bundle-and-evidence
+          path: |
+            build/Awl-0.24.0-dev-windows-x86_64-preview.tar.xz*
+            tests/windows-real-host-*.json

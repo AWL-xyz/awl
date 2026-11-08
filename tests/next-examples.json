@@ -1,0 +1,199 @@
+{
+  "status": "passed",
+  "scope": "Development regression only: structural checker coverage over every examples-next source, imports auto-loaded.",
+  "binary_sha256": "ebfc945e9e3dbcc6ce7d89ed363655b96d389f25de6c472635f1df926c1e4598",
+  "checker_source_sha256": "f80a7d5b0c0e067e297ceeb665416785e901219a05db2e1c20d6e03a281a89dd",
+  "sources": 38,
+  "records": [
+    {
+      "source": "examples-next/apps/colorlab/Graphics.aw",
+      "source_sha256": "a95672fd5fa983ef464840fa65a84d823a9284a53c96fe4d1e5c997ccb9ea0b1",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/apps/colorlab/main.aw",
+      "source_sha256": "84e737ae52715a2ed4d6683d4296633aa426ea9f0f6fb42760f914a0fe40f4af",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/apps/kpipe/main.aw",
+      "source_sha256": "f66edb4394cedf3169080771c8cb393bbd83bce55c64ce94be97330503e5a4ec",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/apps/ksave/main.aw",
+      "source_sha256": "fa2adf9ce82ec2fc61aa564a8caf23275b3d72cb52cb943eba349fba82d6bc4b",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/apps/kserve/Http.aw",
+      "source_sha256": "e05ecdde66c63986865afd02d7ab75237e90edc14f3357d4382a979fe9c7f9b4",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/apps/kserve/main.aw",
+      "source_sha256": "4ea6e70482fddff837b390b77246755b967191829c840ddd2537c279350d6322",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/apps/ksort/Sort.aw",
+      "source_sha256": "4aaae9abdb8065014f4f3923aca663d1fa79c2b5a72446f90ca4577d829cfaf0",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/apps/ksort/main.aw",
+      "source_sha256": "153452c030acb0334a23fbe49103dc37ee1ee4cb0191273117043e21b1c92ab6",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/apps/kvserve/Http.aw",
+      "source_sha256": "be27fedeadffbac3178bf7225a874b51e22ccfc2aba0677e66db6ae36648c1e7",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/apps/kvserve/Journal.aw",
+      "source_sha256": "83d530f8e59ec36f79477610f256e55b97caa934043501814f76675599e3d01a",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/apps/kvserve/Json.aw",
+      "source_sha256": "e7b3adb8c1227804ebdf82fdd13107ce57318455e4d44ee25200de0df245674c",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/apps/kvserve/TextMap.aw",
+      "source_sha256": "81c89b0beb6ffadb469c8fe2bc7cd00a489e9d777d5b8600054849960fce403f",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/apps/kvserve/main.aw",
+      "source_sha256": "45072c202bb30e3b5115d679f55dc60779c55585816fb97bf492ebbeea61f737",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/collections/main.aw",
+      "source_sha256": "93e55db8c576e1e9071b91d73f28ace54dd7e5584a531ce85e9c4bf2ff503238",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/containers/main.aw",
+      "source_sha256": "ac36b6fb8f4263bc3516e5cd54810897c4de166aaa0d054529246e8ab1d71a25",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/enums/main.aw",
+      "source_sha256": "cbca333555c978c6152d6e8d26a98950882ccdbb757ad276d402cd59759b33b2",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/exported-enums/Config.aw",
+      "source_sha256": "92b703144f076c30cdb9d2fe7d481b41c45b1a47588206575d41c29cce943091",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/exported-enums/File.aw",
+      "source_sha256": "b50ab015ca0335e610d3a97d525eb86ea221aa114e181b849d4b32c084b9e829",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/exported-enums/main.aw",
+      "source_sha256": "d1ff75cdd49ba5c248dbf611019b9b574bb6176e46974e9621a45b7f55d74974",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/exported-enums/vendor/Json.aw",
+      "source_sha256": "0d9d608b2e751cb58587bf83ba98d0c0c2c911ae05ba584c490cc9b5cf1cfdda",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/exported-enums/web.aw",
+      "source_sha256": "196926078f534bd009fe0c41c94d23cc838feb890e8b49ec88bed505be3a93bf",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/exports/Template.aw",
+      "source_sha256": "184375445025fdc617f2cfef933a1dcc3bf86a44f895caef7e83bf49117e30b1",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/exports/main.aw",
+      "source_sha256": "989f1535f457a14ac100f14a75b065e2b5d434047dc5a26b085ac173403473bd",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/loops/main.aw",
+      "source_sha256": "46e0bd3e1986e20ca66c59a067b37aa2d0debd0dbffdba7e4cfcc77f784bb45d",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/modules/Library.aw",
+      "source_sha256": "6f960b540b89e2c9ca1ea2c85457880cb467b68f2e626494406a5cbbadc3b9b6",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/modules/main.aw",
+      "source_sha256": "513c2a881ef64608de64ce0c87743ebd924d33eb59ffca1e533aa2d9301a44b7",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/native/Library.aw",
+      "source_sha256": "b2360133282286456dd60d68daeddc4a4f50780eb83fe8d2bb72e22af5a544df",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/native/main.aw",
+      "source_sha256": "371e3769e6dff94872761517d49ab3e0ba25e0f2de9ac47929100f2afa4c3d59",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/numeric/donut.aw",
+      "source_sha256": "c50bc94d23d6f10396ddd27f5769c3cea2a1c7b7fffc6a7b6655e25d9d7e86f9",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/numeric/main.aw",
+      "source_sha256": "ddda8ae3dac2f219a5058205640b0733c5ec22b3a155b801c093e894bb5cdf85",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/parsing/Integer.aw",
+      "source_sha256": "1226f2af77b0373a0ecbacf569964e700d9cb05f6d1bc6f5ceb7b60ea2ee0f36",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/parsing/Json.aw",
+      "source_sha256": "0d9d608b2e751cb58587bf83ba98d0c0c2c911ae05ba584c490cc9b5cf1cfdda",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/parsing/jget.aw",
+      "source_sha256": "fbb82b0412df70f3b4ef0e91cb8704405c9878f94d12ff86e89dfd6e0635bca6",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/parsing/web.aw",
+      "source_sha256": "7bcb73975d194fa3d3bc6b8ba58ba8d7d4200a22d46002a0ab80ecf35efeadc9",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/structs/Shape.aw",
+      "source_sha256": "c5259c5a46330576c9b92e693f50f0c7cf7a2357ff6d8327f788fe0176563df2",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/structs/main.aw",
+      "source_sha256": "cbe548c45dd10742d509b4985376f1e0ef263fb0f4ed7fee0ca6d8b4c765d4b1",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/tour/Library.aw",
+      "source_sha256": "2e73290e9f6b1ef6c2c75064938ddfa2b13cf8c288ce97cf2b1ed15f12810a5d",
+      "exit": 0
+    },
+    {
+      "source": "examples-next/tour/main.aw",
+      "source_sha256": "8c5e0d581ef7803b908c839f49dd03771ac3b55496ccc7d33237b4a0ab131c22",
+      "exit": 0
+    }
+  ]
+}

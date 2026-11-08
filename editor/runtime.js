@@ -1,0 +1,61 @@
+/* Browser-only Awl subset. Grammar parsed before JavaScript generation; never eval user source. */
+function AwlBrowserRuntime(files, entry, send) {
+ 'use strict';
+ const sleep = ms => new Promise(r=>setTimeout(r,Math.max(0,Math.min(10000,ms))));
+ const windows=new Map(); let nextWindow=1, frames=0, operations=0;
+ const checked = n => {if(!Number.isSafeInteger(n))throw Error('Browser integer range exceeded (safe integers only).');return n;};
+ const win=id=>{if(!windows.has(id))throw Error('Invalid window handle');return windows.get(id);};
+ const builtins={pi:Math.PI,tau:2*Math.PI,sin:Math.sin,cos:Math.cos,sqrt:Math.sqrt,atan2:Math.atan2,
+ f64:x=>Number(x),print:x=>{send({type:'stdout',text:String(x)+'\n'});},
+ sleep_millis:sleep,clock_millis:()=>Math.floor(performance.now()),
+ window_open:(w,h)=>{if(!Number.isInteger(w)||!Number.isInteger(h)||w<1||h<1||w*h>1048576)throw Error('Browser framebuffer limit: 1,048,576 pixels');const id=nextWindow++;windows.set(id,{w,h,title:'Awl window',pixels:new Uint8ClampedArray(w*h*4)});send({type:'open',id,w,h});return id;},
+ window_width:id=>win(id).w,window_height:id=>win(id).h,
+ window_set_title:(id,title)=>{win(id).title=String(title);send({type:'title',id,title:String(title)});return true;},
+ window_set_pixel:(id,x,y,c)=>{const v=win(id);if(!Number.isInteger(x)||!Number.isInteger(y)||x<0||y<0||x>=v.w||y>=v.h)throw Error('Pixel outside framebuffer');const i=(y*v.w+x)*4;v.pixels[i]=(c>>16)&255;v.pixels[i+1]=(c>>8)&255;v.pixels[i+2]=c&255;v.pixels[i+3]=255;},
+ window_present:id=>{const v=win(id);send({type:'frame',id,w:v.w,h:v.h,pixels:v.pixels.slice(),frame:++frames});return true;},
+ window_close:id=>{win(id);windows.delete(id);send({type:'close',id});},
+ window_poll:id=>{win(id);return 0;},window_key:id=>0,window_mouse_x:id=>0,window_mouse_y:id=>0};
+ const bin=(op,a,b)=>{switch(op){case '+':return typeof a==='string'||typeof b==='string'?(()=>{throw Error('Text arithmetic unsupported');})():a+b;case '-':return a-b;case '*':return a*b;case '/':if(b===0)throw Error('Division by zero');return a/b;case '%':if(b===0)throw Error('Remainder by zero');return a%b;case '==':return a===b;case '!=':return a!==b;case '<':return a<b;case '>':return a>b;case '<=':return a<=b;case '>=':return a>=b;case 'and':return a&&b;case 'or':return a||b;}throw Error('Unknown operator');};
+ class Parser {
+  constructor(src,path){this.path=path;this.t=[];this.i=0;let p=0,line=1;while(p<src.length){let s=src.slice(p),m;if((m=/^\s+/.exec(s))){line+=(m[0].match(/\n/g)||[]).length;p+=m[0].length;continue;}if((m=/^--[^\n]*/.exec(s))){p+=m[0].length;continue;}if((m=/^(?:"(?:[^"\\]|\\.)*"|\d+\.\d+|\d+|@[A-Za-z_]+|[A-Za-z_][A-Za-z_0-9]*|->|==|!=|<=|>=|[(){}\[\],;:.+*\/%<>\-=])/.exec(s))){this.t.push({v:m[0],line});p+=m[0].length;}else throw Error(path+':'+line+': unsupported character '+s[0]);}this.t.push({v:'<eof>',line});}
+  peek(){return this.t[this.i].v;}
+  take(){return this.t[this.i++].v;}
+  error(msg){throw Error(this.path+':'+this.t[this.i].line+': '+msg);}
+  eat(s){if(this.peek()===s){this.i++;return true;}return false;}
+  need(s){if(!this.eat(s))this.error('Expected '+s+', found '+this.peek());}
+  id(){let s=this.take();if(!/^[A-Za-z_][A-Za-z_0-9]*$/.test(s))this.error('Expected identifier');return s;}
+  expr(min=0){let a,t=this.take();if(t==='('){a=this.expr();this.need(')');}else if(t==='-'||t==='not'){a={k:'un',op:t,a:this.expr(8)};}else if(/^\d/.test(t)){a={k:'lit',v:Number(t),type:t.includes('.')?'f64':'i64'};if(!Number.isFinite(a.v))this.error('Nonfinite literal');}else if(t[0]==='"'){a={k:'lit',v:JSON.parse(t),type:'text'};}else if(t==='true'||t==='false'){a={k:'lit',v:t==='true',type:'bool'};}else if(/^[A-Za-z_]/.test(t)){a={k:'id',name:t};}else this.error('Unsupported expression '+t);
+   for(;;){if(this.peek()==='('){this.take();let args=[];if(this.peek()!==')'){do{args.push(this.expr());}while(this.eat(','));}this.need(')');a={k:'call',a,args};continue;}if(this.eat('.')){a={k:'member',a,name:this.id()};continue;}
+    const prec={or:1,and:2,'==':3,'!=':3,'<':4,'>':4,'<=':4,'>=':4,'+':5,'-':5,'*':6,'/':6,'%':6};let op=this.peek(),n=prec[op];if(n===undefined||n<min)break;this.take();a={k:'bin',op,a,b:this.expr(n+1)};
+   }return a;
+  }
+  binding(mode){let name=this.id(),type=null;if(this.peek()!==':')type=this.id();this.need(':');let value=this.expr();this.need(';');return {k:'let',name,type,value,mode};}
+  func(mode){let name=this.id();this.need('(');let args=[];if(this.peek()!==')'){do{let n=this.id();this.need(':');let type=this.id();args.push({name:n,type});}while(this.eat(','));}this.need(')');let type='unit';if(this.eat('->'))type=this.id();let body=this.block(['end']);this.need('end');this.need(';');return {k:'func',name,args,type,body,mode};}
+  block(stops){let out=[];while(!stops.includes(this.peek())){if(this.peek()==='<eof>')this.error('Unterminated block');out.push(this.statement());}return out;}
+  statement(){if(this.eat('@p')){if(this.eat('func'))return this.func('private');return this.binding('private');}if(this.eat('return')){let value=this.peek()===';'?null:this.expr();this.need(';');return {k:'return',value};}if(this.eat('while')){let test=this.expr();this.need('do');let body=this.block(['end']);this.need('end');this.need(';');return {k:'while',test,body};}if(this.eat('if')){let test=this.expr();this.need('then');let yes=this.block(['else','end']),no=[];if(this.eat('else'))no=this.block(['end']);this.need('end');this.need(';');return {k:'if',test,yes,no};}let value=this.expr();if(this.eat(':')){let rhs=this.expr();this.need(';');return {k:'assign',value,rhs};}this.need(';');return {k:'expr',value};}
+  parse(){let out=[];const decl=mode=>{if(this.eat('func'))return this.func(mode);return this.binding(mode);};while(this.peek()!=='<eof>'){if(this.eat('use')){let path='';while(this.peek()!==';'&&this.peek()!=='as'){if(this.peek()==='<eof>')this.error('Unterminated import');path+=this.take();}let alias=null;if(this.eat('as'))alias=this.id();this.need(';');out.push({k:'use',path,alias:alias||path.split('/').pop().replace(/\.aw$/,'')});}else if(this.eat('exports')){this.need('(');while(this.peek()!==')'){let mode=this.take();if(mode!=='@r'&&mode!=='@rw')this.error('Expected @r/@rw inside exports');out.push(decl(mode));}this.need(')');this.need(';');}else if(this.eat('@p'))out.push(this.binding('private'));else if(this.eat('func'))out.push(this.func('private'));else this.error('Browser runtime supports next scalar/functions/control-flow/math/window syntax only. Legacy syntax, arrays, structs, unions, ownership and platform I/O require native Awl.');}return out;}
+ }
+ const modules=new Map(),loading=new Set();
+ const safeName=n=>'v_'+n;
+ function load(path){if(loading.has(path))throw Error('Circular import: '+path);if(modules.has(path))return modules.get(path);if(!(path in files))throw Error('Missing project file: '+path);loading.add(path);let ast=new Parser(files[path],path).parse(),imports={};for(let n of ast)if(n.k==='use'){let parts=(path.slice(0,path.lastIndexOf('/')+1)+n.path).split('/'),resolved=[];for(let p of parts){if(p==='..'){if(!resolved.length)throw Error('Import escapes project');resolved.pop();}else if(p!=='.'&&p)resolved.push(p);}imports[n.alias]=load(resolved.join('/'));}
+ const types=new Map(Object.keys(builtins).map(n=>[n, ['pi','tau'].includes(n)?'f64':'builtin']));for(let n of ast)if(n.k==='func')types.set(n.name,'func');for(let n of Object.keys(imports))types.set(n,'module');
+ const expr=(n,scope,expected)=>{if(n.k==='lit')return {s:JSON.stringify(n.v),t:n.type==='i64'&&expected==='f64'?'f64':n.type};if(n.k==='id'){if(!scope.has(n.name))throw Error(path+': Unknown name '+n.name);return {s:safeName(n.name),t:scope.get(n.name)};}if(n.k==='member'){let a=expr(n.a,scope);if(a.t!=='module')throw Error('Member access is only supported on imported modules');return {s:a.s+'['+JSON.stringify(n.name)+']',t:'unknown'};}if(n.k==='un'){let a=expr(n.a,scope);return {s:'('+ (n.op==='not'?'!':'-')+a.s+')',t:n.op==='not'?'bool':a.t};}if(n.k==='call'){let a=expr(n.a,scope);const name=n.a.name,signature=ast.find(x=>x.k==='func'&&x.name===name);let t=signature?signature.type: ['sin','cos','sqrt','atan2','f64'].includes(name)?'f64':['window_present','window_set_title'].includes(name)?'bool':['print','window_set_pixel','window_close','sleep_millis'].includes(name)?'unit':'i64';const args=n.args.map((a,i)=>expr(a,scope,signature?.args[i]?.type).s);return {s:'(await '+a.s+'('+args.join(',')+'))',t};}if(n.k==='bin'){let a=expr(n.a,scope,expected),b=expr(n.b,scope,expected);let t=['==','!=','<','>','<=','>=','and','or'].includes(n.op)?'bool':a.t==='f64'||b.t==='f64'?'f64':'i64';let s=n.op==='and'||n.op==='or'?'('+a.s+(n.op==='and'?'&&':'||')+b.s+')':'B('+JSON.stringify(n.op)+','+a.s+','+b.s+')';if(t==='i64'){if(n.op==='/')s='Math.trunc('+s+')';s='I('+s+')';}return {s,t};}throw Error('Unsupported expression');};
+ const emitBlock=(body,parent,returnType)=>{let scope=new Map(parent),out='';for(let n of body){if(n.k==='let'){if(scope.has(n.name)&&!parent.has(n.name))throw Error('Duplicate local '+n.name);let e=expr(n.value,scope,n.type);scope.set(n.name,n.type||e.t);out+='let '+safeName(n.name)+'='+e.s+';';}else if(n.k==='func'){scope.set(n.name,'func');let nested=new Map(scope);for(let a of n.args)nested.set(a.name,a.type);out+='async function '+safeName(n.name)+'('+n.args.map(a=>safeName(a.name)).join(',')+'){T();'+emitBlock(n.body,nested,n.type)+'}';}else if(n.k==='assign'){let a=expr(n.value,scope),b=expr(n.rhs,scope,a.t);out+=a.s+'='+b.s+';';}else if(n.k==='return')out+='return '+(n.value?expr(n.value,scope,returnType).s:'undefined')+';';else if(n.k==='expr')out+=expr(n.value,scope).s+';';else if(n.k==='while')out+='while('+expr(n.test,scope).s+'){T();'+emitBlock(n.body,scope,returnType)+'}';else if(n.k==='if')out+='if('+expr(n.test,scope).s+'){'+emitBlock(n.yes,scope,returnType)+'}else{'+emitBlock(n.no,scope,returnType)+'}';else throw Error('Unsupported statement');}return out;};
+ let code='"use strict";';for(let n of Object.keys(builtins))code+='const '+safeName(n)+'=H['+JSON.stringify(n)+'];';for(let n of Object.keys(imports))code+='const '+safeName(n)+'=M['+JSON.stringify(n)+'];';
+ for(let n of ast)if(n.k==='let'){let e=expr(n.value,types,n.type);types.set(n.name,n.type||e.t);code+='let '+safeName(n.name)+'='+e.s+';';}
+ for(let n of ast)if(n.k==='func'){let scope=new Map(types);for(let a of n.args)scope.set(a.name,a.type);code+='async function '+safeName(n.name)+'('+n.args.map(a=>safeName(a.name)).join(',')+'){T();'+emitBlock(n.body,scope,n.type)+'}';}
+ code+='const exports=Object.create(null);';for(let n of ast)if(n.mode==='@r'||n.mode==='@rw')code+='Object.defineProperty(exports,'+JSON.stringify(n.name)+',{get:()=>'+safeName(n.name)+(n.mode==='@rw'?',set:x=>{'+safeName(n.name)+'=x;}':'')+'});';code+='return {exports,main:'+(ast.some(n=>n.k==='func'&&n.name==='main')?'v_main':'null')+'};';
+ const tick=()=>{if(++operations>100000000)throw Error('Browser execution budget exceeded. Reduce workload or restart.');};
+ const compiled=(new Function('H','M','B','I','T','return (async()=>{'+code+'})()'))(builtins,imports,bin,checked,tick);
+ // Await initialization before exposing imports, preserving shared module state.
+ loading.delete(path);modules.set(path,compiled.then(r=>r.exports));return compiled;
+ }
+ // Imports must be initialized before JavaScript module generation receives their exports.
+ async function run(){
+  const ordered=new Set(),visiting=new Set();
+  async function prepare(path){if(ordered.has(path))return;if(visiting.has(path))throw Error('Circular import: '+path);visiting.add(path);if(!(path in files))throw Error('Missing file '+path);const ast=new Parser(files[path],path).parse();for(let n of ast)if(n.k==='use'){let parts=(path.slice(0,path.lastIndexOf('/')+1)+n.path).split('/'),r=[];for(let p of parts){if(p==='..')r.pop();else if(p&&p!=='.')r.push(p);}await prepare(r.join('/'));}const result=await load(path);modules.set(path,result.exports);visiting.delete(path);ordered.add(path);if(path===entry){if(!result.main)throw Error('No main function in entry file');let code=await result.main();send({type:'done',code,operations,frames});}}
+  await prepare(entry);
+ }
+ return run();
+}
+if(typeof module!=='undefined')module.exports=AwlBrowserRuntime;

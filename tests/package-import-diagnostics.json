@@ -1,0 +1,115 @@
+{
+  "status": "passed",
+  "scope": "Development gate: exact compiler diagnostics for typos, borrow misuse and misplaced control flow.",
+  "compiler_sha256": "1595aad882a9304fce949556eaefaeb3968840082f5b0fba90cd352f592e5308",
+  "cases": [
+    {
+      "case": "unknown field suggests the real one",
+      "code": "E200",
+      "message": "unknown field cuont on Row, did you mean 'count'?",
+      "stderr": "main.aw:7:13: error[E200]: unknown field cuont on Row, did you mean 'count'?"
+    },
+    {
+      "case": "unknown function suggests the real one",
+      "code": "E200",
+      "message": "unknown function helpr, did you mean 'helper'?",
+      "stderr": "main.aw:5:11: error[E200]: unknown function helpr, did you mean 'helper'?"
+    },
+    {
+      "case": "unknown local suggests the real one",
+      "code": "E200",
+      "message": "unknown local cuonter, did you mean 'counter'?",
+      "stderr": "main.aw:3:11: error[E200]: unknown local cuonter, did you mean 'counter'?"
+    },
+    {
+      "case": "unknown variant suggests the real one",
+      "code": "E200",
+      "message": "unknown variant Kind.C, did you mean 'A'?",
+      "stderr": "main.aw:6:9: error[E200]: unknown variant Kind.C, did you mean 'A'?"
+    },
+    {
+      "case": "mutable borrow of a temporary",
+      "code": "E229",
+      "message": "@m arguments must be an existing local, field or element",
+      "stderr": "main.aw:9:5: error[E229]: @m arguments must be an existing local, field or element, found a temporary value"
+    },
+    {
+      "case": "mutable borrow of a scalar",
+      "code": "E229",
+      "message": "@m parameters must be a struct type, not i64",
+      "stderr": "main.aw:5:17: error[E229]: @m parameters must be a struct type, not i64"
+    },
+    {
+      "case": "mutable borrow type mismatch",
+      "code": "E200",
+      "message": "argument types ['Row', 'string'] do not match ['Row', 'i64']",
+      "stderr": "main.aw:10:5: error[E200]: argument types ['Row', 'string'] do not match ['Row', 'i64']"
+    },
+    {
+      "case": "break outside a loop",
+      "code": "E226",
+      "message": "break outside for/while loop",
+      "stderr": "main.aw:2:5: error[E226]: break outside for/while loop"
+    },
+    {
+      "case": "bare return in a value function",
+      "code": "E200",
+      "message": "return without a value in a function returning i64",
+      "stderr": "main.aw:2:5: error[E200]: return without a value in a function returning i64"
+    },
+    {
+      "case": "use after move",
+      "code": "E221",
+      "message": "use of moved builder b",
+      "stderr": "main.aw:4:26: error[E221]: use of moved builder b"
+    },
+    {
+      "case": "struct equality rejects mismatched struct types",
+      "code": "E200",
+      "message": "equality requires matching scalar types or structs of scalars",
+      "stderr": "main.aw:10:10: error[E200]: equality requires matching scalar types or structs of scalars"
+    },
+    {
+      "case": "struct equality rejects enum fields",
+      "code": "E200",
+      "message": "equality requires matching scalar types or structs of scalars",
+      "stderr": "main.aw:8:10: error[E200]: equality requires matching scalar types or structs of scalars"
+    },
+    {
+      "case": "resource struct cannot be copied",
+      "code": "E220",
+      "message": "restricted builder cannot be copied, released or escape",
+      "stderr": "main.aw:8:18: error[E220]: restricted builder cannot be copied, released or escape; use supported borrows"
+    },
+    {
+      "case": "resource struct rejects a non-move owner argument",
+      "code": "E222",
+      "message": "own arguments require explicit same-block move in a direct call",
+      "stderr": "main.aw:7:17: error[E222]: own arguments require explicit same-block move in a direct call"
+    },
+    {
+      "case": "resource struct needs a scoped binding",
+      "code": "E223",
+      "message": "a struct holding owned resources must initialize a scoped binding",
+      "stderr": "main.aw:6:11: error[E223]: a struct holding owned resources must initialize a scoped binding or be forwarded as an owned return"
+    },
+    {
+      "case": "resource struct cannot be an enum payload",
+      "code": "E210",
+      "message": "enum payload requires a scalar or enum value",
+      "stderr": "main.aw:5:10: error[E210]: enum payload requires a scalar or enum value, not an owned resource/array"
+    },
+    {
+      "case": "builtins use category.function",
+      "code": "E102",
+      "message": "call builtins as category.function, use spool.new(...)",
+      "stderr": "main.aw:2:17: error[E102]: call builtins as category.function, use spool.new(...)"
+    },
+    {
+      "case": "missing package is an error, never a local fallback",
+      "code": "E300",
+      "message": "package 'nothere' is not installed",
+      "stderr": "/tmp/Awl-next-diagnostics-qw1ubygh/17/main.aw:1:1: error[E300]: package 'nothere' is not installed (expected packages/nothere/nothere.awpkg)"
+    }
+  ]
+}

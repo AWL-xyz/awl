@@ -1,0 +1,6 @@
+multiple.aw:2:20: error[E100]: expected expression; got ';'
+      local x: i64 = ;
+                     ^
+multiple.aw:3:13: error[E100]: expected ':'; got 'bool'
+      local y bool = 1;
+              ^~~~

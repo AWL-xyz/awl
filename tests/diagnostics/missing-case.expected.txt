@@ -1,0 +1,3 @@
+missing-case.aw:6:5: error[E200]: non-exhaustive match; missing: Missing
+      match Lookup.Found(1) then
+      ^~~~~

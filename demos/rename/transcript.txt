@@ -1,0 +1,2575 @@
+Script started on 2026-11-07 07:22:10+00:00 [COMMAND="/bin/bash /var/tmp/Awl-actual-terminal-c482byya/session.sh" TERM="xterm" TTY="/dev/pts/0" COLUMNS="114" LINES="34"]
+Awl / native SDK, real compilation and execution
+
+$ awl --version
+Awl Software Development Kit [Beta] 0.24.0-dev
+$ AwL InIt Demo
+Initialized Demo in /var/tmp/Awl-actual-terminal-c482byya
+Created main.aw
+Created Demo.awproj
+Build with: awl build
+$ set +x
+$ cat Lib.aw main.aw
+exports(@r func answer()->i64 return 42; end;);
+use Lib.aw;
+func main()->i64 print(Lib.answer()); return 0; end;
+$ AWL BuIlD
+[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[13] musl libc.a
+(0tq(B symlinkat.c
+(0tq(B [0/13] Linking
+(0mq(B symlink.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[19] musl libc.a
+(0tq(B setreuid.c
+(0tq(B [0/19] Linking
+(0mq(B setresuid.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[25] musl libc.a
+(0tq(B seteuid.c
+(0tq(B [0/25] Linking
+(0mq(B setpgid.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[31] musl libc.a
+(0tq(B readlink.c
+(0tq(B [0/31] Linking
+(0mq(B readlinkat.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[37] musl libc.a
+(0tq(B posix_close.c
+(0tq(B [0/37] Linking
+(0mq(B pread.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[42] musl libc.a
+(0tq(B lseek.c
+(0tq(B [0/42] Linking
+(0mq(B nice.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[49] musl libc.a
+(0tq(B getppid.c
+(0tq(B [0/49] Linking
+(0mq(B getuid.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[56] musl libc.a
+(0tq(B getgroups.c
+(0tq(B [0/56] Linking
+(0mq(B gethostname.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[61] musl libc.a
+(0tq(B ftruncate.c
+(0tq(B [0/61] Linking
+(0mq(B getegid.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[69] musl libc.a
+(0tq(B faccessat.c
+(0tq(B [0/69] Linking
+(0mq(B dup.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[76] musl libc.a
+(0tq(B chdir.c
+(0tq(B [0/76] Linking
+(0mq(B alarm.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[82] musl libc.a
+(0tq(B utime.c
+(0tq(B [0/82] Linking
+(0mq(B __tz.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[88] musl libc.a
+(0tq(B timer_getoverrun.c
+(0tq(B [0/88] Linking
+(0mq(B __tz.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[92] musl libc.a
+(0tq(B time.c
+(0tq(B [0/92] Linking
+(0mq(B __tz.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[95] musl libc.a
+(0tq(B __secs_to_tm.c
+(0tq(B [0/95] Linking
+(0mq(B strftime.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[99] musl libc.a
+(0tq(B mktime.c
+(0tq(B [0/99] Linking
+(0mq(B __map_file.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[105] musl libc.a
+(0tq(B getdate.c
+(0tq(B [0/105] Linking
+(0mq(B gettimeofday.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[111] musl libc.a
+(0tq(B clock_nanosleep.c
+(0tq(B [0/111] Linking
+(0mq(B clock_settime.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[116] musl libc.a
+(0tq(B asctime_r.c
+(0tq(B [0/116] Linking
+(0mq(B clock.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[123] musl libc.a
+(0tq(B vmlock.c
+(0tq(B [0/123] Linking
+(0mq(B __wait.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[129] musl libc.a
+(0tq(B __timedwait.c
+(0tq(B [0/129] Linking
+(0mq(B __tls_get_addr.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[134] musl libc.a
+(0tq(B thrd_create.c
+(0tq(B [0/134] Linking
+(0mq(B thrd_exit.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[139] musl libc.a
+(0tq(B sem_unlink.c
+(0tq(B [0/139] Linking
+(0mq(B sem_trywait.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[142] musl libc.a
+(0tq(B sem_open.c
+(0tq(B [0/142] Linking
+(0mq(B sem_post.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[147] musl libc.a
+(0tq(B pthread_spin_unlock.c
+(0tq(B [0/147] Linking
+(0mq(B pthread_testcancel.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[153] musl libc.a
+(0tq(B pthread_sigmask.c
+(0tq(B [0/153] Linking
+(0mq(B pthread_setspecific.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[159] musl libc.a
+(0tq(B pthread_setcanceltype.c
+(0tq(B [0/159] Linking
+(0mq(B pthread_setcancelstate.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[165] musl libc.a
+(0tq(B pthread_rwlock_tryrdlock.c
+(0tq(B [0/165] Linking
+(0mq(B pthread_rwlock_trywrlock.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[170] musl libc.a
+(0tq(B pthread_rwlock_init.c
+(0tq(B [0/170] Linking
+(0mq(B pthread_rwlock_destroy.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[176] musl libc.a
+(0tq(B pthread_mutex_trylock.c
+(0tq(B [0/176] Linking
+(0mq(B pthread_mutex_unlock.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[179] musl libc.a
+(0tq(B pthread_mutex_setprioceiling.c
+(0tq(B [0/179] Linking
+(0mq(B pthread_mutex_lock.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[186] musl libc.a
+(0tq(B pthread_mutexattr_setpshared.c
+(0tq(B [0/186] Linking
+(0mq(B pthread_mutexattr_setrobust.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[191] musl libc.a
+(0tq(B pthread_key_create.c
+(0tq(B [0/191] Linking
+(0mq(B pthread_mutexattr_destroy.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[196] musl libc.a
+(0tq(B pthread_getname_np.c
+(0tq(B [0/196] Linking
+(0mq(B pthread_getcpuclockid.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[202] musl libc.a
+(0tq(B pthread_create.c
+(0tq(B [0/202] Linking
+(0mq(B pthread_cond_wait.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[204] musl libc.a
+(0tq(B pthread_cond_signal.c
+(0tq(B [0/204] Linking
+(0mq(B pthread_cond_timedwait.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[210] musl libc.a
+(0tq(B pthread_condattr_init.c
+(0tq(B [0/210] Linking
+(0mq(B pthread_condattr_setclock.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[214] musl libc.a
+(0tq(B pthread_barrier_wait.c
+(0tq(B [0/214] Linking
+(0mq(B pthread_cancel.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[219] musl libc.a
+(0tq(B pthread_barrierattr_init.c
+(0tq(B [0/219] Linking
+(0mq(B pthread_barrierattr_destroy.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[227] musl libc.a
+(0tq(B pthread_attr_setguardsize.c
+(0tq(B [0/227] Linking
+(0mq(B pthread_attr_setdetachstate.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[231] musl libc.a
+(0tq(B pthread_atfork.c
+(0tq(B [0/231] Linking
+(0mq(B pthread_attr_get.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[237] musl libc.a
+(0tq(B mtx_destroy.c
+(0tq(B [0/237] Linking
+(0mq(B mtx_lock.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[245] musl libc.a
+(0tq(B cnd_destroy.c
+(0tq(B [0/245] Linking
+(0mq(B cnd_init.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[257] musl libc.a
+(0tq(B tcdrain.c
+(0tq(B [0/257] Linking
+(0mq(B cfsetospeed.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[263] musl libc.a
+(0tq(B mkstemp.c
+(0tq(B [0/263] Linking
+(0mq(B mkstemps.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[275] musl libc.a
+(0tq(B wcsstr.c
+(0tq(B [0/275] Linking
+(0mq(B wcstok.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[285] musl libc.a
+(0tq(B wcslen.c
+(0tq(B [0/285] Linking
+(0mq(B wcsncasecmp.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[293] musl libc.a
+(0tq(B wcscasecmp_l.c
+(0tq(B [0/293] Linking
+(0mq(B wcscasecmp.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[301] musl libc.a
+(0tq(B strspn.c
+(0tq(B [0/301] Linking
+(0mq(B strstr.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[308] musl libc.a
+(0tq(B strncpy.c
+(0tq(B [0/308] Linking
+(0mq(B strndup.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[317] musl libc.a
+(0tq(B strchr.c
+(0tq(B [0/317] Linking
+(0mq(B strchrnul.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[325] musl libc.a
+(0tq(B memmem.c
+(0tq(B [0/325] Linking
+(0mq(B mempcpy.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[328] musl libc.a
+(0tq(B memccpy.c
+(0tq(B [0/328] Linking
+(0mq(B memchr.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[336] musl libc.a
+(0tq(B wcstol.c
+(0tq(B [0/336] Linking
+(0mq(B strtod.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[343] musl libc.a
+(0tq(B fcvt.c
+(0tq(B [0/343] Linking
+(0mq(B gcvt.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[350] musl libc.a
+(0tq(B atoi.c
+(0tq(B [0/350] Linking
+(0mq(B atof.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[357] musl libc.a
+(0tq(B vsscanf.c
+(0tq(B [0/357] Linking
+(0mq(B vswprintf.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[363] musl libc.a
+(0tq(B vfwprintf.c
+(0tq(B [0/363] Linking
+(0mq(B vfwscanf.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[364] musl libc.a
+(0tq(B vfwprintf.c
+(0tq(B [0/364] Linking
+(0mq(B vfscanf.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[366] musl libc.a
+(0tq(B vfprintf.c
+(0tq(B [0/366] Linking
+(0mq(B vdprintf.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[371] musl libc.a
+(0tq(B vfprintf.c
+(0tq(B [0/371] Linking
+(0mq(B __towrite.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[375] musl libc.a
+(0tq(B vfprintf.c
+(0tq(B [0/375] Linking
+(0mq(B tempnam.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[380] musl libc.a
+(0tq(B vfprintf.c
+(0tq(B [0/380] Linking
+(0mq(B __stdio_write.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[392] musl libc.a
+(0tq(B setbuffer.c
+(0tq(B [0/392] Linking
+(0mq(B setvbuf.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[400] musl libc.a
+(0tq(B putwchar.c
+(0tq(B [0/400] Linking
+(0mq(B putw.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[407] musl libc.a
+(0tq(B putchar.c
+(0tq(B [0/407] Linking
+(0mq(B popen.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[413] musl libc.a
+(0tq(B open_memstream.c
+(0tq(B [0/413] Linking
+(0mq(B ofl.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[420] musl libc.a
+(0tq(B getline.c
+(0tq(B [0/420] Linking
+(0mq(B gets.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[426] musl libc.a
+(0tq(B getc.c
+(0tq(B [0/426] Linking
+(0mq(B fwscanf.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[432] musl libc.a
+(0tq(B ftrylockfile.c
+(0tq(B [0/432] Linking
+(0mq(B ftell.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[438] musl libc.a
+(0tq(B fread.c
+(0tq(B [0/438] Linking
+(0mq(B fputws.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[444] musl libc.a
+(0tq(B fopencookie.c
+(0tq(B [0/444] Linking
+(0mq(B __fopen_rb_ca.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[449] musl libc.a
+(0tq(B flockfile.c
+(0tq(B [0/449] Linking
+(0mq(B fileno.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[452] musl libc.a
+(0tq(B fgets.c
+(0tq(B [0/452] Linking
+(0mq(B fgetwc.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[458] musl libc.a
+(0tq(B fflush.c
+(0tq(B [0/458] Linking
+(0mq(B feof.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[465] musl libc.a
+(0tq(B dprintf.c
+(0tq(B [0/465] Linking
+(0mq(B clearerr.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[472] musl libc.a
+(0tq(B stat.c
+(0tq(B [0/472] Linking
+(0mq(B mknod.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[480] musl libc.a
+(0tq(B futimesat.c
+(0tq(B [0/480] Linking
+(0mq(B lstat.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[486] musl libc.a
+(0tq(B chmod.c
+(0tq(B [0/486] Linking
+(0mq(B fchmodat.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[492] musl libc.a
+(0tq(B sigtimedwait.c
+(0tq(B [0/492] Linking
+(0mq(B sigsuspend.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[499] musl libc.a
+(0tq(B sigprocmask.c
+(0tq(B [0/499] Linking
+(0mq(B sigqueue.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[507] musl libc.a
+(0tq(B siginterrupt.c
+(0tq(B [0/507] Linking
+(0mq(B sigisemptyset.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[515] musl libc.a
+(0tq(B sigaltstack.c
+(0tq(B [0/515] Linking
+(0mq(B sigaddset.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[520] musl libc.a
+(0tq(B psiginfo.c
+(0tq(B [0/520] Linking
+(0mq(B psignal.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[528] musl libc.a
+(0tq(B select.c
+(0tq(B [0/528] Linking
+(0mq(B pselect.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[533] musl libc.a
+(0tq(B tfind.c
+(0tq(B [0/533] Linking
+(0mq(B tsearch.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[539] musl libc.a
+(0tq(B hsearch.c
+(0tq(B [0/539] Linking
+(0mq(B sched_yield.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[546] musl libc.a
+(0tq(B sched_getcpu.c
+(0tq(B [0/546] Linking
+(0mq(B sched_getparam.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[551] musl libc.a
+(0tq(B regerror.c
+(0tq(B [0/551] Linking
+(0mq(B regexec.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[552] musl libc.a
+(0tq(B regcomp.c
+(0tq(B [0/552] Linking
+(0mq(B regexec.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[552] musl libc.a
+(0tq(B regcomp.c
+(0tq(B [0/552] Linking
+(0mq(B regexec.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[552] musl libc.a
+(0tq(B regcomp.c
+(0tq(B [0/552] Linking
+(0mq(B regexec.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[552] musl libc.a
+(0tq(B regcomp.c
+(0tq(B [0/552] Linking
+(0mq(B regexec.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[556] musl libc.a
+(0tq(B fnmatch.c
+(0tq(B [0/556] Linking
+(0mq(B waitpid.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[562] musl libc.a
+(0tq(B posix_spawn_file_actions_destroy.c
+(0tq(B [0/562] Linking
+(0mq(B posix_spawn_file_actions_init.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[570] musl libc.a
+(0tq(B posix_spawn.c
+(0tq(B [0/570] Linking
+(0mq(B posix_spawnattr_setsigdefault.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[578] musl libc.a
+(0tq(B posix_spawnattr_getflags.c
+(0tq(B [0/578] Linking
+(0mq(B posix_spawnattr_getpgroup.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[587] musl libc.a
+(0tq(B execle.c
+(0tq(B [0/587] Linking
+(0mq(B execlp.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[593] musl libc.a
+(0tq(B rand_r.c
+(0tq(B [0/593] Linking
+(0mq(B random.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[600] musl libc.a
+(0tq(B lrand48.c
+(0tq(B [0/600] Linking
+(0mq(B putspent.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[607] musl libc.a
+(0tq(B getspnam.c
+(0tq(B [0/607] Linking
+(0mq(B getspent.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[613] musl libc.a
+(0tq(B getgrouplist.c
+(0tq(B [0/613] Linking
+(0mq(B getgr_r.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[617] musl libc.a
+(0tq(B fgetspent.c
+(0tq(B [0/617] Linking
+(0mq(B getgr_a.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[621] musl libc.a
+(0tq(B socketpair.c
+(0tq(B [0/621] Linking
+(0mq(B socket.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[628] musl libc.a
+(0tq(B sendmmsg.c
+(0tq(B [0/628] Linking
+(0mq(B sendmsg.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[634] musl libc.a
+(0tq(B resolvconf.c
+(0tq(B [0/634] Linking
+(0mq(B res_query.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[639] musl libc.a
+(0tq(B recvmmsg.c
+(0tq(B [0/639] Linking
+(0mq(B res_msend.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[645] musl libc.a
+(0tq(B ns_parse.c
+(0tq(B [0/645] Linking
+(0mq(B res_msend.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[650] musl libc.a
+(0tq(B lookup_ipliteral.c
+(0tq(B [0/650] Linking
+(0mq(B lookup_name.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[653] musl libc.a
+(0tq(B inet_ntop.c
+(0tq(B [0/653] Linking
+(0mq(B inet_pton.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[661] musl libc.a
+(0tq(B if_nametoindex.c
+(0tq(B [0/661] Linking
+(0mq(B if_nameindex.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[667] musl libc.a
+(0tq(B herror.c
+(0tq(B [0/667] Linking
+(0mq(B hstrerror.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[673] musl libc.a
+(0tq(B getservbyname_r.c
+(0tq(B [0/673] Linking
+(0mq(B getservbyport_r.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[678] musl libc.a
+(0tq(B gethostbyname_r.c
+(0tq(B [0/678] Linking
+(0mq(B getifaddrs.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[685] musl libc.a
+(0tq(B getaddrinfo.c
+(0tq(B [0/685] Linking
+(0mq(B gai_strerror.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[690] musl libc.a
+(0tq(B dn_skipname.c
+(0tq(B [0/690] Linking
+(0mq(B ent.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[696] musl libc.a
+(0tq(B accept4.c
+(0tq(B [0/696] Linking
+(0mq(B accept.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[701] musl libc.a
+(0tq(B wcsrtombs.c
+(0tq(B [0/701] Linking
+(0mq(B wcsnrtombs.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[703] musl libc.a
+(0tq(B mbtowc.c
+(0tq(B [0/703] Linking
+(0mq(B wcrtomb.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[708] musl libc.a
+(0tq(B mbsinit.c
+(0tq(B [0/708] Linking
+(0mq(B mbrtowc.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[717] musl libc.a
+(0tq(B mq_unlink.c
+(0tq(B [0/717] Linking
+(0mq(B btowc.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[725] musl libc.a
+(0tq(B mq_getattr.c
+(0tq(B [0/725] Linking
+(0mq(B mq_notify.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[733] musl libc.a
+(0tq(B mremap.c
+(0tq(B [0/733] Linking
+(0mq(B msync.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[741] musl libc.a
+(0tq(B wordexp.c
+(0tq(B [0/741] Linking
+(0mq(B uname.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[743] musl libc.a
+(0tq(B syscall.c
+(0tq(B [0/743] Linking
+(0mq(B syslog.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[748] musl libc.a
+(0tq(B pty.c
+(0tq(B [0/748] Linking
+(0mq(B realpath.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[751] musl libc.a
+(0tq(B nftw.c
+(0tq(B [0/751] Linking
+(0mq(B openpty.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[755] musl libc.a
+(0tq(B issetugid.c
+(0tq(B [0/755] Linking
+(0mq(B lockf.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[761] musl libc.a
+(0tq(B getresuid.c
+(0tq(B [0/761] Linking
+(0mq(B getrlimit.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[765] musl libc.a
+(0tq(B getopt_long.c
+(0tq(B [0/765] Linking
+(0mq(B getopt.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[773] musl libc.a
+(0tq(B fmtmsg.c
+(0tq(B [0/773] Linking
+(0mq(B ffsll.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[782] musl libc.a
+(0tq(B sqrt.c
+(0tq(B [0/782] Linking
+(0mq(B sqrtf.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[794] musl libc.a
+(0tq(B llrintf.c
+(0tq(B [0/794] Linking
+(0mq(B llrintl.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[802] musl libc.a
+(0tq(B expl.s
+(0tq(B [0/802] Linking
+(0mq(B expm1l.s
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[813] musl libc.a
+(0tq(B tgammal.c
+(0tq(B [0/813] Linking
+(0mq(B tgamma.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[818] musl libc.a
+(0tq(B tanhf.c
+(0tq(B [0/818] Linking
+(0mq(B tanh.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[823] musl libc.a
+(0tq(B sinl.c
+(0tq(B [0/823] Linking
+(0mq(B __sinl.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[829] musl libc.a
+(0tq(B sincosl.c
+(0tq(B [0/829] Linking
+(0mq(B __sin.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[837] musl libc.a
+(0tq(B scalbnl.c
+(0tq(B [0/837] Linking
+(0mq(B scalbnf.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[844] musl libc.a
+(0tq(B scalb.c
+(0tq(B [0/844] Linking
+(0mq(B roundl.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[851] musl libc.a
+(0tq(B __rem_pio2l.c
+(0tq(B [0/851] Linking
+(0mq(B remquo.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[858] musl libc.a
+(0tq(B powf_data.c
+(0tq(B [0/858] Linking
+(0mq(B powl.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[866] musl libc.a
+(0tq(B nextafterl.c
+(0tq(B [0/866] Linking
+(0mq(B nexttoward.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[870] musl libc.a
+(0tq(B nearbyintl.c
+(0tq(B [0/870] Linking
+(0mq(B nearbyintf.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[876] musl libc.a
+(0tq(B modff.c
+(0tq(B [0/876] Linking
+(0mq(B modfl.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[883] musl libc.a
+(0tq(B __math_oflowf.c
+(0tq(B [0/883] Linking
+(0mq(B __math_oflow.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[896] musl libc.a
+(0tq(B logbl.c
+(0tq(B [0/896] Linking
+(0mq(B log.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[903] musl libc.a
+(0tq(B log1pf.c
+(0tq(B [0/903] Linking
+(0mq(B log2.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[909] musl libc.a
+(0tq(B llroundf.c
+(0tq(B [0/909] Linking
+(0mq(B llround.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[913] musl libc.a
+(0tq(B lgammaf.c
+(0tq(B [0/913] Linking
+(0mq(B lgammaf_r.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[919] musl libc.a
+(0tq(B jnf.c
+(0tq(B [0/919] Linking
+(0mq(B jn.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[924] musl libc.a
+(0tq(B ilogbl.c
+(0tq(B [0/924] Linking
+(0mq(B j0.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[931] musl libc.a
+(0tq(B hypot.c
+(0tq(B [0/931] Linking
+(0mq(B frexpf.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[937] musl libc.a
+(0tq(B fmod.c
+(0tq(B [0/937] Linking
+(0mq(B fmodf.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[943] musl libc.a
+(0tq(B fmax.c
+(0tq(B [0/943] Linking
+(0mq(B fmaxf.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[951] musl libc.a
+(0tq(B __expo2f.c
+(0tq(B [0/951] Linking
+(0mq(B __expo2.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[959] musl libc.a
+(0tq(B exp2f.c
+(0tq(B [0/959] Linking
+(0mq(B exp2.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[965] musl libc.a
+(0tq(B erf.c
+(0tq(B [0/965] Linking
+(0mq(B erfl.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[971] musl libc.a
+(0tq(B cosh.c
+(0tq(B [0/971] Linking
+(0mq(B __cosdf.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[978] musl libc.a
+(0tq(B cbrtl.c
+(0tq(B [0/978] Linking
+(0mq(B ceil.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[983] musl libc.a
+(0tq(B atanhf.c
+(0tq(B [0/983] Linking
+(0mq(B atanh.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[990] musl libc.a
+(0tq(B asinhf.c
+(0tq(B [0/990] Linking
+(0mq(B asinh.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[997] musl libc.a
+(0tq(B acosf.c
+(0tq(B [0/997] Linking
+(0mq(B acos.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1003] musl libc.a
+(0tq(B malloc.c
+(0tq(B [0/1003] Linking
+(0mq(B malloc_usable_size.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1006] musl libc.a
+(0tq(B malloc.c
+(0tq(B [0/1006] Linking
+(0mq(B realloc.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1009] musl libc.a
+(0tq(B free.c
+(0tq(B [0/1009] Linking
+(0mq(B malloc.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1009] musl libc.a
+(0tq(B free.c
+(0tq(B [0/1009] Linking
+(0mq(B malloc.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1013] musl libc.a
+(0tq(B libc_calloc.c
+(0tq(B [0/1013] Linking
+(0mq(B aligned_alloc.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1019] musl libc.a
+(0tq(B textdomain.c
+(0tq(B [0/1019] Linking
+(0mq(B uselocale.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1025] musl libc.a
+(0tq(B pleval.c
+(0tq(B [0/1025] Linking
+(0mq(B setlocale.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1030] musl libc.a
+(0tq(B locale_map.c
+(0tq(B [0/1030] Linking
+(0mq(B __lctrans.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1035] musl libc.a
+(0tq(B iconv.c
+(0tq(B [0/1035] Linking
+(0mq(B duplocale.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1036] musl libc.a
+(0tq(B iconv.c
+(0tq(B [0/1036] Linking
+(0mq(B dcngettext.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1039] musl libc.a
+(0tq(B iconv.c
+(0tq(B [0/1039] Linking
+(0mq(B catgets.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1043] musl libc.a
+(0tq(B xattr.c
+(0tq(B [0/1043] Linking
+(0mq(B wait4.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1049] musl libc.a
+(0tq(B unshare.c
+(0tq(B [0/1049] Linking
+(0mq(B timerfd.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1056] musl libc.a
+(0tq(B statx.c
+(0tq(B [0/1056] Linking
+(0mq(B stime.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1063] musl libc.a
+(0tq(B setfsuid.c
+(0tq(B [0/1063] Linking
+(0mq(B setgroups.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1071] musl libc.a
+(0tq(B quotactl.c
+(0tq(B [0/1071] Linking
+(0mq(B pwritev2.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1079] musl libc.a
+(0tq(B open_by_handle_at.c
+(0tq(B [0/1079] Linking
+(0mq(B personality.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1086] musl libc.a
+(0tq(B membarrier.c
+(0tq(B [0/1086] Linking
+(0mq(B klogctl.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1094] musl libc.a
+(0tq(B flock.c
+(0tq(B [0/1094] Linking
+(0mq(B fanotify.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1102] musl libc.a
+(0tq(B chroot.c
+(0tq(B [0/1102] Linking
+(0mq(B cap.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1112] musl libc.a
+(0tq(B isastream.c
+(0tq(B [0/1112] Linking
+(0mq(B ulimit.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1120] musl libc.a
+(0tq(B euidaccess.c
+(0tq(B [0/1120] Linking
+(0mq(B ftw.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1130] musl libc.a
+(0tq(B dl_iterate_phdr.c
+(0tq(B [0/1130] Linking
+(0mq(B dlerror.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1137] musl libc.a
+(0tq(B semtimedop.c
+(0tq(B [0/1137] Linking
+(0mq(B shmat.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1145] musl libc.a
+(0tq(B msgctl.c
+(0tq(B [0/1145] Linking
+(0mq(B ftok.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1150] musl libc.a
+(0tq(B shgetc.c
+(0tq(B [0/1150] Linking
+(0mq(B procfdname.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1153] musl libc.a
+(0tq(B intscan.c
+(0tq(B [0/1153] Linking
+(0mq(B floatscan.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1160] musl libc.a
+(0tq(B fesetexceptflag.c
+(0tq(B [0/1160] Linking
+(0mq(B floatscan.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1165] musl libc.a
+(0tq(B posix_fadvise.c
+(0tq(B [0/1165] Linking
+(0mq(B open.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1174] musl libc.a
+(0tq(B assert.c
+(0tq(B [0/1174] Linking
+(0mq(B atexit.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1179] musl libc.a
+(0tq(B __errno_location.c
+(0tq(B [0/1179] Linking
+(0mq(B unsetenv.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1184] musl libc.a
+(0tq(B putenv.c
+(0tq(B [0/1184] Linking
+(0mq(B __reset_tls.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1189] musl libc.a
+(0tq(B __environ.c
+(0tq(B [0/1189] Linking
+(0mq(B clearenv.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1198] musl libc.a
+(0tq(B fdopendir.c
+(0tq(B [0/1198] Linking
+(0mq(B opendir.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1206] musl libc.a
+(0tq(B toupper.c
+(0tq(B [0/1206] Linking
+(0mq(B towctrans.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1215] musl libc.a
+(0tq(B iswprint.c
+(0tq(B [0/1215] Linking
+(0mq(B iswlower.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1222] musl libc.a
+(0tq(B iswalnum.c
+(0tq(B [0/1222] Linking
+(0mq(B iswalpha.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1231] musl libc.a
+(0tq(B iscntrl.c
+(0tq(B [0/1231] Linking
+(0mq(B isblank.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1240] musl libc.a
+(0tq(B crypt_sha512.c
+(0tq(B [0/1240] Linking
+(0mq(B encrypt.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1244] musl libc.a
+(0tq(B crypt_des.c
+(0tq(B [0/1244] Linking
+(0mq(B crypt_md5.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1247] musl libc.a
+(0tq(B crypt_blowfish.c
+(0tq(B [0/1247] Linking
+(0mq(B sysconf.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1253] musl libc.a
+(0tq(B ctanhl.c
+(0tq(B [0/1253] Linking
+(0mq(B ctanl.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1259] musl libc.a
+(0tq(B csqrtf.c
+(0tq(B [0/1259] Linking
+(0mq(B csqrtl.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1266] musl libc.a
+(0tq(B csinf.c
+(0tq(B [0/1266] Linking
+(0mq(B csin.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1275] musl libc.a
+(0tq(B cpowf.c
+(0tq(B [0/1275] Linking
+(0mq(B cpow.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1282] musl libc.a
+(0tq(B cimagl.c
+(0tq(B [0/1282] Linking
+(0mq(B clog.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1290] musl libc.a
+(0tq(B __cexp.c
+(0tq(B [0/1290] Linking
+(0mq(B ccosl.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1298] musl libc.a
+(0tq(B catanhf.c
+(0tq(B [0/1298] Linking
+(0mq(B catanl.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1305] musl libc.a
+(0tq(B casinh.c
+(0tq(B [0/1305] Linking
+(0mq(B casinhf.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1313] musl libc.a
+(0tq(B cacoshl.c
+(0tq(B [0/1313] Linking
+(0mq(B cacoshf.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1321] musl libc.a
+(0tq(B lio_listio.c
+(0tq(B [0/1321] Linking
+(0mq(B aio_suspend.c
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B [43] AST Lowering
+   (0mq(B exp2.zig
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1323] musl libc.a
+(0tq(B aio.c
+(0mq(B [1323/1323] Linking
+]9;4;1;0MMMMMMMMMMM[?2026l[?2026h[J[0/3] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B [310] AST Lowering
+   (0tq(B bitcode_writer.zig
+   (0mq(B Builder.zig
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+[1324] musl libc.a
+(0mq(B [1324/1324] Linking
+   (0mq(B LLD Link
+]9;4;1;0MMMMMMMMMMMM[?2026l[?2026h[J[0/4] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B [341] AST Lowering
+   (0tq(B AstGen.zig
+   (0mq(B tokenizer.zig
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+]9;4;1;0MMMMMMMMM[?2026l[?2026h[J[0/4] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B [426] AST Lowering
+   (0tq(B mem.zig
+   (0mq(B linux.zig
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+]9;4;1;0MMMMMMMMM[?2026l[?2026h[J[0/4] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B [574] AST Lowering
+   (0tq(B path.zig
+   (0mq(B File.zig
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+]9;4;1;0MMMMMMMMM[?2026l[?2026h[J[0/4] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B [667] AST Lowering
+   (0tq(B p384_64.zig
+   (0mq(B edwards25519.zig
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+]9;4;1;0MMMMMMMMM[?2026l[?2026h[J[0/4] Linking
+compiler_rt
+(0tq(B [0/1] Linking
+(0mq(B [763] AST Lowering
+   (0tq(B powerpc.zig
+   (0mq(B arm.zig
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B AST Lowering
+]9;4;1;0MMMMMMMMM[?2026l[?2026h[J[0/4] Linking
+[1] compiler_rt
+(0mq(B [1/1] Linking
+libzigc
+(0tq(B [0/1] Linking
+(0mq(B [315] AST Lowering
+   (0tq(B convert_eisel_lemire.zig
+   (0mq(B Dwarf.zig
+]9;4;1;0MMMMMMMM[?2026l[?2026h[J[4/4] Linking
+[1] compiler_rt
+(0tq(B [233/235] Code Generation
+(0x(B  (0mq(B compiler_rt.floateitf.__floateitf
+(0tq(B [238/272] Linking
+(0mq(B [1780] Semantic Analysis
+[3] libzigc
+(0mq(B [59/59] Linking
+   (0mq(B LLVM Emit Object
+]9;4;1;100MMMMMMMMM[?2026l[?2026h[J[5/5] Linking
+[3] compiler_rt
+(0mq(B [718/718] Linking
+]9;4;1;100MMM[?2026l[?2026h[J[5/5] Linking
+[3] compiler_rt
+(0mq(B [718/718] Linking
+   (0mq(B LLVM Emit Object
+]9;4;1;100MMMM[?2026l[?2026h[J[5/5] Linking
+[3] compiler_rt
+(0mq(B [718/718] Linking
+   (0mq(B LLVM Emit Object
+]9;4;1;100MMMM[?2026l[?2026h[J[5/5] Linking
+[3] compiler_rt
+(0mq(B [718/718] Linking
+   (0mq(B LLVM Emit Object
+]9;4;1;100MMMM[?2026l[?2026h[J[5/5] Linking
+[3] compiler_rt
+(0mq(B [718/718] Linking
+   (0mq(B LLVM Emit Object
+]9;4;1;100MMMM[?2026l[?2026h[J[5/5] Linking
+[3] compiler_rt
+(0mq(B [718/718] Linking
+   (0mq(B LLVM Emit Object
+]9;4;1;100MMMM[?2026l[?2026h[J[5/5] Linking
+[3] compiler_rt
+(0mq(B [718/718] Linking
+   (0mq(B LLVM Emit Object
+]9;4;1;100MMMM[?2026l[?2026h[J[5/5] Linking
+[3] compiler_rt
+(0mq(B [718/718] Linking
+   (0mq(B LLVM Emit Object
+]9;4;1;100MMMM[?2026l[?2026h[J[5/5] Linking
+[3] compiler_rt
+(0mq(B [718/718] Linking
+   (0mq(B LLVM Emit Object
+]9;4;1;100MMMM[?2026l[?2026h[J[5/5] Linking
+[3] compiler_rt
+(0mq(B [718/718] Linking
+   (0mq(B LLVM Emit Object
+]9;4;1;100MMMM[?2026l[?2026h[J[5/5] Linking
+[3] compiler_rt
+(0mq(B [718/718] Linking
+   (0mq(B LLVM Emit Object
+]9;4;1;100MMMM[?2026l[?2026h[J[5/5] Linking
+[3] compiler_rt
+(0mq(B [718/718] Linking
+   (0mq(B LLVM Emit Object
+]9;4;1;100MMMM[?2026l[?2026h[J[5/5] Linking
+[3] compiler_rt
+(0mq(B [718/718] Linking
+   (0mq(B LLVM Emit Object
+]9;4;1;100MMMM[?2026l[?2026h[J[5/5] Linking
+[3] compiler_rt
+(0mq(B [718/718] Linking
+   (0mq(B LLVM Emit Object
+]9;4;1;100MMMM[?2026l[?2026h[J[5/5] Linking
+[3] compiler_rt
+(0mq(B [718/718] Linking
+   (0mq(B LLVM Emit Object
+]9;4;1;100MMMM[?2026l[?2026h[J[5/5] Linking
+[3] compiler_rt
+(0mq(B [718/718] Linking
+   (0mq(B LLVM Emit Object
+]9;4;1;100MMMM[?2026l[?2026h[J[5/5] Linking
+[3] compiler_rt
+(0mq(B [718/718] Linking
+   (0mq(B LLVM Emit Object
+]9;4;1;100MMMM[?2026l[?2026h[J[5/5] Linking
+[3] compiler_rt
+(0mq(B [718/718] Linking
+   (0mq(B LLVM Emit Object
+]9;4;1;100MMMM[?2026l[?2026h[J[5/5] Linking
+[3] compiler_rt
+(0mq(B [718/718] Linking
+   (0mq(B LLVM Emit Object
+]9;4;1;100MMMM[?2026l[?2026h[J[5/5] Linking
+[3] compiler_rt
+(0mq(B [718/718] Linking
+   (0mq(B LLVM Emit Object
+]9;4;1;100MMMM[?2026l[?2026h[J[5/5] Linking
+[3] compiler_rt
+(0mq(B [718/718] Linking
+   (0mq(B LLVM Emit Object
+]9;4;1;100MMMM[?2026l[?2026h[J[5/5] Linking
+[3] compiler_rt
+(0mq(B [718/718] Linking
+   (0mq(B LLVM Emit Object
+]9;4;1;100MMMM[?2026l[?2026h[J[5/5] Linking
+[3] compiler_rt
+(0mq(B [718/718] Linking
+   (0mq(B LLVM Emit Object
+]9;4;1;100MMMM[?2026l[?2026h[J[5/5] Linking
+[3] compiler_rt
+(0mq(B [718/718] Linking
+   (0mq(B LLVM Emit Object
+]9;4;1;100MMMM[?2026l[?2026h[J[5/5] Linking
+[3] compiler_rt
+(0mq(B [718/718] Linking
+   (0mq(B LLVM Emit Object
+]9;4;1;100MMMM[?2026l[?2026h[J[5/5] Linking
+[3] compiler_rt
+(0mq(B [718/718] Linking
+   (0mq(B LLVM Emit Object
+]9;4;1;100MMMM[?2026l[?2026h[J[5/5] Linking
+[3] compiler_rt
+(0mq(B [718/718] Linking
+   (0mq(B LLVM Emit Object
+]9;4;1;100MMMM[?2026l[J]9;4;0/var/tmp/Awl-actual-terminal-c482byya/build/Demo
+$ ./build/Demo
+42
+$ awl build main.aw -o single
+/var/tmp/Awl-actual-terminal-c482byya/single
+$ ./single
+42
+$ ls Demo.awproj main.aw Lib.aw
+Demo.awproj  Lib.aw  main.aw
+$ set +x
+
+all shown commands ran against the complete bundled backend
+project and import names retained their exact case

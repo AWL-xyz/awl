@@ -1,0 +1,138 @@
+name: KCC native migration
+on: [push, pull_request]
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            cc: gcc
+            cxx: g++
+          - os: ubuntu-latest
+            cc: clang
+            cxx: clang++
+          - os: windows-latest
+            cc: gcc
+            cxx: g++
+    runs-on: ${{ matrix.os }}
+    env:
+      CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cxx }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Select MinGW on Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: '"C:\msys64\mingw64\bin" >> $env:GITHUB_PATH'
+      - run: python compiler/build_native.py --standalone --static
+      - run: python compiler/generate_runtime.py --check
+      - run: python compiler/generate_platform.py --check
+      - run: python compiler/generate_strings.py --check
+      - run: python compiler/generate_builders.py --check
+      - run: python compiler/generate_vectors.py --check
+      - run: python compiler/generate_arguments.py --check
+      - run: python compiler/generate_files.py --check
+      - run: python compiler/test_native.py
+      - name: Reference-default suite
+        run: python -m unittest discover -s tests -v
+      - name: Native-default suite
+        env:
+          KCC_LEXER: native
+          KCC_PARSER: native
+        run: python -m unittest discover -s tests -v
+      - name: Native semantic frontend regression bridge
+        run: python tests/native_frontend_suite.py
+      - run: python compiler/kcc.py doctor
+      - run: python compiler/kcc.py run examples/hello.aw
+      - run: python compiler/kcc.py run examples/values.aw
+      - run: python compiler/kcc.py run examples/results.aw
+      - run: python compiler/kcc.py run examples/integers.aw --lexer native
+      - name: Compiler and generated-program sanitizers
+        if: runner.os == 'Linux'
+        run: |
+          python compiler/test_native.py --sanitize
+          python compiler/kcc.py run examples/hello.aw --sanitize
+          python compiler/kcc.py run examples/values.aw --sanitize
+          python compiler/kcc.py run examples/results.aw --sanitize
+          python compiler/kcc.py run examples/integers.aw --sanitize --lexer native
+          python tests/sanitizer_matrix.py
+          python tests/sanitizer_matrix.py --frontend native
+
+  linux-bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python compiler/package_linux.py --download-toolchain --no-archive
+      - name: Desktop test fixtures (not product dependencies)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb
+          python -m pip install python-xlib
+      - run: python -m unittest discover -s tests -p test_bundle.py -v
+      - run: python -m unittest discover -s tests -p test_platform.py -v
+      - run: python -m unittest discover -s tests -p test_modules.py -v
+      - run: python -m unittest discover -s tests -p test_strings.py -v
+      - run: python -m unittest discover -s tests -p test_builders.py -v
+      - run: python -m unittest discover -s tests -p test_cleanup.py -v
+      - run: python -m unittest discover -s tests -p test_arrays.py -v
+      - run: python -m unittest discover -s tests -p test_repeat.py -v
+      - run: python -m unittest discover -s tests -p test_scoped_owner.py -v
+      - run: python -m unittest discover -s tests -p test_borrows.py -v
+      - run: python -m unittest discover -s tests -p test_moves.py -v
+      - run: python -m unittest discover -s tests -p test_vectors.py -v
+      - run: python -m unittest discover -s tests -p test_loop_owners.py -v
+      - run: python -m unittest discover -s tests -p test_reinit.py -v
+      - run: python -m unittest discover -s tests -p test_match_joins.py -v
+      - run: python -m unittest discover -s tests -p test_branch_joins.py -v
+      - run: python -m unittest discover -s tests -p test_owned_results.py -v
+      - run: python -m unittest discover -s tests -p test_own_params.py -v
+      - name: Instrument owning builder parameter programs
+        env:
+          Awl_BUILDER_SANITIZE: 1
+        run: python -m unittest discover -s tests -p test_own_params.py -v
+      - name: Instrument local ownership move programs
+        env:
+          Awl_BUILDER_SANITIZE: 1
+        run: python -m unittest discover -s tests -p test_moves.py -v
+      - name: Instrument builder borrow programs
+        env:
+          Awl_BUILDER_SANITIZE: 1
+        run: python -m unittest discover -s tests -p test_borrows.py -v
+      - name: Instrument scope-owned builder programs
+        env:
+          Awl_BUILDER_SANITIZE: 1
+        run: python -m unittest discover -s tests -p test_scoped_owner.py -v
+      - name: Instrument fixed array programs
+        env:
+          Awl_BUILDER_SANITIZE: 1
+        run: python -m unittest discover -s tests -p test_arrays.py -v
+      - name: Instrument scoped cleanup programs
+        env:
+          Awl_BUILDER_SANITIZE: 1
+        run: python -m unittest discover -s tests -p test_cleanup.py -v
+      - name: Instrument emitted builder programs
+        env:
+          Awl_BUILDER_SANITIZE: 1
+        run: python -m unittest discover -s tests -p test_builders.py -v
+      - name: Instrument emitted string programs
+        env:
+          Awl_STRING_SANITIZE: 1
+        run: python -m unittest discover -s tests -p test_strings.py -v
+      - name: Instrument emitted module programs
+        env:
+          Awl_MODULE_SANITIZE: 1
+        run: python -m unittest discover -s tests -p test_modules.py -v
+      - name: Instrument generated platform runtime
+        env:
+          Awl_PLATFORM_SANITIZE: 1
+        run: python -m unittest discover -s tests -p test_platform.py -v
+      - run: python tests/bundle_runtime.py
+      - run: python compiler/test_bundle_driver.py --sanitize
+      - run: python tests/bundle_isolation.py

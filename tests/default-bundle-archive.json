@@ -1,0 +1,1518 @@
+{
+  "status": "passed",
+  "harness_sha256": "16c1a486fc293994ddd837ad1f6ec07fd2b4f56c3c89e2e42117ee00145e27a9",
+  "test_host_kernel": "6.1.189+",
+  "rootfs_initial_directories": [
+    "Awl",
+    "work",
+    "tmp",
+    "cache",
+    "proc",
+    "dev"
+  ],
+  "host_development_tools_in_rootfs": false,
+  "python_or_shell_in_rootfs": false,
+  "network": "private network namespace, no configured external interfaces",
+  "pid_and_mount_namespaces": "private; proc mounted inside root",
+  "run_uid": 1000,
+  "cache_initially_empty": true,
+  "host_tools_used_for_test_setup_only": [
+    "Python",
+    "sudo",
+    "env",
+    "unshare",
+    "chroot",
+    "mknod",
+    "chmod",
+    "readelf"
+  ],
+  "compiler_inside_rootfs": "only Awl bin/kcc and its shipped libexec/zig bundle",
+  "integer_matrix_checks": 348,
+  "trap_cases": 5,
+  "resource_trap_cases": 1,
+  "string_trap_cases": 1,
+  "builder_trap_cases": 1,
+  "array_trap_cases": 1,
+  "generated_executable_has_ELF_interpreter": false,
+  "manifest": {
+    "version": "0.25.0-dev",
+    "brand": "Awl",
+    "toolkit": {
+      "name": "Awl Software Development Kit [Beta]",
+      "command": "bin/awl",
+      "commands": [
+        "init",
+        "build"
+      ],
+      "command_case": "ASCII case-insensitive; project names and source paths are not folded"
+    },
+    "host": "x86_64-linux",
+    "status": "experimental Linux SDK, separately qualify the exact distribution archive",
+    "toolchain": {
+      "name": "zig",
+      "version": "0.15.2",
+      "host": "x86_64-linux",
+      "target": "x86_64-linux-musl",
+      "cpu": "baseline",
+      "url": "https://ziglang.org/download/0.15.2/zig-x86_64-linux-0.15.2.tar.xz",
+      "sha256": "02aa270f183da276e5b5920b1dac44a63f1a49e55050ebde3aecc9eb82f93239",
+      "bytes": 53733924,
+      "llvm": "20.1.2",
+      "upstream_metadata": "https://ziglang.org/download/index.json"
+    },
+    "kcc_sha256": "3ae0337c85e535364bb774faa7ee1dffffc9187a39b77561038881d56d5f9971",
+    "zig_sha256": "2858dc89dbbfdd08cceda1b841e7fd0a793a1a67b49f150bc3d0d1de44ed7f51",
+    "compiler_sources_sha256": {
+      "ASDK.inc": "4d8ca9330f64e04f28d3b962b650352ea4ef87555cf715622c1c457f78b27a34",
+      "karguments.c": "8e3c99e20c3c461e92fe7bb78a2d4bca1be998c24c3df131272acec035fa7a58",
+      "karguments.inc": "ebdb67765075a52128181828cc7355cbd157f4f3a7824210de48214fa6fbd2ba",
+      "karrays.inc": "b86457d4ae05d89b5792506cdea1ad87d3b125e51490d8be1a0f5d44d582b672",
+      "kbuild.cpp": "596d0bd5a9da5056834ba57ad9adbd26afcc4184be1b57cf41515d30bf0caa34",
+      "kbuild.h": "5d6b683a2eafee496f6ae25bc4b32bf8e5761e5e1260e854c493c8c8a14b9243",
+      "kbuild_windows.inc": "dbd92f1e12b3652906f5efd051b2c50f71a81dde3f490e3ed6175cdb49ccbe0b",
+      "kbuilders.c": "40483eeb4528f4ef8b9b0263580bbc0c5d87f6fd31ddcc0fdfb41a01389fbc47",
+      "kbuilders.inc": "e94f8b5214e5e410d9a479c4bb3597908ae4200f29a4ff4d8088bbd8dca2fd6d",
+      "kcc.cpp": "631ee939321eedbd9967fa9eb9ce10b142cbfabd6947b763df2c7566025dac3e",
+      "kcheck.inc": "cf671d478fd70e38f3103dcd44f1287755d723a5f9a0b774d0423a14b588fd75",
+      "kemit.inc": "7963a1596d0adf80b006faec0e23711adbb72b42d6f538b4e4df470324081561",
+      "kenum_test.cpp": "4bfe0c752ceb4743182e8879e460fafad941e7ef5668faec33898cc572917362",
+      "kexport_test.cpp": "c9692183fbf6d6669da26b6c166abe22d7ad530546ddb6bb26142884629e23be",
+      "kfiles.c": "d6a9ad829a8b74d020a8b6c5b6ac4a573621d805802984324dc333f5ea47cf1a",
+      "kfiles.inc": "50b3897e3b13854972041951ce25db8d7698375673af04020236c5dde4432b04",
+      "kgeneric-types.inc": "36d0da5e2ee502dc183e5734ea5c7bbec77b55f5ab77f261a283b12fd8a21a39",
+      "kgeneric.c": "1697afe2a038095d79a813ca4afac616fb95449b1fd9ccca137db07ad89efbc8",
+      "kgeneric.inc": "8a2d59fd6b600422c876300d8aef4d773b8f69c901c4deff2ff9c0ba0e0f49eb",
+      "kgeneric_test.cpp": "0de723e3ed2436ec00918d7491ee415a185a4694545989bff918119863e669e5",
+      "klex.cpp": "40b5de657350491f1f60aedeb9d959997ea95c3756856227ab5a8ad9189a7eab",
+      "klex.h": "5cb5a8fdf4d50368f4c30001a334e7a2e38696823dbe142a13dfd92deadf42fa",
+      "klex_test.cpp": "8108133f5312aa2c216edc4ba3207dbc48072f54fe5c204ea47af9bc789b57a4",
+      "kmath.inc": "5fd6bc8bbfc52b12090d4bfd80ffb06350278f078759e7c95556bddcc2663735",
+      "kmodule_numeric_test.cpp": "4f11022921f7d77ca199255b7ee20c6665a3b4b9d803c489130a2141285c25b8",
+      "knext_test.cpp": "079d8c30fbccde037beeb43c1e62c6f1e7ac587560563ad00c04fd517c370696",
+      "kparse.cpp": "913be449aa65dd22eb16378dd2b6ba2167714580255dc0774ccc6c1c4d121ba5",
+      "kparse.h": "06a05163a805f21d9c0263686503c42586d0f7244d899729058b4d469f738097",
+      "kparse_test.cpp": "2c936cdbef64dda0b0404551749dd4adc7375987a3db1e470ea654323ddbd79f",
+      "kplatform-signatures.inc": "2338571e98a1a93e2218d2b60d01194cab3e52f1c3b36e9fd12e01c0db02becf",
+      "kplatform.c": "a46c4d7ba6244c87a5a4c50fd884fa6ff1fd81643bf9bbcffab2aa7cd617b083",
+      "kplatform.inc": "c513533d7e628c1a84dba5b5fcf635fb9f53a492f7fc230bc6023c85d0f10bac",
+      "kproject.inc": "d54902fd8488a621383d56fd9530775af62c59c8ca94b08b97ca4f1f5474e6f2",
+      "kproject_test.cpp": "df5ede01e2462373e1f636b355d598f7a9af0028197b6513c73f31b1e90de79d",
+      "kreplace_test.cpp": "e930d61569a63b31ba3d5dcb861aae225d80c9e49530d4373958d9eb432a5a71",
+      "kruntime.inc": "33421e9fd95fb5801719a32e276f80e4aa2262cb477e1fddfb79adb311bcc7fd",
+      "kstreams.c": "bebbecdbef078710d22e7c837ddc597b52eb1887028f8071ef60e527818e1a51",
+      "kstreams.inc": "66ee465976a899ae70cca6b10f85454f9d999451ca238b84389035be9035bdba",
+      "kstreams_test.cpp": "aabde72a6d21be6256d906a523af0418ce466f0d977ae597041f42345b3aa623",
+      "kstrings.c": "d189a7237fceb3097b46c9fdb9a8d60cf2df454cd0cf69fad830541ab5ed8f1b",
+      "kstrings.inc": "51f1b65e718af2facee2f1ac8b07274e8a982809a74676a70207c1f95ecc8cb2",
+      "ktcp.c": "934670c3983ef7620d997bbea22f7be11ac753dc89f8644604316ece86a38e7b",
+      "ktcp.inc": "476f489de3e5a454cdcb485113a820ec657edfee56960e5cb2a104162a0a44aa",
+      "ktcp_test.cpp": "7108140b018a4ab21ad3f80dbd11d5f4365fa7473100f81531de372bd3d94314",
+      "ktext.inc": "77973b9a2ab159424c47e6f9108de09730a52d2bf74dfd638e5220d9c5e1860f",
+      "kvectors.c": "51da3126b095142a7cd1a97a553e0be493a349ba5b3b0435fcc104250d1c1973",
+      "kvectors.inc": "b2d0f0d9c5ddf5744cde6905b3ce43a2f31d7c58be11c6f18d712de2619f187d",
+      "kverify.inc": "e4225114df7b3f2afca75c9aca0cf0a0c2798e0127358371896764caf5a9e18a",
+      "kverify_test.cpp": "9d9ad10fb691ad3f7d712cd317e90500ca40f4552f5195afc82ef0b78331bedb",
+      "unicode_tables.inc": "5b0ca9a17b9ccdb6ce79f9370b8d46698895da9311c34f44a491643a3a3edd39"
+    },
+    "source_extension": ".aw",
+    "project_extension": ".awproj",
+    "default_syntax": "next",
+    "legacy_requires_explicit_syntax": true,
+    "windows_native_host_accepted": false,
+    "upstream_files_verified": 18105,
+    "resources": "complete unmodified checksum-pinned upstream distribution, source, libc, linker, headers, startup resources and licenses retained",
+    "compiler_build": {
+      "file": "kcc",
+      "flags": [
+        "-std=c++20",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-s",
+        "-flto",
+        "-ffunction-sections",
+        "-fdata-sections",
+        "-Wl,--gc-sections",
+        "-static"
+      ],
+      "sha256": "3ae0337c85e535364bb774faa7ee1dffffc9187a39b77561038881d56d5f9971",
+      "bytes": 2237736
+    }
+  },
+  "commands": [
+    {
+      "argv": [
+        "/Awl/bin/AwL",
+        "InIt",
+        "Demo"
+      ],
+      "exit_code": 0,
+      "stdout": "Initialized Demo in /\nCreated main.aw\nCreated Demo.awproj\nBuild with: awl build\n",
+      "stderr": "",
+      "elapsed_seconds": 0.036486140000079104
+    },
+    {
+      "argv": [
+        "/Awl/bin/awl",
+        "--HeLp"
+      ],
+      "exit_code": 0,
+      "stdout": "Awl Software Development Kit [Beta]\nUsage:\n  awl                         Show this help\n  awl init NAME               Create NAME.awproj and, if absent, main.aw here\n  awl build                   Build the sole .awproj project here\n  awl build NAME              Find NAME.awproj in an immediate child folder\n  awl build relative/file.aw   Compile a single .aw file (imports supported)\n\nBuild options:\n  -o FILE                      Executable destination (relative to terminal cwd)\n  -O 0|1|2|3                   Optimization level (default 2)\n  --syntax next|legacy         Override manifest / single-file default next\n  --build-timeout 1..3600       Backend timeout in seconds (default 120)\n  --build-memory-mib 512..16384 Backend memory bound (default 4096)\n\nProject output: <project>/build/<manifest-name> (.exe on Windows).\nSingle-file output: <cwd>/<source-stem> (.exe on Windows).\nInit never overwrites existing files. NAME: 1..64 letters/digits/_/-, starts alphanumeric.\nCompilation needs the complete bundled backend, not Python or a host compiler.\nOnly initialization and compilation are included; no run/install commands yet.\n",
+      "stderr": "",
+      "elapsed_seconds": 0.024664829000016653
+    },
+    {
+      "argv": [
+        "/Awl/bin/awl",
+        "BuIlD"
+      ],
+      "exit_code": 0,
+      "stdout": "/build/Demo\n",
+      "stderr": "",
+      "elapsed_seconds": 29.16154240000003
+    },
+    {
+      "argv": [
+        "/build/Demo"
+      ],
+      "exit_code": 0,
+      "stdout": "42\n",
+      "stderr": "",
+      "elapsed_seconds": 0.02286194099997374
+    },
+    {
+      "argv": [
+        "/Awl/bin/awL",
+        "--HeLp"
+      ],
+      "exit_code": 0,
+      "stdout": "Awl Software Development Kit [Beta]\nUsage:\n  awl                         Show this help\n  awl init NAME               Create NAME.awproj and, if absent, main.aw here\n  awl build                   Build the sole .awproj project here\n  awl build NAME              Find NAME.awproj in an immediate child folder\n  awl build relative/file.aw   Compile a single .aw file (imports supported)\n\nBuild options:\n  -o FILE                      Executable destination (relative to terminal cwd)\n  -O 0|1|2|3                   Optimization level (default 2)\n  --syntax next|legacy         Override manifest / single-file default next\n  --build-timeout 1..3600       Backend timeout in seconds (default 120)\n  --build-memory-mib 512..16384 Backend memory bound (default 4096)\n\nProject output: <project>/build/<manifest-name> (.exe on Windows).\nSingle-file output: <cwd>/<source-stem> (.exe on Windows).\nInit never overwrites existing files. NAME: 1..64 letters/digits/_/-, starts alphanumeric.\nCompilation needs the complete bundled backend, not Python or a host compiler.\nOnly initialization and compilation are included; no run/install commands yet.\n",
+      "stderr": "",
+      "elapsed_seconds": 0.020269022000093173
+    },
+    {
+      "argv": [
+        "/Awl/bin/awL",
+        "BuIlD"
+      ],
+      "exit_code": 0,
+      "stdout": "/build/Demo\n",
+      "stderr": "",
+      "elapsed_seconds": 0.0790804850000768
+    },
+    {
+      "argv": [
+        "/build/Demo"
+      ],
+      "exit_code": 0,
+      "stdout": "42\n",
+      "stderr": "",
+      "elapsed_seconds": 0.01866907600003742
+    },
+    {
+      "argv": [
+        "/Awl/bin/aWl",
+        "--HeLp"
+      ],
+      "exit_code": 0,
+      "stdout": "Awl Software Development Kit [Beta]\nUsage:\n  awl                         Show this help\n  awl init NAME               Create NAME.awproj and, if absent, main.aw here\n  awl build                   Build the sole .awproj project here\n  awl build NAME              Find NAME.awproj in an immediate child folder\n  awl build relative/file.aw   Compile a single .aw file (imports supported)\n\nBuild options:\n  -o FILE                      Executable destination (relative to terminal cwd)\n  -O 0|1|2|3                   Optimization level (default 2)\n  --syntax next|legacy         Override manifest / single-file default next\n  --build-timeout 1..3600       Backend timeout in seconds (default 120)\n  --build-memory-mib 512..16384 Backend memory bound (default 4096)\n\nProject output: <project>/build/<manifest-name> (.exe on Windows).\nSingle-file output: <cwd>/<source-stem> (.exe on Windows).\nInit never overwrites existing files. NAME: 1..64 letters/digits/_/-, starts alphanumeric.\nCompilation needs the complete bundled backend, not Python or a host compiler.\nOnly initialization and compilation are included; no run/install commands yet.\n",
+      "stderr": "",
+      "elapsed_seconds": 0.023727736000068944
+    },
+    {
+      "argv": [
+        "/Awl/bin/aWl",
+        "BuIlD"
+      ],
+      "exit_code": 0,
+      "stdout": "/build/Demo\n",
+      "stderr": "",
+      "elapsed_seconds": 0.11664777900000445
+    },
+    {
+      "argv": [
+        "/build/Demo"
+      ],
+      "exit_code": 0,
+      "stdout": "42\n",
+      "stderr": "",
+      "elapsed_seconds": 0.027680338999971354
+    },
+    {
+      "argv": [
+        "/Awl/bin/aWL",
+        "--HeLp"
+      ],
+      "exit_code": 0,
+      "stdout": "Awl Software Development Kit [Beta]\nUsage:\n  awl                         Show this help\n  awl init NAME               Create NAME.awproj and, if absent, main.aw here\n  awl build                   Build the sole .awproj project here\n  awl build NAME              Find NAME.awproj in an immediate child folder\n  awl build relative/file.aw   Compile a single .aw file (imports supported)\n\nBuild options:\n  -o FILE                      Executable destination (relative to terminal cwd)\n  -O 0|1|2|3                   Optimization level (default 2)\n  --syntax next|legacy         Override manifest / single-file default next\n  --build-timeout 1..3600       Backend timeout in seconds (default 120)\n  --build-memory-mib 512..16384 Backend memory bound (default 4096)\n\nProject output: <project>/build/<manifest-name> (.exe on Windows).\nSingle-file output: <cwd>/<source-stem> (.exe on Windows).\nInit never overwrites existing files. NAME: 1..64 letters/digits/_/-, starts alphanumeric.\nCompilation needs the complete bundled backend, not Python or a host compiler.\nOnly initialization and compilation are included; no run/install commands yet.\n",
+      "stderr": "",
+      "elapsed_seconds": 0.02828726400002779
+    },
+    {
+      "argv": [
+        "/Awl/bin/aWL",
+        "BuIlD"
+      ],
+      "exit_code": 0,
+      "stdout": "/build/Demo\n",
+      "stderr": "",
+      "elapsed_seconds": 0.13055618400005642
+    },
+    {
+      "argv": [
+        "/build/Demo"
+      ],
+      "exit_code": 0,
+      "stdout": "42\n",
+      "stderr": "",
+      "elapsed_seconds": 0.033041766999986066
+    },
+    {
+      "argv": [
+        "/Awl/bin/Awl",
+        "--HeLp"
+      ],
+      "exit_code": 0,
+      "stdout": "Awl Software Development Kit [Beta]\nUsage:\n  awl                         Show this help\n  awl init NAME               Create NAME.awproj and, if absent, main.aw here\n  awl build                   Build the sole .awproj project here\n  awl build NAME              Find NAME.awproj in an immediate child folder\n  awl build relative/file.aw   Compile a single .aw file (imports supported)\n\nBuild options:\n  -o FILE                      Executable destination (relative to terminal cwd)\n  -O 0|1|2|3                   Optimization level (default 2)\n  --syntax next|legacy         Override manifest / single-file default next\n  --build-timeout 1..3600       Backend timeout in seconds (default 120)\n  --build-memory-mib 512..16384 Backend memory bound (default 4096)\n\nProject output: <project>/build/<manifest-name> (.exe on Windows).\nSingle-file output: <cwd>/<source-stem> (.exe on Windows).\nInit never overwrites existing files. NAME: 1..64 letters/digits/_/-, starts alphanumeric.\nCompilation needs the complete bundled backend, not Python or a host compiler.\nOnly initialization and compilation are included; no run/install commands yet.\n",
+      "stderr": "",
+      "elapsed_seconds": 0.03607423400001153
+    },
+    {
+      "argv": [
+        "/Awl/bin/Awl",
+        "BuIlD"
+      ],
+      "exit_code": 0,
+      "stdout": "/build/Demo\n",
+      "stderr": "",
+      "elapsed_seconds": 0.11073289399996611
+    },
+    {
+      "argv": [
+        "/build/Demo"
+      ],
+      "exit_code": 0,
+      "stdout": "42\n",
+      "stderr": "",
+      "elapsed_seconds": 0.01968968500000301
+    },
+    {
+      "argv": [
+        "/Awl/bin/AwL",
+        "--HeLp"
+      ],
+      "exit_code": 0,
+      "stdout": "Awl Software Development Kit [Beta]\nUsage:\n  awl                         Show this help\n  awl init NAME               Create NAME.awproj and, if absent, main.aw here\n  awl build                   Build the sole .awproj project here\n  awl build NAME              Find NAME.awproj in an immediate child folder\n  awl build relative/file.aw   Compile a single .aw file (imports supported)\n\nBuild options:\n  -o FILE                      Executable destination (relative to terminal cwd)\n  -O 0|1|2|3                   Optimization level (default 2)\n  --syntax next|legacy         Override manifest / single-file default next\n  --build-timeout 1..3600       Backend timeout in seconds (default 120)\n  --build-memory-mib 512..16384 Backend memory bound (default 4096)\n\nProject output: <project>/build/<manifest-name> (.exe on Windows).\nSingle-file output: <cwd>/<source-stem> (.exe on Windows).\nInit never overwrites existing files. NAME: 1..64 letters/digits/_/-, starts alphanumeric.\nCompilation needs the complete bundled backend, not Python or a host compiler.\nOnly initialization and compilation are included; no run/install commands yet.\n",
+      "stderr": "",
+      "elapsed_seconds": 0.02523921900001369
+    },
+    {
+      "argv": [
+        "/Awl/bin/AwL",
+        "BuIlD"
+      ],
+      "exit_code": 0,
+      "stdout": "/build/Demo\n",
+      "stderr": "",
+      "elapsed_seconds": 0.09543281300000217
+    },
+    {
+      "argv": [
+        "/build/Demo"
+      ],
+      "exit_code": 0,
+      "stdout": "42\n",
+      "stderr": "",
+      "elapsed_seconds": 0.02365916400003698
+    },
+    {
+      "argv": [
+        "/Awl/bin/AWl",
+        "--HeLp"
+      ],
+      "exit_code": 0,
+      "stdout": "Awl Software Development Kit [Beta]\nUsage:\n  awl                         Show this help\n  awl init NAME               Create NAME.awproj and, if absent, main.aw here\n  awl build                   Build the sole .awproj project here\n  awl build NAME              Find NAME.awproj in an immediate child folder\n  awl build relative/file.aw   Compile a single .aw file (imports supported)\n\nBuild options:\n  -o FILE                      Executable destination (relative to terminal cwd)\n  -O 0|1|2|3                   Optimization level (default 2)\n  --syntax next|legacy         Override manifest / single-file default next\n  --build-timeout 1..3600       Backend timeout in seconds (default 120)\n  --build-memory-mib 512..16384 Backend memory bound (default 4096)\n\nProject output: <project>/build/<manifest-name> (.exe on Windows).\nSingle-file output: <cwd>/<source-stem> (.exe on Windows).\nInit never overwrites existing files. NAME: 1..64 letters/digits/_/-, starts alphanumeric.\nCompilation needs the complete bundled backend, not Python or a host compiler.\nOnly initialization and compilation are included; no run/install commands yet.\n",
+      "stderr": "",
+      "elapsed_seconds": 0.024789175000023533
+    },
+    {
+      "argv": [
+        "/Awl/bin/AWl",
+        "BuIlD"
+      ],
+      "exit_code": 0,
+      "stdout": "/build/Demo\n",
+      "stderr": "",
+      "elapsed_seconds": 0.107417279999936
+    },
+    {
+      "argv": [
+        "/build/Demo"
+      ],
+      "exit_code": 0,
+      "stdout": "42\n",
+      "stderr": "",
+      "elapsed_seconds": 0.023738911000009466
+    },
+    {
+      "argv": [
+        "/Awl/bin/AWL",
+        "--HeLp"
+      ],
+      "exit_code": 0,
+      "stdout": "Awl Software Development Kit [Beta]\nUsage:\n  awl                         Show this help\n  awl init NAME               Create NAME.awproj and, if absent, main.aw here\n  awl build                   Build the sole .awproj project here\n  awl build NAME              Find NAME.awproj in an immediate child folder\n  awl build relative/file.aw   Compile a single .aw file (imports supported)\n\nBuild options:\n  -o FILE                      Executable destination (relative to terminal cwd)\n  -O 0|1|2|3                   Optimization level (default 2)\n  --syntax next|legacy         Override manifest / single-file default next\n  --build-timeout 1..3600       Backend timeout in seconds (default 120)\n  --build-memory-mib 512..16384 Backend memory bound (default 4096)\n\nProject output: <project>/build/<manifest-name> (.exe on Windows).\nSingle-file output: <cwd>/<source-stem> (.exe on Windows).\nInit never overwrites existing files. NAME: 1..64 letters/digits/_/-, starts alphanumeric.\nCompilation needs the complete bundled backend, not Python or a host compiler.\nOnly initialization and compilation are included; no run/install commands yet.\n",
+      "stderr": "",
+      "elapsed_seconds": 0.028114596000023084
+    },
+    {
+      "argv": [
+        "/Awl/bin/AWL",
+        "BuIlD"
+      ],
+      "exit_code": 0,
+      "stdout": "/build/Demo\n",
+      "stderr": "",
+      "elapsed_seconds": 0.10603773000002548
+    },
+    {
+      "argv": [
+        "/build/Demo"
+      ],
+      "exit_code": 0,
+      "stdout": "42\n",
+      "stderr": "",
+      "elapsed_seconds": 0.018722282999988238
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "check",
+        "/work/default.aw"
+      ],
+      "exit_code": 0,
+      "stdout": "/work/default.aw: checked (native frontend)\n",
+      "stderr": "",
+      "elapsed_seconds": 0.024332609999987653
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/default.aw"
+      ],
+      "exit_code": 0,
+      "stdout": "42\n",
+      "stderr": "",
+      "elapsed_seconds": 0.09137918300007186
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "check",
+        "/work/default-bad.aw"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "/work/default-bad.aw:1:1: error[E100]: expected 'func'; got 'function'\n",
+      "elapsed_seconds": 0.024704355999915606
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "build",
+        "/Awl/examples-next/exported-enums/main.aw",
+        "-o",
+        "/work/configcheck"
+      ],
+      "exit_code": 0,
+      "stdout": "/work/configcheck\n",
+      "stderr": "",
+      "elapsed_seconds": 1.6999259030000076
+    },
+    {
+      "argv": [
+        "/work/configcheck",
+        "/work/settings.json"
+      ],
+      "exit_code": 0,
+      "stdout": "localhost\n8080\ntrue\n",
+      "stderr": "",
+      "elapsed_seconds": 0.02069800699996449
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "build",
+        "/work/first.aw",
+        "-o",
+        "/work/first",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 0,
+      "stdout": "/work/first\n",
+      "stderr": "",
+      "elapsed_seconds": 0.07869793299994399
+    },
+    {
+      "argv": [
+        "/work/first"
+      ],
+      "exit_code": 0,
+      "stdout": "42\n",
+      "stderr": "",
+      "elapsed_seconds": 0.017934340000010707
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/hello.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 0,
+      "stdout": "1\n2\n6\n24\n120\n720\n5040\n40320\n362880\n3628800\n",
+      "stderr": "",
+      "elapsed_seconds": 0.07617349299994203
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/integers.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 0,
+      "stdout": "4097\n-128\n32767\n2147483647\n255\n",
+      "stderr": "",
+      "elapsed_seconds": 0.07705101299995931
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/logic.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 0,
+      "stdout": "true\n",
+      "stderr": "",
+      "elapsed_seconds": 0.0711747729999388
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/results.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 0,
+      "stdout": "7\ntrue\n6\nfalse\nfalse\n-1\n",
+      "stderr": "",
+      "elapsed_seconds": 0.08141379500000312
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/values.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 0,
+      "stdout": "10\n15\n1\ntrue\n18446744073709551615\n",
+      "stderr": "",
+      "elapsed_seconds": 0.07154137800000626
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/buffers.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 0,
+      "stdout": "4\n0\n255\n42\n0\n",
+      "stderr": "",
+      "elapsed_seconds": 0.11862814599999183
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/no-display.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 0,
+      "stdout": "0\n",
+      "stderr": "",
+      "elapsed_seconds": 0.24570414799995888
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/buffer-trap.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 134,
+      "stdout": "",
+      "stderr": "Awl resource trap: invalid handle, bounds, or argument\n",
+      "elapsed_seconds": 0.09001730099998895
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/modules/main.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 0,
+      "stdout": "10\n15\n3\n",
+      "stderr": "",
+      "elapsed_seconds": 0.07852927800001908
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "build",
+        "/work/modules/main.aw",
+        "-o",
+        "/work/modules/geometry/points.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 2,
+      "stdout": "",
+      "stderr": "kcc: refusing to overwrite source with executable\n",
+      "elapsed_seconds": 0.02136669100002564
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "check",
+        "/work/cycle.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "/work/cycle.aw:1:1: error[E301]: cyclic module import: /work/cycle.aw\n",
+      "elapsed_seconds": 0.017241900000044552
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/strings.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 0,
+      "stdout": "Hello, Awl \ud83d\ude80!\n5\n8\n\ud83d\ude80\ntrue\nAnswer: 42\n",
+      "stderr": "",
+      "elapsed_seconds": 0.11674234899999192
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/string-trap.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 134,
+      "stdout": "",
+      "stderr": "Awl string trap: bounds, scalar, I/O, or allocation limit\n",
+      "elapsed_seconds": 0.07610384700001305
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "check",
+        "/work/bad-escape.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "/work/bad-escape.aw:1:28: error[E102]: Unicode escape is not a scalar value\n",
+      "elapsed_seconds": 0.01804404400002113
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/builders/main.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 0,
+      "stdout": "Awl caf\u00e9 | 42\n13\n14\nInvalid scalar: recovered\nframe=99999\n100000 updates, one reusable builder\n",
+      "stderr": "",
+      "elapsed_seconds": 0.22425101499993616
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/builder-stale.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 134,
+      "stdout": "",
+      "stderr": "Awl text builder trap: invalid or released handle\n",
+      "elapsed_seconds": 0.1251549129999603
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "check",
+        "/work/builder-type.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "/work/builder-type.aw:1:22: error[E200]: invalid platform arguments for buffer_free: expected ['i64']\n",
+      "elapsed_seconds": 0.021832620000054703
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/cleanup.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 0,
+      "stdout": "frame=99999\n100000 calls: scoped cleanup on every return\ncaf\u00e9\nInner scope released before this line\n",
+      "stderr": "",
+      "elapsed_seconds": 0.25845874499998445
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "check",
+        "/work/bad-defer.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "/work/bad-defer.aw:1:22: error[E200]: defer requires a supported release intrinsic\n",
+      "elapsed_seconds": 0.02028423000001567
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/arrays.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 0,
+      "stdout": "Typed arrays: original / doubled\n3\n6\n7\n14\n11\n22\n15\n30\nNested update\n42\nValue copies preserve the original\ntrue\n",
+      "stderr": "",
+      "elapsed_seconds": 0.10380823499997405
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/array-trap.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 134,
+      "stdout": "",
+      "stderr": "Awl array bounds trap\n",
+      "elapsed_seconds": 0.10797752299993135
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "check",
+        "/work/array-type.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "/work/array-type.aw:1:38: error[E200]: expected i64, found bool\n",
+      "elapsed_seconds": 0.020605169000077694
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/repeat.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 0,
+      "stdout": "Compact fixed arrays\nSeed evaluated once\n1024\n7168\nIndependent rows after copy\n0\n42\n0\n",
+      "stderr": "",
+      "elapsed_seconds": 0.10522773899992899
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "check",
+        "/work/repeat-invalid.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "/work/repeat-invalid.aw:1:38: error[E100]: array length must be from 1 to 1024\n",
+      "elapsed_seconds": 0.02038826099999369
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/scoped-owner.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 0,
+      "stdout": "frame=99999\n100000 scoped builders: automatic release\n1088890\nUnavailable allocation is safe to leave scope\nfalse\n",
+      "stderr": "",
+      "elapsed_seconds": 0.22828646799996477
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "check",
+        "/work/scoped-escape.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "/work/scoped-escape.aw:1:77: error[E220]: restricted builder cannot be copied, released or escape; use supported borrows\n",
+      "elapsed_seconds": 0.01792047399999319
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "check",
+        "/work/scoped-free.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "/work/scoped-free.aw:1:82: error[E220]: restricted builder cannot be copied, released or escape; use supported borrows\n",
+      "elapsed_seconds": 0.020461667000063244
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/borrows/main.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 0,
+      "stdout": "frame=99999\n100000 helper calls: one scoped builder\n1088890\ntrue\n",
+      "stderr": "",
+      "elapsed_seconds": 0.21863639200000762
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "check",
+        "/work/borrow-escape.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "/work/borrow-escape.aw:1:56: error[E220]: restricted builder cannot be copied, released or escape; use supported borrows\n",
+      "elapsed_seconds": 0.021266545000003134
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "check",
+        "/work/borrow-free.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "/work/borrow-free.aw:1:59: error[E220]: restricted builder cannot be copied, released or escape; use supported borrows\n",
+      "elapsed_seconds": 0.020266771999899902
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/moves.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 0,
+      "stdout": "frame=99999 / moved\n100000 local moves: one release per owner\n1888890\nMoved unavailable descriptor remains unavailable\nfalse\n",
+      "stderr": "",
+      "elapsed_seconds": 0.3244706350000115
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "check",
+        "/work/use-after-move.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "/work/use-after-move.aw:1:118: error[E221]: use of moved builder a\n",
+      "elapsed_seconds": 0.03802048299996841
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "check",
+        "/work/cross-block-move.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "/work/cross-block-move.aw:1:64: error[E225]: loop backedge must restore the entry ownership state of a\n",
+      "elapsed_seconds": 0.023965350999901602
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/own-params/main.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 0,
+      "stdout": "frame=99999\n100000 owning calls: callee releases builders\n1088890\nUnavailable handles transfer safely\nfalse\n",
+      "stderr": "",
+      "elapsed_seconds": 0.25046834900001613
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "check",
+        "/work/own-use.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "/work/own-use.aw:1:146: error[E221]: use of moved builder a\n",
+      "elapsed_seconds": 0.023978574000011577
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "check",
+        "/work/own-alias.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "/work/own-alias.aw:1:130: error[E222]: one call cannot borrow and consume the same owner\n",
+      "elapsed_seconds": 0.02116986500004714
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/owned-results/main.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 0,
+      "stdout": "frame=99999 / returned\n100000 factory -> transform -> caller pipelines\n2188890\n",
+      "stderr": "",
+      "elapsed_seconds": 0.258097189999944
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "check",
+        "/work/result-drop.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "/work/result-drop.aw:1:116: error[E223]: owned result must initialize a scoped binding or be forwarded as an owned return\n",
+      "elapsed_seconds": 0.02135448699993958
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "check",
+        "/work/result-manual.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "/work/result-manual.aw:1:137: error[E223]: owned result must initialize a scoped binding or be forwarded as an owned return\n",
+      "elapsed_seconds": 0.020381021999924087
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/branch-joins/main.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 0,
+      "stdout": "frame=99999 / odd\n100000 conditional handoffs: one owner per path\n1738890\n",
+      "stderr": "",
+      "elapsed_seconds": 0.28703365000001213
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "check",
+        "/work/join-use.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "/work/join-use.aw:1:129: error[E221]: use of moved builder a\n",
+      "elapsed_seconds": 0.023198895000064113
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "check",
+        "/work/join-shadow.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "/work/join-shadow.aw:1:144: error[E221]: use of moved builder a\n",
+      "elapsed_seconds": 0.02140018299996882
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/match-joins/main.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 0,
+      "stdout": "frame=99999 / draw\n100000 match routes: moved or retained, one cleanup\n1555559\n",
+      "stderr": "",
+      "elapsed_seconds": 0.2393492349999633
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "check",
+        "/work/match-use.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "/work/match-use.aw:1:234: error[E221]: use of moved builder a\n",
+      "elapsed_seconds": 0.01582401900009245
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "check",
+        "/work/match-shadow.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "/work/match-shadow.aw:1:248: error[E221]: use of moved builder a\n",
+      "elapsed_seconds": 0.015448988999992253
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/reinit/main.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 0,
+      "stdout": "restored=99999\n100000 owner reinitializations: original cleanup slot\n2477780\n",
+      "stderr": "",
+      "elapsed_seconds": 0.3578322930000013
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "check",
+        "/work/reinit-maybe.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "/work/reinit-maybe.aw:1:138: error[E224]: reinitialization requires a definitely empty eligible owner\n",
+      "elapsed_seconds": 0.02065565499992772
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "check",
+        "/work/reinit-live.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "/work/reinit-live.aw:1:108: error[E220]: live owner cannot be overwritten\n",
+      "elapsed_seconds": 0.01795489500000258
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/loop-owners/main.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 0,
+      "stdout": "frame=99999\n100000 loop-carried owners: state restored on every backedge\n1088890\nFinal owner remains live\nframe=100000\n",
+      "stderr": "",
+      "elapsed_seconds": 0.20250940699997955
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "check",
+        "/work/loop-live.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "/work/loop-live.aw:1:108: error[E225]: loop backedge must restore the entry ownership state of a\n",
+      "elapsed_seconds": 0.018399891000058233
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "check",
+        "/work/loop-empty.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "/work/loop-empty.aw:1:121: error[E225]: loop backedge must restore the entry ownership state of a\n",
+      "elapsed_seconds": 0.020552686000087306
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "build",
+        "/work/intstats/main.aw",
+        "-o",
+        "/work/intstats-tool",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 0,
+      "stdout": "/work/intstats-tool\n",
+      "stderr": "",
+      "elapsed_seconds": 0.24473878499998136
+    },
+    {
+      "argv": [
+        "/work/intstats-tool",
+        "42",
+        "-7",
+        "19",
+        "0",
+        "42",
+        "-9223372036854775808",
+        "9223372036854775807"
+      ],
+      "exit_code": 0,
+      "stdout": "count\n7\nminimum\n-9223372036854775808\nmaximum\n9223372036854775807\nsorted\n-9223372036854775808\n-7\n0\n19\n42\n42\n9223372036854775807\n",
+      "stderr": "",
+      "elapsed_seconds": 0.01569030999996812
+    },
+    {
+      "argv": [
+        "/work/intstats-tool",
+        "9223372036854775808"
+      ],
+      "exit_code": 2,
+      "stdout": "invalid signed 64-bit integer argument\n",
+      "stderr": "",
+      "elapsed_seconds": 0.01878584700000374
+    },
+    {
+      "argv": [
+        "/work/intstats-tool"
+      ],
+      "exit_code": 2,
+      "stdout": "usage: intstats INTEGER [INTEGER ...]\n",
+      "stderr": "",
+      "elapsed_seconds": 0.01879275199996755
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/vector-trap.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 134,
+      "stdout": "",
+      "stderr": "Awl int vector trap: invalid handle or index\n",
+      "elapsed_seconds": 0.10832077800000661
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "check",
+        "/work/vector-copy.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "/work/vector-copy.aw:1:83: error[E220]: restricted builder cannot be copied, released or escape; use supported borrows\n",
+      "elapsed_seconds": 0.021047705999990285
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "check",
+        "/work/pixelboard/main.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 0,
+      "stdout": "/work/pixelboard/main.aw: checked (native frontend)\n",
+      "stderr": "",
+      "elapsed_seconds": 0.031308015000035994
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "build",
+        "/work/pixelboard/main.aw",
+        "-o",
+        "/work/pixelboard-tool",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 0,
+      "stdout": "/work/pixelboard-tool\n",
+      "stderr": "",
+      "elapsed_seconds": 1.0269354829999884
+    },
+    {
+      "argv": [
+        "/work/pixelboard-tool"
+      ],
+      "exit_code": 3,
+      "stdout": "",
+      "stderr": "",
+      "elapsed_seconds": 0.014444323000020631
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "build",
+        "/work/kcopy/main.aw",
+        "-o",
+        "/work/kcopy-tool",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 0,
+      "stdout": "/work/kcopy-tool\n",
+      "stderr": "",
+      "elapsed_seconds": 0.3647626570000284
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "build",
+        "/work/textinfo/main.aw",
+        "-o",
+        "/work/textinfo-tool",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 0,
+      "stdout": "/work/textinfo-tool\n",
+      "stderr": "",
+      "elapsed_seconds": 0.37574395799993
+    },
+    {
+      "argv": [
+        "/work/kcopy-tool",
+        "/work/input.bin",
+        "/work/copy \u00e9.bin"
+      ],
+      "exit_code": 0,
+      "stdout": "bytes copied\n131328\n",
+      "stderr": "",
+      "elapsed_seconds": 0.025535945000001448
+    },
+    {
+      "argv": [
+        "/work/kcopy-tool",
+        "/work/input.bin",
+        "/work/copy \u00e9.bin"
+      ],
+      "exit_code": 4,
+      "stdout": "cannot create destination\n-3\n",
+      "stderr": "",
+      "elapsed_seconds": 0.017765763000056722
+    },
+    {
+      "argv": [
+        "/work/textinfo-tool",
+        "/work/text.txt"
+      ],
+      "exit_code": 0,
+      "stdout": "bytes\n9\nUnicode scalars\n5\n",
+      "stderr": "",
+      "elapsed_seconds": 0.023865877000048386
+    },
+    {
+      "argv": [
+        "/work/textinfo-tool",
+        "/work/text.txt"
+      ],
+      "exit_code": 5,
+      "stdout": "invalid UTF-8\n",
+      "stderr": "",
+      "elapsed_seconds": 0.022382355999980064
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/file-trap.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 134,
+      "stdout": "",
+      "stderr": "Awl resource trap: invalid handle, bounds, or argument\n",
+      "elapsed_seconds": 0.12883879000003162
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/integers-matrix.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 0,
+      "stdout": "-128\n-128\n-128\n-128\n0\n0\n0\n0\n0\n0\n1\n1\n1\n1\n0\n127\n127\n127\n127\n0\n-32768\n-32768\n-32768\n-32768\n0\n0\n0\n0\n0\n0\n1\n1\n1\n1\n0\n32767\n32767\n32767\n32767\n0\n-2147483648\n-2147483648\n-2147483648\n-2147483648\n0\n0\n0\n0\n0\n0\n1\n1\n1\n1\n0\n2147483647\n2147483647\n2147483647\n2147483647\n0\n-9223372036854775808\n-9223372036854775808\n-9223372036854775808\n-9223372036854775808\n0\n0\n0\n0\n0\n0\n1\n1\n1\n1\n0\n9223372036854775807\n9223372036854775807\n9223372036854775807\n9223372036854775807\n0\n0\n0\n0\n0\n0\n1\n1\n1\n1\n0\n255\n255\n255\n255\n0\n0\n0\n0\n0\n0\n1\n1\n1\n1\n0\n65535\n65535\n65535\n65535\n0\n0\n0\n0\n0\n0\n1\n1\n1\n1\n0\n4294967295\n4294967295\n4294967295\n4294967295\n0\n0\n0\n0\n0\n0\n1\n1\n1\n1\n0\n18446744073709551615\n18446744073709551615\n18446744073709551615\n18446744073709551615\n0\n-128\n0\n1\n127\n-128\n0\n1\n127\n-128\n0\n1\n127\n-128\n0\n1\n127\n0\n1\n127\n0\n1\n127\n0\n1\n127\n0\n1\n127\n-128\n0\n1\n127\n-32768\n0\n1\n32767\n-32768\n0\n1\n32767\n-32768\n0\n1\n32767\n0\n1\n255\n0\n1\n32767\n0\n1\n32767\n0\n1\n32767\n-128\n0\n1\n127\n-32768\n0\n1\n32767\n-2147483648\n0\n1\n2147483647\n-2147483648\n0\n1\n2147483647\n0\n1\n255\n0\n1\n65535\n0\n1\n2147483647\n0\n1\n2147483647\n-128\n0\n1\n127\n-32768\n0\n1\n32767\n-2147483648\n0\n1\n2147483647\n-9223372036854775808\n0\n1\n9223372036854775807\n0\n1\n255\n0\n1\n65535\n0\n1\n4294967295\n0\n1\n9223372036854775807\n0\n1\n127\n0\n1\n255\n0\n1\n255\n0\n1\n255\n0\n1\n255\n0\n1\n255\n0\n1\n255\n0\n1\n255\n0\n1\n127\n0\n1\n32767\n0\n1\n65535\n0\n1\n65535\n0\n1\n255\n0\n1\n65535\n0\n1\n65535\n0\n1\n65535\n0\n1\n127\n0\n1\n32767\n0\n1\n2147483647\n0\n1\n4294967295\n0\n1\n255\n0\n1\n65535\n0\n1\n4294967295\n0\n1\n4294967295\n0\n1\n127\n0\n1\n32767\n0\n1\n2147483647\n0\n1\n9223372036854775807\n0\n1\n255\n0\n1\n65535\n0\n1\n4294967295\n0\n1\n18446744073709551615\n",
+      "stderr": "",
+      "elapsed_seconds": 0.2645555899999863
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/trap0.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 134,
+      "stdout": "",
+      "stderr": "Awl arithmetic trap\n",
+      "elapsed_seconds": 0.11511891700001797
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/trap1.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 134,
+      "stdout": "",
+      "stderr": "Awl arithmetic trap\n",
+      "elapsed_seconds": 0.10759917099994709
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/trap2.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 134,
+      "stdout": "",
+      "stderr": "Awl arithmetic trap\n",
+      "elapsed_seconds": 0.09314250599993557
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/trap3.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 134,
+      "stdout": "",
+      "stderr": "Awl arithmetic trap\n",
+      "elapsed_seconds": 0.09209046500006934
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/trap4.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 134,
+      "stdout": "",
+      "stderr": "Awl arithmetic trap\n",
+      "elapsed_seconds": 0.0965943139999581
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/exit.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 37,
+      "stdout": "",
+      "stderr": "",
+      "elapsed_seconds": 0.08814726800005701
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "run",
+        "/work/infinite.aw",
+        "--run-timeout",
+        "1",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 124,
+      "stdout": "",
+      "stderr": "kcc: program wall-time limit exceeded\n",
+      "elapsed_seconds": 1.0792067790000601
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "build",
+        "/work/first.aw",
+        "--build-timeout",
+        "0",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 2,
+      "stdout": "",
+      "stderr": "kcc: invalid option or value\n",
+      "elapsed_seconds": 0.02109441799996148
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "build",
+        "/work/bad.aw",
+        "-o",
+        "/work/first",
+        "--diagnostic-format",
+        "json",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "{\"file\":\"/work/bad.aw\",\"diagnostics\":[{\"code\":\"E200\",\"message\":\"expected i64, found bool\",\"line\":1,\"column\":22,\"end_column\":28,\"start\":21,\"end\":27}]}\n",
+      "elapsed_seconds": 0.019596626000065953
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "build",
+        "/work/first.aw",
+        "-o",
+        "/work/first.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 2,
+      "stdout": "",
+      "stderr": "kcc: refusing to overwrite source with executable\n",
+      "elapsed_seconds": 0.020139599000003727
+    },
+    {
+      "argv": [
+        "/Awl/bin/kcc",
+        "build",
+        "/work/first.aw",
+        "-o",
+        "/work/first",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 2,
+      "stdout": "",
+      "stderr": "kcc: bundled toolchain missing; use the complete Awl Linux bundle (no system-tool fallback)\n",
+      "elapsed_seconds": 0.019175657999994655
+    },
+    {
+      "argv": [
+        "/relocated Awl/bin/kcc",
+        "run",
+        "/work/first.aw",
+        "--syntax",
+        "legacy"
+      ],
+      "exit_code": 0,
+      "stdout": "42\n",
+      "stderr": "",
+      "elapsed_seconds": 22.478598938000005
+    }
+  ],
+  "scope": "Linux x86-64 on recorded kernel only; not a full VM/distro matrix, sandbox/security proof or production-safety certification.",
+  "tested_archive": {
+    "path": "/var/tmp/Awl-default-work/Awl-0.25.0-dev-linux-x86_64.complete.tar.xz",
+    "sha256": "eda04f5701153315fa8db64e2aa09a17bf0c4e3c46753cd818e9026b14a045a5",
+    "bytes": 57574272
+  }
+}

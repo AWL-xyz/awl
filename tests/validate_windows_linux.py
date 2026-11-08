@@ -1,0 +1,16 @@
+"""Local development gates; not archive acceptance or benchmark evidence."""
+import concurrent.futures,json,os,subprocess,sys,time,shutil,importlib.util
+from pathlib import Path
+ROOT=Path(__file__).resolve().parents[1]
+def run(name,command,env):
+ start=time.monotonic()
+ with (ROOT/'tests'/('windows-linux-'+name+'.txt')).open('w') as f:r=subprocess.run(command,cwd=ROOT,env={**os.environ,**env},stdout=f,stderr=subprocess.STDOUT)
+ text=(ROOT/'tests'/('windows-linux-'+name+'.txt')).read_text()
+ code=r.returncode or int('skipped=' in text or ' ... skipped ' in text)
+ return name,{'exit':code,'seconds':round(time.monotonic()-start,3)}
+if __name__=='__main__':
+ if not shutil.which('Xvfb') or importlib.util.find_spec('Xlib') is None:raise SystemExit('Install Xvfb + python-xlib contributor fixtures; zero skips required')
+ jobs=[('reference-suite',[sys.executable,'-m','unittest','discover','-s','tests','-v'],{}),('native-parser-suite',[sys.executable,'-m','unittest','discover','-s','tests','-v'],{'KCC_LEXER':'native','KCC_PARSER':'native'}),('native-frontend-suite',[sys.executable,'tests/native_frontend_suite.py'],{}),('focused-sanitized',[sys.executable,'-m','unittest','discover','-s','tests','-p','test_vectors.py','-v'],{'Awl_BUILDER_SANITIZE':'1'})]
+ with concurrent.futures.ThreadPoolExecutor(max_workers=5) as pool:results=dict(pool.map(lambda j:run(*j),jobs))
+ (ROOT/'tests/windows-linux-development-validation.json').write_text(json.dumps(results,indent=2)+'\n');print(json.dumps(results,indent=2),flush=True)
+ sys.exit(any(r['exit'] for r in results.values()))
