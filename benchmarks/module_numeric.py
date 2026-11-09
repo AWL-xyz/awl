@@ -1,7 +1,7 @@
 """Whole native commands on the two-file module-state/math example; Linux only."""
 import hashlib,json,os,statistics,subprocess,tempfile,time
 from pathlib import Path
-ROOT=Path(__file__).resolve().parents[1];binary=ROOT/'build/Awl-linux-x86_64/bin/kcc';source=ROOT/'examples-next/modules/main.aw'
+ROOT=Path(__file__).resolve().parents[1];binary=ROOT/'build/Awl-linux-x86_64/bin/kcc';source=ROOT/'examples/modules/main.aw'
 def main():
  env={**os.environ,'PATH':'/no-host-tools','XDG_CACHE_HOME':str(ROOT/'build/module-benchmark-cache')};measurements={}
  with tempfile.TemporaryDirectory(prefix='Awl-module-bench-') as td:

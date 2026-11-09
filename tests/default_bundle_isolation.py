@@ -59,7 +59,7 @@ def main():
     invoke(['/Awl/bin/kcc','run','/work/default.aw'],stdout='42\n',legacy=False)
     (root/'work/default-bad.aw').write_text('function main()->i64 return 0 end')
     invoke(['/Awl/bin/kcc','check','/work/default-bad.aw'],code=1,stderr_part='error[',legacy=False)
-    invoke(['/Awl/bin/kcc','build','/Awl/examples-next/exported-enums/main.aw','-o','/work/configcheck'],stdout='/work/configcheck\n',legacy=False)
+    invoke(['/Awl/bin/kcc','build','/Awl/examples/exported-enums/main.aw','-o','/work/configcheck'],stdout='/work/configcheck\n',legacy=False)
     (root/'work/settings.json').write_text('{"host":"localhost","port":8080,"debug":true}')
     invoke(['/work/configcheck','/work/settings.json'],stdout='localhost\n8080\ntrue\n',legacy=False)
     source=root/'work/first.aw';source.write_text('function main()->i64 print(40+2) return 0 end')

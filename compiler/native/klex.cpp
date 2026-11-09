@@ -33,14 +33,14 @@ size_t utf8_width(std::string_view s,size_t i) {
 }
 }
 extern "C" {
-uint32_t Awl_lex_abi_version(void) { return 1; }
+uint32_t Awl_lex_abi_version(void) { return 2; }
 size_t Awl_lex_token_size(void) { return sizeof(AwlLexToken); }
 size_t Awl_lex_result_size(void) { return sizeof(AwlLexResult); }
 void Awl_lex_free(AwlLexResult *out) {
     if(!out) return;
     delete static_cast<Tokens*>(out->owner); *out={};
 }
-static int scan(const char *input,size_t size,AwlLexResult *out,bool strings,bool next=false) {
+static int scan(const char *input,size_t size,AwlLexResult *out) {
     if(!out) return 5;
     *out={}; out->line=out->column=1;
     if(size>max_source) return 3;
@@ -61,7 +61,7 @@ static int scan(const char *input,size_t size,AwlLexResult *out,bool strings,boo
                 continue;
             }
             const size_t start=i; const auto start_cp=cp, start_column=column; uint32_t flags=0;
-            if(strings&&c=='"') {
+            if(c=='"') {
                 flags=4; ++i; bool closed=false;
                 while(i<size) {
                     if(source[i]=='"') {++i;closed=true;break;}
@@ -85,9 +85,9 @@ static int scan(const char *input,size_t size,AwlLexResult *out,bool strings,boo
                 while(i<size&&(letter(static_cast<unsigned char>(source[i]))||digit(static_cast<unsigned char>(source[i])))) ++i;
             } else {
                 const auto rest=source.substr(i);
-                if((next&&(rest.starts_with("..")||rest.starts_with("::")))||rest.starts_with("->")||rest.starts_with("==")||rest.starts_with("!=")||
+                if((rest.starts_with("..")||rest.starts_with("::"))||rest.starts_with("->")||rest.starts_with("==")||rest.starts_with("!=")||
                    rest.starts_with("<=")||rest.starts_with(">=")) i+=2;
-                else if((strings&&(c=='['||c==']'))||(next&&(c=='@'||c=='{'||c=='}'))) ++i;
+                else if((c=='['||c==']'||c=='@'||c=='{'||c=='}')) ++i;
                 else if(std::string_view("+*/%<>=():,;.-").find(static_cast<char>(c))!=std::string_view::npos) ++i;
                 else { status=1; break; }
             }
@@ -105,9 +105,7 @@ static int scan(const char *input,size_t size,AwlLexResult *out,bool strings,boo
         out->owner=tokens.release(); return status;
     } catch(...) { *out={}; return 5; }
 }
-int Awl_lex(const char *input,size_t size,AwlLexResult *out) {return scan(input,size,out,false);}
-int Awl_lex_project(const char *input,size_t size,AwlLexResult *out) {return scan(input,size,out,true);}
-int Awl_lex_next(const char *input,size_t size,AwlLexResult *out) {return scan(input,size,out,true,true);}
+int Awl_lex(const char *input,size_t size,AwlLexResult *out) {return scan(input,size,out);}
 int Awl_lex_benchmark(const char *source,size_t size,uint32_t repeat,double *seconds,uint64_t *count) {
     if(!seconds||!count||!repeat||repeat>100000) return 5;
     *seconds=0; *count=0;

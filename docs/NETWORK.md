@@ -40,7 +40,7 @@ socket sends use MSG_NOSIGNAL, EPIPE returns -11 without changing process-wide S
 
 ## kserve, a real bounded service
 
-`examples-next/apps/kserve` is a two-file manifest project implemented in Awl, build using the native toolkit, run `./build/kserve [PORT [MAX_CONNECTIONS]]`, default port0 and32connections, explicit maximum1..256, first stdout line is the assigned port and is explicitly flushed
+`examples/apps/kserve` is a two-file manifest project implemented in Awl, build using the native toolkit, run `./build/kserve [PORT [MAX_CONNECTIONS]]`, default port0 and32connections, explicit maximum1..256, first stdout line is the assigned port and is explicitly flushed
 
 - GET /health returns a JSON status object
 - GET /counter reads in-process state

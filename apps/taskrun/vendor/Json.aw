@@ -1,9 +1,9 @@
-func fail :: @b result[i64], code:i64, offset:i64: i64 {
+func fail[i64] :: @b result[i64], code:i64, offset:i64 {
     vector.set(result, 0, code);
     vector.set(result, 1, offset);
     return -1;
 };
-func space :: source:text, offset:i64: i64 {
+func space[i64] :: source:text, offset:i64 {
     while offset < string.bytes(source) {
         @p b: string.byte_at(source, offset);
         if b != 32u8 and b != 9u8 and b != 10u8 and b != 13u8 { return offset; };
@@ -11,7 +11,7 @@ func space :: source:text, offset:i64: i64 {
     };
     return offset;
 };
-func emit :: kind:i64, value:text, offset:i64, @b values[text], @b metadata[i64], @b result[i64]: bool {
+func emit[bool] :: kind:i64, value:text, offset:i64, @b values[text], @b metadata[i64], @b result[i64] {
     if vector.length(values) == 512 { fail(result, 2, offset); return false; };
     if not vector.reserve(values, vector.length(values) + 1) or not vector.reserve(metadata, vector.length(metadata) + 2) { fail(result, 3, offset); return false; };
     vector.push(values, value);
@@ -19,7 +19,7 @@ func emit :: kind:i64, value:text, offset:i64, @b values[text], @b metadata[i64]
     vector.push(metadata, offset);
     return true;
 };
-func hex :: source:text, offset:i64: i64 {
+func hex[i64] :: source:text, offset:i64 {
     if offset + 4 > string.bytes(source) { return -1; };
     @p value: 0;
     @p i: 0;
@@ -35,7 +35,7 @@ func hex :: source:text, offset:i64: i64 {
     };
     return value;
 };
-func quoted :: source:text, offset:i64, kind:i64, @b values[text], @b metadata[i64], @b result[i64]: i64 {
+func quoted[i64] :: source:text, offset:i64, kind:i64, @b values[text], @b metadata[i64], @b result[i64] {
     @p start: offset;
     @p size: string.bytes(source);
     if offset >= size { return fail(result, 1, offset); };
@@ -102,12 +102,12 @@ func quoted :: source:text, offset:i64, kind:i64, @b values[text], @b metadata[i
     };
     return fail(result, 1, size);
 };
-func digit :: source:text, offset:i64: bool {
+func digit[bool] :: source:text, offset:i64 {
     if offset >= string.bytes(source) { return false; };
     @p b: string.byte_at(source, offset);
     return b >= 48u8 and b <= 57u8;
 };
-func number :: source:text, offset:i64, @b values[text], @b metadata[i64], @b result[i64]: i64 {
+func number[i64] :: source:text, offset:i64, @b values[text], @b metadata[i64], @b result[i64] {
     @p start: offset;
     @p size: string.bytes(source);
     if string.byte_at(source, offset) == 45u8 { offset: offset + 1; };
@@ -140,7 +140,7 @@ func number :: source:text, offset:i64, @b values[text], @b metadata[i64], @b re
     if not emit(6, spool.snapshot(builder), start, values, metadata, result) { return -1; };
     return offset;
 };
-func item :: source:text, offset:i64, depth:i64, @b values[text], @b metadata[i64], @b result[i64]: i64 {
+func item[i64] :: source:text, offset:i64, depth:i64, @b values[text], @b metadata[i64], @b result[i64] {
     offset: space(source, offset);
     @p size: string.bytes(source);
     if offset == size { return fail(result, 1, offset); };
@@ -196,7 +196,7 @@ func item :: source:text, offset:i64, depth:i64, @b values[text], @b metadata[i6
     if not emit(kind, literal, offset, values, metadata, result) { return -1; };
     return offset + i;
 };
-func after :: index:i64, @b tokens[text], @b result[i64]: i64 {
+func after[i64] :: index:i64, @b tokens[text], @b result[i64] {
     @p kind: vector.get(result, 2 + index * 2);
     if kind != 1 and kind != 2 { return index + 1; };
     @p depth: 1;
@@ -211,7 +211,7 @@ func after :: index:i64, @b tokens[text], @b result[i64]: i64 {
     return -1;
 };
 exports{
-    @r func parse :: source:text, @b tokens[text], @b result[i64]: bool {
+    @r func parse[bool] :: source:text, @b tokens[text], @b result[i64] {
         if not vector.reserve(result, 2) { return false; };
         vector.clear(result);
         vector.push(result, 0);
@@ -233,7 +233,7 @@ exports{
         vector.set(result, 1, offset);
         return true;
     };
-    @r func locate :: pointer:text, @b tokens[text], @b result[i64]: i64 {
+    @r func locate[i64] :: pointer:text, @b tokens[text], @b result[i64] {
         @p count: vector.length(tokens);
         if count == 0 or vector.length(result) != count * 2 + 2 { return -4; };
         if vector.get(result, 0) != 0 { return -4; };

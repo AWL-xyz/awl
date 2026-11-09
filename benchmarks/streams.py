@@ -5,7 +5,7 @@ ROOT=Path(__file__).resolve().parents[1]
 p=argparse.ArgumentParser();p.add_argument('--awl',type=Path,required=True);a=p.parse_args();binary=a.awl.absolute()
 with tempfile.TemporaryDirectory(prefix='Awl-stream-bench-',dir='/var/tmp') as td:
  work=Path(td)
- for name in ['main.aw','kpipe.awproj']:(work/name).write_bytes((ROOT/'examples-next/apps/kpipe'/name).read_bytes())
+ for name in ['main.aw','kpipe.awproj']:(work/name).write_bytes((ROOT/'examples/apps/kpipe'/name).read_bytes())
  env={k:v for k,v in os.environ.items() if not k.startswith('KPIPE_')};env.update(PATH='/no-host-tools',XDG_CACHE_HOME='/tmp/Awl-streams-cache')
  samples={'build':[],'copy_8mib':[],'upper_8mib':[]};data=bytes(range(256))*32768
  for i in range(8):

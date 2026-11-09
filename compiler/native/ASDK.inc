@@ -39,7 +39,7 @@ void help() {
         <<"Build options:\n"
         <<"  -o FILE                      Executable destination (relative to terminal cwd)\n"
         <<"  -O 0|1|2|3                   Optimization level (default 2)\n"
-        <<"  --syntax next|legacy         Override manifest / single-file default next\n"
+        <<"  --syntax aesop               Aesop is the only supported syntax\n"
         <<"  --build-timeout 1..3600       Backend timeout in seconds (default 120)\n"
         <<"  --build-memory-mib 512..16384 Backend memory bound (default 4096)\n\n"
         <<"Project output: <project>/build/<manifest-name> (.exe on Windows).\n"
@@ -94,7 +94,7 @@ fs::path discover(const fs::path &cwd,const std::string &name) {
     if(found.size()!=1) throw std::runtime_error("ambiguous project: multiple child folders contain "+name+".awproj; enter the desired folder and use awl build");
     return found[0];
 }
-struct Project {fs::path manifest,entry;std::string syntax="next";};
+struct Project {fs::path manifest,entry;std::string syntax="aesop";};
 Project read_project(const fs::path &file) {
     if(fs::is_symlink(file)||!fs::is_regular_file(file)||fs::file_size(file)>16384) throw std::runtime_error("manifest must be a regular non-symlink file of at most 16 KiB");
     std::ifstream in(file,std::ios::binary);if(!in) throw std::runtime_error("cannot read manifest");
@@ -107,7 +107,7 @@ Project read_project(const fs::path &file) {
         if(!keys.insert(key).second) throw std::runtime_error("duplicate manifest key: "+key);
         if(key=="format") {if(value!="1") throw std::runtime_error("unsupported project manifest format");format=true;}
         else if(key=="entry") entry=value;
-        else if(key=="syntax") {if(value!="next"&&value!="legacy") throw std::runtime_error("manifest syntax must be next or legacy");result.syntax=value;}
+        else if(key=="syntax") {if(value!="aesop") throw std::runtime_error("manifest syntax must be aesop");result.syntax=value;}
         else throw std::runtime_error("unknown manifest key: "+key);
     }
     if(in.bad()) throw std::runtime_error("manifest read failed");
@@ -135,8 +135,8 @@ int run(int argc,char **argv,int (*compiler)(int,char**)) {
                 const auto source_status=fs::symlink_status(source);
                 if(source_status.type()!=fs::file_type::not_found&&(fs::is_symlink(source_status)||!fs::is_regular_file(source_status))) throw std::runtime_error(name+".aw exists but is not a regular non-symlink file; refusing to use it");
                 bool made=false;
-                if(source_status.type()==fs::file_type::not_found) {create_new(source,"exports{\n    @r func hello :: who:text: text {\n        return \"Hello, \" + who + \"!\";\n    };\n};\n");made=true;}
-                create_new(manifest,"format: 1\nkind: package\nname: "+name+"\nversion: 0.1.0\nentry: "+name+".aw\nsyntax: next\n");
+                if(source_status.type()==fs::file_type::not_found) {create_new(source,"exports{\n    @r func hello :: who:text {\n        return \"Hello, \" + who + \"!\";\n    };\n};\n");made=true;}
+                create_new(manifest,"format: 1\nkind: package\nname: "+name+"\nversion: 0.1.0\nentry: "+name+".aw\nsyntax: aesop\n");
                 std::cout<<"Initialized package "<<name<<" in "<<utf8(cwd)<<"\n"<<(made?"Created":"Preserved")<<" "<<name<<".aw\nCreated "<<name<<".awpkg\nInstall by copying this folder to <project>/packages/"<<name<<"/ and writing: use "<<name<<";\n";return std::cout?0:2;
             }
             if(argc!=3||!project_name(argv[2])) throw std::runtime_error("usage: awl init NAME (1..64 letters/digits/_/-, starts alphanumeric; no reserved device names) or awl init NAME --pkg");
@@ -145,8 +145,8 @@ int run(int argc,char **argv,int (*compiler)(int,char**)) {
             const auto source_status=fs::symlink_status(source);
             if(source_status.type()!=fs::file_type::not_found&&(fs::is_symlink(source_status)||!fs::is_regular_file(source_status))) throw std::runtime_error("main.aw exists but is not a regular non-symlink source");
             bool made=false;
-            if(source_status.type()==fs::file_type::not_found) {create_new(source,"func main: i64 {\n    print(\"Hello from Awl!\");\n    return 0;\n};\n");made=true;}
-            create_new(manifest,"format: 1\nentry: main.aw\nsyntax: next\n");
+            if(source_status.type()==fs::file_type::not_found) {create_new(source,"func main {\n    print(\"Hello from Awl!\");\n    return 0;\n};\n");made=true;}
+            create_new(manifest,"format: 1\nentry: main.aw\nsyntax: aesop\n");
             std::cout<<"Initialized "<<argv[2]<<" in "<<utf8(cwd)<<"\n"<<(made?"Created":"Preserved")<<" main.aw\nCreated "<<utf8(manifest.filename())<<"\nBuild with: awl build\n";return std::cout?0:2;
         }
         if(command!="build") throw std::runtime_error("unknown command '"+command+"'; use Awl for help (beta includes only init/build)");
@@ -159,7 +159,7 @@ int run(int argc,char **argv,int (*compiler)(int,char**)) {
             if(option!="-o"&&option!="-O"&&option!="--syntax"&&option!="--build-timeout"&&option!="--build-memory-mib") throw std::runtime_error("unknown build option: "+option);
             if(++i>=argc) throw std::runtime_error("missing value for "+option);
             const std::string value=argv[i];
-            if(option=="--syntax") {if(value!="next"&&value!="legacy") throw std::runtime_error("syntax must be next or legacy");override_syntax=value;}
+            if(option=="--syntax") {if(value!="aesop") throw std::runtime_error("syntax must be aesop");override_syntax=value;}
             else {
                 unsigned parsed=0;
                 if(option=="-O"&&!(value.size()==1&&value[0]>='0'&&value[0]<='3')) throw std::runtime_error("optimization must be 0..3");
@@ -169,7 +169,7 @@ int run(int argc,char **argv,int (*compiler)(int,char**)) {
                 flags.push_back(option);flags.push_back(value);
             }
         }
-        fs::path source,output,manifest;std::string syntax="next";
+        fs::path source,output,manifest;std::string syntax="aesop";
         const bool single=!target.empty()&&path(target).extension()==".aw";
         if(single) {source=fs::canonical(path(target));if(!fs::is_regular_file(source)) throw std::runtime_error("source is not a regular .aw file");}
         else {const auto project=read_project(discover(cwd,target));source=project.entry;manifest=project.manifest;syntax=project.syntax;output=manifest.parent_path()/"build"/manifest.stem();}

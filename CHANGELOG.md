@@ -1,5 +1,18 @@
 # unreleased mutable borrows and diagnostics
 
+## Aesop source revision, not a published SDK release
+
+- function results are optional, `func size :: @b values[i64], etc[i64] { ... };` infers its result from the body
+- explicit results use `func size[i64] :: ... { ... };`, owned results retain explicit `[@o type]` annotations
+- mixed return types and missing return paths are diagnosed, unresolved recursive type dependencies require annotations
+- Aesop is the sole native compiler grammar, legacy/Python/prototype frontends are retired, current examples live in `examples/`
+- the language is Awl, the source syntax is Aesop, those names are not a compound product name
+- local `time` Package adds monotonic and UTC wall clocks, bounded sleeps and overflow-checked deadlines, `wall_clock_millis` is a new checked intrinsic emitted only into programs that use it
+- the offline editor recognizes the wall-clock intrinsic, db/websocket/fetch Packages and native Windows acceptance remain unfinished
+- scanner/parser C ABI v2 removes dialect-selecting exports
+- source-current native, inference, editor and generated-program evidence lives in `tests/aesop-*`, older SDK archives are unchanged
+
+
 - `@m` mutable borrows for struct parameters, the callee edits the caller's value in place, arguments must be an existing local, field or element, `@m` on non-struct types is rejected with `E229`
 - bare `return;` in unit functions, running the scope cleanup on the way out
 - unknown field, function, local, module variable and enum variant diagnostics now suggest the closest real declaration, `E229` covers mutable-borrow misuse

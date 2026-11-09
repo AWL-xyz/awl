@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-// Contributor harness: exercises the in-browser next-syntax interpreter that
+// Contributor harness: exercises the in-browser Aesop-syntax interpreter that
 // ships inside editor/awl-editor.html, no browser or network required.
 const fs=require('fs'),path=require('path');
 const html=fs.readFileSync(process.argv[2],'utf8');
 const cut=(a,b)=>{const i=html.indexOf(a),j=html.indexOf(b);if(i<0||j<0)throw Error('missing marker '+a+' / '+b);return html.slice(i,j);};
 const core=path.join(require('os').tmpdir(),'awl-editor-core-'+process.pid+'.js');
 fs.writeFileSync(core,cut('/* ---------- language definition ---------- */','/* ---------- state ---------- */')+'\n'+
-  cut('/* ---------- in-browser next-syntax interpreter ---------- */','function runProgram(')+'\nmodule.exports={EXAMPLES,kernRun,parse};\n');
+  cut('/* ---------- in-browser Aesop-syntax interpreter ---------- */','function runProgram(')+'\nmodule.exports={EXAMPLES,kernRun,parse};\n');
 const lib=require(core);fs.unlinkSync(core);
 const records=[];
 const expect=(ok,label)=>{if(!ok)throw Error('failed: '+label);records.push(label);};
@@ -29,10 +29,21 @@ r=run([{name:'main.aw',text:lib.EXAMPLES['bounce.aw']}],'main.aw');
 expect(r.code===0&&r.frames===90,'bouncing square records 90 frames');
 const rejects=(label,source)=>{let bad=false;try{lib.parse(source);}catch(e){bad=true;}expect(bad,label);};
 rejects('old arrow result syntax rejected','func main()->i64 return 0; end;');
-rejects('old parenthesized parameters rejected','func size(v:i64) -> i64 return v; end; func main: i64 { return 0; };');
+rejects('old parenthesized parameters rejected','func size(v:i64) -> i64 return v; end; func main[i64] { return 0; };');
 rejects('old end; function body rejected','func main: i64 return 0; end;');
-const prog=lib.parse('func size :: @b values[i64], etc[i64]: i64 { return 0; };\nfunc main: i64 { return 0; };');
+rejects('old colon result rejected','func main: i64 { return 0; };');
+rejects('old trailing parameter result rejected','func size :: v:i64: i64 { return v; };');
+const prog=lib.parse('func size[i64] :: @b values[i64], etc[i64] { return 0; };\nfunc main[i64] { return 0; };');
 expect(prog.fns.size.params.length===2&&prog.fns.size.ret==='i64'&&prog.fns.main.params.length===0,'func :: parameters and bare main header parse');
+r=run([{name:'main.aw',text:'func choose :: b:bool { if b { return 7; } else { return 9; }; }; func main { print(choose(false)); return 0; };'}],'main.aw');
+expect(r.code===0&&r.out[0]==='9','inferred function and entry-point results');
+r=run([{name:'main.aw',text:'func main { print(answer()); return 0; }; func answer { return 42; };'}],'main.aw');
+expect(r.out[0]==='42','forward inferred result');
+r=run([{name:'main.aw',text:'func main { @p stamp: wall_clock_millis(); print(stamp >= 0); return 0; };'}],'main.aw');
+expect(r.code===0&&r.out[0]==='true','wall-clock intrinsic has a checked i64 result');
+for(const source of ['func bad :: b:bool { if b { return 1; } else { return false; }; }; func main { print(bad(true)); return 0; };','func bad { return bad(); }; func main { print(bad()); return 0; };','func bad :: b:bool { if b { return 1; }; }; func main { print(bad(true)); return 0; };']) {
+  let rejected=false;try{run([{name:'main.aw',text:source}],'main.aw');}catch(e){rejected=true;}expect(rejected,'editor rejects mixed/circular/incomplete inferred results');
+}
 const examples=Object.fromEntries(Object.entries(lib.EXAMPLES).map(([k,v])=>[k,Array.isArray(v)?v:[{name:k,text:v}]]));
 fs.writeFileSync(process.argv[3],JSON.stringify(examples));
 console.log(records.length+' in-browser interpreter checks passed');

@@ -12,8 +12,8 @@ static void verify(Unit &u,bool good) {
     serialize(u);expect(before==u.json,"verifier modified arena");expect(failed!=good,"incorrect verifier outcome");
 }
 int main() {try {
-    const std::string text="@p first: 1; func main: i64 { @p b: buffer_new(8); stdin_read(b,0,8); stdout_write(b,0,8); stderr_write(b,0,8); stdout_flush(); stderr_flush(); env_size(\"key\"); env_read(\"key\",b,0,8); buffer_free(b); return 0; };";
-    auto seed=parse_source(text.data(),text.size(),true,true);expect(seed->diagnostics.empty(),"seed parse");Checker(*seed).run();verify(*seed,true);unsigned cases=1;
+    const std::string text="@p first: 1; func main[i64] { @p b: buffer_new(8); stdin_read(b,0,8); stdout_write(b,0,8); stderr_write(b,0,8); stdout_flush(); stderr_flush(); env_size(\"key\"); env_read(\"key\",b,0,8); buffer_free(b); return 0; };";
+    auto seed=parse_source(text.data(),text.size());expect(seed->diagnostics.empty(),"seed parse");Checker(*seed).run();verify(*seed,true);unsigned cases=1;
     for(const auto &name:{"stdin_read","stdout_write","stderr_write","stdout_flush","stderr_flush","env_size","env_read"}) {
         const auto id=find(*seed,"call",name);
         auto run=[&](const std::function<void(Unit &)> &edit){Unit u=*seed;edit(u);verify(u,false);++cases;};

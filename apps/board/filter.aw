@@ -1,7 +1,7 @@
 use vendor/Json.aw as json;
 use Rules.aw as rules;
 use Store.aw as store;
-func main: i64 {
+func main[i64] {
     if arg_count() != 3 { return 2; };
     if not arg_text_valid(0) or not arg_text_valid(1) or not arg_text_valid(2) { return 2; };
     @p query: arg_text(1);

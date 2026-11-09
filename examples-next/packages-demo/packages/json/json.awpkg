@@ -1,6 +1,0 @@
-format: 1
-kind: package
-name: json
-version: 0.1.0
-entry: json.aw
-syntax: next

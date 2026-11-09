@@ -9,8 +9,8 @@ int main() {
     struct Cleanup {fs::path p;~Cleanup(){std::error_code ec;fs::remove_all(p,ec);}} cleanup{folder};
     try {
         fs::create_directories(folder);
-        {std::ofstream f(folder/"main.aw");f<<"import lib function main()->i64 return lib.answer() end";}
-        {std::ofstream f(folder/"lib.aw");f<<"-- Unicode: \xce\xbb\nfunction answer()->i64 return 42 end";}
+        {std::ofstream f(folder/"main.aw");f<<"use lib.aw as lib; func main[i64] { return lib.answer(); };";}
+        {std::ofstream f(folder/"lib.aw");f<<"-- Unicode: \xce\xbb\nexports{@r func answer[i64] { return 42; };};";}
         auto seed=parse_project((folder/"main.aw").string().c_str());
         require_project(seed->diagnostics.empty(),"project parse failed");
         Checker checker(*seed);checker.run();Verifier v(*seed);v.run();

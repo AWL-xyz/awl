@@ -6,7 +6,7 @@ from Xlib import X,display
 ROOT=Path(__file__).resolve().parents[2];out=Path(__file__).resolve().parent;binary=Path(os.environ.get('Awl_ENUM_BINARY','/var/tmp/Awl-enum-sdk/Awl/bin/Awl'))
 with tempfile.TemporaryDirectory(prefix='Awl-enum-photo-',dir='/var/tmp') as td:
  work=Path(td)
- for src in (ROOT/'examples-next/enums').iterdir():
+ for src in (ROOT/'examples/enums').iterdir():
   if src.is_file():(work/src.name).write_bytes(src.read_bytes())
  transcript=work/'transcript.txt';script=work/'demo.sh';script.write_text('''#!/bin/sh
 export PATH="'''+str(binary.parent)+'''":/usr/bin:/bin

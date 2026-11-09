@@ -12,7 +12,7 @@ def main():
  p=argparse.ArgumentParser();p.add_argument('--sdk',type=Path,required=True);p.add_argument('--report',type=Path,required=True);a=p.parse_args();acc=(a.sdk/'bin/acc').resolve();records=[];env={**os.environ,'XDG_CACHE_HOME':'/var/tmp/awl-import-cache','ASAN_OPTIONS':'detect_leaks=1:abort_on_error=1'}
  with tempfile.TemporaryDirectory(prefix='Awl-next-features-',dir='/var/tmp')as td:
   for name,expected in CASES.items():
-   source=ROOT/'examples-next'/name;work=Path(td)/name;shutil.copytree(source,work);c=work/'main.c';r=subprocess.run([str(acc),'emit-c','main.aw'],cwd=work,capture_output=True);assert r.returncode==0,r.stderr;c.write_bytes(r.stdout)
+   source=ROOT/'examples'/name;work=Path(td)/name;shutil.copytree(source,work);c=work/'main.c';r=subprocess.run([str(acc),'emit-c','main.aw'],cwd=work,capture_output=True);assert r.returncode==0,r.stderr;c.write_bytes(r.stdout)
    for mode in ['native','sanitized']:
     exe=work/(name+'-'+mode)
     cmd=[str(acc),'build','main.aw','-o',str(exe)]if mode=='native'else['cc','-std=c11','-O1','-Wall','-Wextra','-Werror','-Wno-unused-function','-Wno-unused-const-variable','-fsanitize=address,undefined','-fno-sanitize-recover=all','-no-pie',str(c),'-lm','-o',str(exe)]

@@ -1,6 +1,6 @@
 # bounded native key/value service
 
-`examples-next/apps/kvserve` is a real Awl backend for a small trusted local text store, it accepts HTTP requests directly through the native tcp runtime, stores immutable mutation segments, and reconstructs state after a process restart
+`examples/apps/kvserve` is a real Awl backend for a small trusted local text store, it accepts HTTP requests directly through the native tcp runtime, stores immutable mutation segments, and reconstructs state after a process restart
 
 linux source checkpoint, not a newly published standalone distribution, protected 0.23 downloads don't include these features, windows qualification follows language development
 
@@ -9,7 +9,7 @@ linux source checkpoint, not a newly published standalone distribution, protecte
 with the current complete development toolchain
 
 ```sh
-cd examples-next/apps/kvserve
+cd examples/apps/kvserve
 awl build
 mkdir -p /var/tmp/Awl-notes
 ./build/kvserve /var/tmp/Awl-notes/store 0 128

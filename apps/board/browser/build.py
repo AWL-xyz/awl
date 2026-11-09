@@ -6,7 +6,7 @@ APP=ROOT/'apps/board'
 def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
 def main():
  p=argparse.ArgumentParser(description='contributor native/WASM board build, end users need no Python');p.add_argument('--sdk',type=Path,required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--report',type=Path,required=True);p.add_argument('--wasm',type=Path);a=p.parse_args();sdk=a.sdk.resolve();env={**os.environ,'PATH':'/no-host-tools','XDG_CACHE_HOME':'/var/tmp/Awl-board-cache'}
- assert (APP/'vendor/Json.aw').read_bytes()==(ROOT/'examples-next/parsing/Json.aw').read_bytes().replace(b'if string_bytes(source) > 16384 then fail(result, 2, 16384);',b'if string_bytes(source) > 65536 then fail(result, 2, 65536);')
+ assert (APP/'vendor/Json.aw').read_bytes()==(ROOT/'examples/parsing/Json.aw').read_bytes().replace(b'if string_bytes(source) > 16384 then fail(result, 2, 16384);',b'if string_bytes(source) > 65536 then fail(result, 2, 65536);')
  with tempfile.TemporaryDirectory(prefix='Awl-board-build-',dir='/var/tmp') as td:
   td=Path(td);c=td/'filter.c';wasm=td/'filter.wasm'
   def emit(entry,dest):dest.write_bytes(subprocess.run([str(sdk/'bin/kcc'),'emit-c',str(entry),'--syntax','next'],check=True,capture_output=True,env=env).stdout)

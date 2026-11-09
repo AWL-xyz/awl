@@ -4,7 +4,7 @@ No generated compiler component calls Python. --check detects reference drift.
 """
 import argparse
 from pathlib import Path
-import kcc
+import runtime_templates as kcc
 
 def render():
     lines=['// Generated C runtime text, not Python compiler logic. Regenerate with compiler/generate_runtime.py.',

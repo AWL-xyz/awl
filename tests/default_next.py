@@ -5,7 +5,7 @@ ROOT=Path(__file__).resolve().parents[1]
 def main():
  p=argparse.ArgumentParser();p.add_argument('--sdk',type=Path,required=True);p.add_argument('--report',type=Path,required=True);a=p.parse_args();sdk=a.sdk.resolve();kcc=sdk/'bin/kcc';awl=sdk/'bin/awl';env={**os.environ,'PATH':'/no-host-tools','XDG_CACHE_HOME':'/var/tmp/Awl-default-cache'};records=[]
  with tempfile.TemporaryDirectory(prefix='Awl-default-tests-',dir='/var/tmp') as td:
-  td=Path(td);next=td/'next.aw';legacy=td/'legacy.aw';next.write_text('func main: i64 { print(42); return 0; };');legacy.write_text('function main()->i64 print(42) return 0 end')
+  td=Path(td);next=td/'next.aw';legacy=td/'legacy.aw';next.write_text('func main[i64] { print(42); return 0; };');legacy.write_text('function main()->i64 print(42) return 0 end')
   def run(label,args,code=0,out=None,cwd=td):
    r=subprocess.run([str(x) for x in args],capture_output=True,env=env,cwd=cwd,timeout=180);assert r.returncode==code,(label,r.returncode,r.stdout,r.stderr)
    if out is not None:assert r.stdout==out,(label,r.stdout,r.stderr)
@@ -28,6 +28,6 @@ def main():
   old=td/'old';old.mkdir();(old/'Old.awproj').write_text('format: 1\nentry: main.aw\nsyntax: legacy\n');(old/'main.aw').write_bytes(legacy.read_bytes());run('explicit legacy manifest',[awl,'build'],cwd=old);run('legacy manifest executable',[old/'build/Old'],out=b'42\n')
   for name in ['next','legacy']:
    run(name+' manifest override rejects opposite syntax',[awl,'build','--syntax',name],1,cwd=old if name=='next' else project)
-  entry=ROOT/'examples-next/exported-enums/main.aw';run('exported results default check',[kcc,'check',entry]);run('exported results default build',[kcc,'build',entry,'-o',td/'configcheck']);settings=td/'settings.json';settings.write_text('{"host":"localhost","port":8080,"debug":true}');run('real typed configuration workload',[td/'configcheck',settings],out=b'localhost\n8080\ntrue\n')
+  entry=ROOT/'examples/exported-enums/main.aw';run('exported results default check',[kcc,'check',entry]);run('exported results default build',[kcc,'build',entry,'-o',td/'configcheck']);settings=td/'settings.json';settings.write_text('{"host":"localhost","port":8080,"debug":true}');run('real typed configuration workload',[td/'configcheck',settings],out=b'localhost\n8080\ntrue\n')
  result={'status':'PASS','cases':len(records),'records':records,'compiler_sha256':hashlib.sha256(kcc.read_bytes()).hexdigest(),'harness_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),'qualification':'actual native CLI and complete bundled backend with PATH excluding host tools, next default and explicit legacy, no syntax autodetection, native Windows not tested'};a.report.write_text(json.dumps(result,separators=(',',':'))+'\n');print('PASS',len(records),'default syntax cases')
 if __name__=='__main__':main()

@@ -14,7 +14,7 @@ class Checker {
         return {};
     }
     Id global_access(Id use,const std::string &name,bool write=false) {
-        if(!u.next_syntax||!globals.contains(name)) {
+        if(!u.aesop_syntax||!globals.contains(name)) {
             std::vector<std::string> names;for(const auto &[candidate,id]:globals) names.push_back(candidate);
             error(use,"unknown module variable "+name+suggest(name,names),"E230");
         }
@@ -28,14 +28,19 @@ class Checker {
     std::unordered_map<std::string,uint32_t> heights;
     std::unordered_set<std::string> visiting;
     uint32_t serial=0,deferred_count=0,loop_depth=0;
-    std::string result;bool owns_result=false;
+    std::string result;bool owns_result=false,inferring_result=false;
+    void infer_return(Id id,const std::string &ty) {
+        if(owner_type(ty)) error(id,"resource results require an explicit [type] or [@o type] annotation","E233");
+        if(result.empty()) result=ty;
+        else if(result!=ty) error(id,"incompatible inferred return types: "+result+" and "+ty,"E233");
+    }
     Node &n(Id id) { return u.arena.at(id); }
     const List &group(Id id) { return n(id).children; }
     [[noreturn]] void error(Id id,const std::string &msg,const std::string &code="E200") { throw Failure{{code,msg,n(id).token}}; }
-    bool scalar(const std::string &ty) const { return ty=="bool"||ty=="string"||(u.next_syntax&&ty=="f64")||integers.contains(ty); }
+    bool scalar(const std::string &ty) const { return ty=="bool"||ty=="string"||(u.aesop_syntax&&ty=="f64")||integers.contains(ty); }
     void literal_context(Id id,const std::string &expected) {
-        auto &v=n(id);if(u.next_syntax&&expected=="f64"&&v.kind=="unary"&&v.value=="-") {literal_context(v.children.at(0),expected);if(n(v.children.at(0)).type=="f64") v.type="f64";return;}
-        if(!u.next_syntax||expected!="f64"||v.kind!="int"||v.literal!="i64") return;
+        auto &v=n(id);if(u.aesop_syntax&&expected=="f64"&&v.kind=="unary"&&v.value=="-") {literal_context(v.children.at(0),expected);if(n(v.children.at(0)).type=="f64") v.type="f64";return;}
+        if(!u.aesop_syntax||expected!="f64"||v.kind!="int"||v.literal!="i64") return;
         const auto token=u.text(v.token);bool plain=!token.empty()&&token.find_first_not_of("0123456789")==std::string::npos;
         if(token=="-"&&v.token+1<u.tokens.size()) {const auto next=u.text(v.token+1);plain=!next.empty()&&next.find_first_not_of("0123456789")==std::string::npos;}
         if(!plain) return;
@@ -43,12 +48,12 @@ class Checker {
     }
     // a struct holding any owner field is itself an owner: @s-only, moved never copied, freed field by field
     bool resource_struct(const std::string &ty,uint32_t depth=0) const {
-        if(!u.next_syntax||depth>64||!aggregates.contains(ty)||u.arena.at(aggregates.at(ty)).kind!="struct") return false;
-        for(auto f:u.arena.at(aggregates.at(ty)).children) {const auto &t=u.arena.at(f).second;if((u.next_syntax&&(generic_type(t)||map_type(t)||set_type(t)))||t=="spool"||resource_struct(t,depth+1)) return true;}
+        if(!u.aesop_syntax||depth>64||!aggregates.contains(ty)||u.arena.at(aggregates.at(ty)).kind!="struct") return false;
+        for(auto f:u.arena.at(aggregates.at(ty)).children) {const auto &t=u.arena.at(f).second;if((u.aesop_syntax&&(generic_type(t)||map_type(t)||set_type(t)))||t=="spool"||resource_struct(t,depth+1)) return true;}
         return false;
     }
-    bool owner_type(const std::string &ty) const {return resource_struct(ty)||(u.next_syntax&&(generic_type(ty)||map_type(ty)||set_type(ty)))||ty=="spool"||(u.project_syntax&&ty=="int_vector");}
-    bool value_type(const std::string &ty,uint32_t depth=0) const {if(depth>64) return false;if(auto a=array_type(ty)) return value_type(a->element,depth+1)&&!resource_struct(a->element);return scalar(ty)||owner_type(ty)||(u.next_syntax&&view_type(ty))||aggregates.contains(ty); }
+    bool owner_type(const std::string &ty) const {return resource_struct(ty)||(u.aesop_syntax&&(generic_type(ty)||map_type(ty)||set_type(ty)))||ty=="spool"||(u.project_syntax&&ty=="int_vector");}
+    bool value_type(const std::string &ty,uint32_t depth=0) const {if(depth>64) return false;if(auto a=array_type(ty)) return value_type(a->element,depth+1)&&!resource_struct(a->element);return scalar(ty)||owner_type(ty)||(u.aesop_syntax&&view_type(ty))||aggregates.contains(ty); }
     void valid_type(Id id,const std::string &ty,bool unit=false) { if(!value_type(ty)&&!(unit&&ty=="unit")) error(id,"unknown or invalid value type "+ty);if(array_type(ty)) layout(ty,1,id); }
     void require(Id id,const std::string &got,const std::string &want) { if(got!=want) error(id,"expected "+want+", found "+got); }
     std::string fresh() { return "k_v"+std::to_string(++serial); }
@@ -92,8 +97,8 @@ class Checker {
             const auto &f=n(id);
             if(!seen.insert(f.value).second) error(id,"duplicate field "+f.value,"E210");
             if(!value_type(f.second)) error(id,"invalid field type "+f.second,"E210");
-            if(u.next_syntax&&n(parent).kind=="union"&&(owner_type(f.second)||resource_struct(f.second))) error(id,"enum payload requires a scalar or enum value, not an owned resource/array","E210");
-            if(u.next_syntax&&!scalar(f.second)&&!aggregates.contains(f.second)&&!(n(parent).kind=="struct"&&owner_type(f.second))) error(id,"enum payload requires a scalar or enum value, not an owned resource/array","E210");
+            if(u.aesop_syntax&&n(parent).kind=="union"&&(owner_type(f.second)||resource_struct(f.second))) error(id,"enum payload requires a scalar or enum value, not an owned resource/array","E210");
+            if(u.aesop_syntax&&!scalar(f.second)&&!aggregates.contains(f.second)&&!(n(parent).kind=="struct"&&owner_type(f.second))) error(id,"enum payload requires a scalar or enum value, not an owned resource/array","E210");
             const auto [size,alignment]=layout(f.second,depth+1,id);
             height=std::max(height,heights.at(f.second)+1);
             if(height>64) error(parent,"aggregate nesting limit exceeded","E210");
@@ -104,7 +109,7 @@ class Checker {
     }
     std::pair<uint64_t,uint64_t> layout(const std::string &ty,uint32_t depth,Id origin=0) {
         if(sizes.contains(ty)) return sizes.at(ty);
-        if(u.next_syntax&&(generic_type(ty)||map_type(ty)||set_type(ty)||ty=="spool")) {heights[ty]=0;return sizes[ty]={16,8};}
+        if(u.aesop_syntax&&(generic_type(ty)||map_type(ty)||set_type(ty)||ty=="spool")) {heights[ty]=0;return sizes[ty]={16,8};}
         if(auto a=array_type(ty)) {
             if(depth>64) error(origin,"array nesting exceeds budget","E210");
             const auto element=layout(a->element,depth+1,origin);
@@ -203,18 +208,18 @@ class Checker {
         } else if(kind=="index") {
             const auto a=array_type(expression(node.children.at(0),env));if(!a) error(id,"index requires an array");
             require(id,expression(node.children.at(1),env),"i64");ty=a->element;
-        } else if(kind=="float") {if(!u.next_syntax||!finite_decimal(node.value)) error(id,"invalid f64 literal");ty="f64";
+        } else if(kind=="float") {if(!u.aesop_syntax||!finite_decimal(node.value)) error(id,"invalid f64 literal");ty="f64";
         } else if(kind=="int"||kind=="uint") {
             ty=node.literal;
             if(!integers.contains(ty)||(kind=="int")!=(ty[0]=='i')) error(id,"invalid integer literal type");
             const bool negative=node.value.starts_with("-"); const auto magnitude=negative?node.value.substr(1):node.value;
             if((negative&&ty[0]!='i')||exceeds(magnitude,negative?minimum_magnitude(ty):maximum(ty))) error(id,"integer literal outside "+ty+" range");
-        } else if(kind=="format") {if(!u.next_syntax||node.children.size()!=1||!scalar(expression(node.children[0],env)))error(id,"string injection requires a scalar value");ty="string";
-        } else if(kind=="concat") {if(!u.next_syntax||node.children.size()!=2)error(id,"invalid concatenation");require(id,expression(node.children[0],env),"string");require(id,expression(node.children[1],env),"string");ty="string";
+        } else if(kind=="format") {if(!u.aesop_syntax||node.children.size()!=1||!scalar(expression(node.children[0],env)))error(id,"string injection requires a scalar value");ty="string";
+        } else if(kind=="concat") {if(!u.aesop_syntax||node.children.size()!=2)error(id,"invalid concatenation");require(id,expression(node.children[0],env),"string");require(id,expression(node.children[1],env),"string");ty="string";
         } else if(kind=="convert") {
-            if((!integers.contains(node.value)&&!(u.next_syntax&&node.value=="f64"))||node.children.size()!=1) error(id,"integer conversion expects exactly one argument");
+            if((!integers.contains(node.value)&&!(u.aesop_syntax&&node.value=="f64"))||node.children.size()!=1) error(id,"integer conversion expects exactly one argument");
             const auto src=expression(node.children[0],env);
-            if(!integers.contains(src)&&!(u.next_syntax&&node.value=="f64"&&src=="f64")) error(id,"integer conversion requires an integer value");
+            if(!integers.contains(src)&&!(u.aesop_syntax&&node.value=="f64"&&src=="f64")) error(id,"integer conversion requires an integer value");
             ty=node.value;
         } else if(kind=="string") {size_t count=0;if(node.value.size()>65536||!text_scalars(node.value,count)) error(id,"invalid UTF-8 string literal","E102");ty="string";}
         else if(kind=="bool") ty="bool";
@@ -234,38 +239,38 @@ class Checker {
                 error(id,"unknown variant "+node.value+"."+node.second+suggest(node.second,names));
             }
             const auto expected=field_types(n(v).children);
-            if(u.next_syntax) for(size_t i=0;i<node.children.size()&&i<expected.size();++i) literal_context(node.children[i],expected[i]);
+            if(u.aesop_syntax) for(size_t i=0;i<node.children.size()&&i<expected.size();++i) literal_context(node.children[i],expected[i]);
             const auto args=arguments(id,env);
             if(args!=expected) error(id,"variant argument types "+types(args)+" do not match "+types(expected));
             ty=node.value;
         } else if(kind=="call") {
-            if(u.next_syntax&&!u.dotted_tokens.contains(node.token)&&!signatures.contains(node.value)) for(const char *category:{"spool_","map_","set_","vector_","view_","string_","int_vector_"}) if(node.value.starts_with(category)&&!node.value.starts_with("kn_")) {
+            if(u.aesop_syntax&&!u.dotted_tokens.contains(node.token)&&node.value!="vector_length"&&!signatures.contains(node.value)) for(const char *category:{"spool_","map_","set_","vector_","view_","string_","int_vector_"}) if(node.value.starts_with(category)&&!node.value.starts_with("kn_")) {
                 const std::string c(category);const auto rest=node.value.substr(c.size());
                 error(id,"call builtins as category.function, use "+c.substr(0,c.size()-1)+"."+rest+"(...)","E102");
             }
-            if((generic_call(node.value)||generic_specialization(node.value)||view_call(node.value)||view_specialization(node.value))&&!u.next_syntax) error(id,"generic vectors require next syntax");
+            if((generic_call(node.value)||generic_specialization(node.value)||view_call(node.value)||view_specialization(node.value))&&!u.aesop_syntax) error(id,"generic vectors require Aesop syntax");
             std::optional<std::pair<std::string,std::pair<std::vector<std::string>,std::string>>> resolved;
             if(map_call(node.value)||set_call(node.value)) {
                 if(node.children.empty()) error(id,node.value+" requires a container argument","E228");
                 const auto &first=n(node.children[0]);std::string container;
                 if(first.kind=="name"&&env.contains(first.value)) container=env.at(first.value).type;
                 else if(first.kind=="global_ref"&&globals.contains(first.value)) container=n(globals.at(first.value)).second;
-                else if(u.next_syntax&&first.kind=="field") container=expression(node.children[0],env,true);
+                else if(u.aesop_syntax&&first.kind=="field") container=expression(node.children[0],env,true);
                 resolved=map_resolve(node.value,container);
                 if(!resolved) error(id,node.value+" requires a map<K,V> or set<T> local container as its first argument","E228");
                 node.value=resolved->first;
             }
             if(node.value.starts_with("int_vector_")&&!u.project_syntax) error(id,"integer vectors require native project syntax");
-            if(u.next_syntax&&!signatures.contains(node.value)&&resource_struct(node.value)&&!adopt) error(id,"a struct holding owned resources must initialize a scoped binding or be forwarded as an owned return","E223");
+            if(u.aesop_syntax&&!signatures.contains(node.value)&&resource_struct(node.value)&&!adopt) error(id,"a struct holding owned resources must initialize a scoped binding or be forwarded as an owned return","E223");
             if(signatures.contains(node.value)&&signatures.at(node.value).owns_result&&!adopt) error(id,"owned result must initialize a scoped binding or be forwarded as an owned return","E223");
             static const std::unordered_set<std::string> borrowing={"spool_valid","spool_reserve","spool_truncate","spool_clear","spool_capacity","spool_bytes","spool_length","spool_append","spool_codepoint","spool_i64","spool_u64","spool_print","spool_snapshot","int_vector_valid","int_vector_length","int_vector_capacity","int_vector_reserve","int_vector_push","int_vector_pop","int_vector_get","int_vector_set","int_vector_clear","int_vector_insert","int_vector_remove"};
             std::vector<std::string> args;std::unordered_set<std::string> lent,taken;
             for(size_t i=0;i<node.children.size();++i) {
-                if(u.next_syntax&&i==static_cast<size_t>(generic_value_argument(node.value))&&!args.empty()&&generic_type(args[0])) literal_context(node.children[i],*generic_type(args[0]));
-                if(u.next_syntax&&math_signatures.contains(node.value)&&i<math_signatures.at(node.value).parameters.size()) literal_context(node.children[i],math_signatures.at(node.value).parameters[i]);
+                if(u.aesop_syntax&&i==static_cast<size_t>(generic_value_argument(node.value))&&!args.empty()&&generic_type(args[0])) literal_context(node.children[i],*generic_type(args[0]));
+                if(u.aesop_syntax&&math_signatures.contains(node.value)&&i<math_signatures.at(node.value).parameters.size()) literal_context(node.children[i],math_signatures.at(node.value).parameters[i]);
                 else if(signatures.contains(node.value)&&i<signatures.at(node.value).parameters.size()) literal_context(node.children[i],signatures.at(node.value).parameters[i]);
                 const bool user_borrow=signatures.contains(node.value)&&i<signatures.at(node.value).borrows.size()&&signatures.at(node.value).borrows[i];
-                const auto *ctor_fields=u.next_syntax&&!signatures.contains(node.value)?structure_fields(node.value):nullptr;
+                const auto *ctor_fields=u.aesop_syntax&&!signatures.contains(node.value)?structure_fields(node.value):nullptr;
                 const bool taking=(signatures.contains(node.value)&&i<signatures.at(node.value).takes.size()&&signatures.at(node.value).takes[i])||(ctor_fields&&resource_struct(node.value)&&i<ctor_fields->size()&&owner_type(n((*ctor_fields)[i]).second));
                 const bool mutating=signatures.contains(node.value)&&i<signatures.at(node.value).mutables.size()&&signatures.at(node.value).mutables[i];
                 auto &arg=n(node.children[i]);
@@ -306,7 +311,7 @@ class Checker {
             } else if(node.value=="array_length") {
                 if(args.size()!=1||!array_type(args[0])) error(id,"array_length expects one array");
                 ty="i64";
-            } else if(u.next_syntax&&math_signatures.contains(node.value)) {
+            } else if(u.aesop_syntax&&math_signatures.contains(node.value)) {
                 const auto &sig=math_signatures.at(node.value);if(args!=sig.parameters) error(id,"invalid math arguments for "+node.value+": expected "+types(sig.parameters));ty=sig.result;
             } else if(auto container=new_container_type(node.value)) {
                 if(args.size()!=1) error(id,node.value+" expects one capacity argument","E228");
@@ -336,16 +341,16 @@ class Checker {
         } else if(kind=="unary") {
             ty=expression(node.children.at(0),env);
             if(node.value=="not") require(id,ty,"bool");
-            else if(!(u.next_syntax&&ty=="f64")&&(!integers.contains(ty)||ty[0]!='i')) error(id,"unary minus requires a signed integer, found "+ty);
+            else if(!(u.aesop_syntax&&ty=="f64")&&(!integers.contains(ty)||ty[0]!='i')) error(id,"unary minus requires a signed integer, found "+ty);
         } else if(kind=="binary") {
             auto a=expression(node.children.at(0),env); auto b=expression(node.children.at(1),env); const auto &op=node.value;
             if(a=="f64") {literal_context(node.children[1],"f64");b=n(node.children[1]).type;}
             if(b=="f64") {literal_context(node.children[0],"f64");a=n(node.children[0]).type;}
             if(op=="and"||op=="or") { require(id,a,"bool"); require(id,b,"bool"); ty="bool"; }
-            else if(op=="=="||op=="!=") { if(a!=b||!(scalar(a)||(u.next_syntax&&comparable_struct(a)))) error(id,"equality requires matching scalar types or structs of scalars"); ty="bool"; }
+            else if(op=="=="||op=="!=") { if(a!=b||!(scalar(a)||(u.aesop_syntax&&comparable_struct(a)))) error(id,"equality requires matching scalar types or structs of scalars"); ty="bool"; }
             else if(op=="+"&&a=="string"&&b=="string") ty="string";
             else {
-                if((!integers.contains(a)&&!(u.next_syntax&&a=="f64"))||a!=b||(a=="f64"&&op=="%")) error(id,"arithmetic/comparison requires matching integer types");
+                if((!integers.contains(a)&&!(u.aesop_syntax&&a=="f64"))||a!=b||(a=="f64"&&op=="%")) error(id,"arithmetic/comparison requires matching integer types");
                 ty=(op=="<"||op==">"||op=="<="||op==">=")?"bool":a;
             }
         } else error(id,"invalid expression");
@@ -411,7 +416,7 @@ class Checker {
                 }
                 if(declared.contains(node.value)) error(id,"duplicate local "+node.value);
                 if(node.second=="unit") error(id,"unit locals are not permitted");
-                const bool inferred=u.next_syntax&&node.second.empty();
+                const bool inferred=u.aesop_syntax&&node.second.empty();
                 if(!inferred) literal_context(node.children.at(0),node.second);
                 if(inferred) {
                     if(owned) error(id,"@p scoped currently requires an explicit resource type","E220");
@@ -448,7 +453,12 @@ class Checker {
             } else if(kind=="store") {
                 const auto ty=place(node.children.at(0),env); require(id,expression(node.children.at(1),env),ty);
             } else if(kind=="return") {
-                if(n(node.children.at(0)).kind=="unit") {if(result!="unit") error(id,"return without a value in a function returning "+result);returns=true;continue;}
+                if(n(node.children.at(0)).kind=="unit") {if(inferring_result) infer_return(id,"unit");if(result!="unit") error(id,"return without a value in a function returning "+result);returns=true;continue;}
+                if(inferring_result) {
+                    const auto &value=n(node.children.at(0));
+                    if(value.kind=="move"||(value.kind=="call"&&signatures.contains(value.value)&&signatures.at(value.value).owns_result)) error(id,"owned results require an explicit [@o type] annotation","E233");
+                    infer_return(id,expression(node.children.at(0),env,false,&eligible));returns=true;continue;
+                }
                 literal_context(node.children.at(0),result);auto &value=n(node.children.at(0));
                 if(owns_result) {
                     if(value.kind=="move") {
@@ -508,7 +518,7 @@ class Checker {
                 else if(auto a=array_type(collection)) element=a->element;
                 else if(auto m=map_type(collection)) element=m->first;
                 else if(auto s=set_type(collection)) element=*s;
-                else if(u.next_syntax&&collection=="string") element="u32";
+                else if(u.aesop_syntax&&collection=="string") element="u32";
                 else error(id,"for iteration requires a vector, view, map, set, int_vector, string or fixed array, not "+collection,"E227");
                 if(declared.contains(node.value)) error(id,"duplicate local "+node.value);
                 node.second=element;node.symbol=fresh();declared.insert(node.value);
@@ -539,27 +549,36 @@ public:
     void run() {
         deferred_count=0;std::unordered_set<std::string> names;
         for(const auto &ty:integers) { const auto bytes=static_cast<uint64_t>(std::stoul(ty.substr(1))/8); sizes[ty]={bytes,bytes}; heights[ty]=0; }
-        if(u.next_syntax) {sizes["f64"]={8,8};heights["f64"]=0;}
+        if(u.aesop_syntax) {sizes["f64"]={8,8};heights["f64"]=0;}
         sizes["bool"]={1,1}; heights["bool"]=0; sizes["string"]={24,8};heights["string"]=0;sizes["spool"]={8,8};heights["spool"]=0;
         if(u.project_syntax) {sizes["int_vector"]={8,8};heights["int_vector"]=0;}
-        if(u.next_syntax) for(const auto &e:generic_elements) {sizes["vector<"+e+">"]={8,8};heights["vector<"+e+">"]=0;sizes["view<"+e+">"]={32,8};heights["view<"+e+">"]=0;}
+        if(u.aesop_syntax) for(const auto &e:generic_elements) {sizes["vector<"+e+">"]={8,8};heights["vector<"+e+">"]=0;sizes["view<"+e+">"]={32,8};heights["view<"+e+">"]=0;}
         for(auto id:u.roots) {
             const auto &d=n(id);
             if(d.kind=="import") error(id,"imports require native filesystem project loading","E300");
-            if((u.next_syntax&&(generic_call(d.value)||view_call(d.value)||d.value=="pi"||d.value=="tau"||math_signatures.contains(d.value)))||d.value=="print"||d.value=="array_length"||platform_signatures.contains(d.value)||!names.insert(d.value).second) error(id,"duplicate/reserved declaration "+d.value,"E210");
-            if(d.kind=="function") functions[d.value]=id; else if(u.next_syntax&&d.kind=="global") globals[d.value]=id;else aggregates[d.value]=id;
+            if((u.aesop_syntax&&(generic_call(d.value)||view_call(d.value)||d.value=="pi"||d.value=="tau"||math_signatures.contains(d.value)))||d.value=="print"||d.value=="array_length"||platform_signatures.contains(d.value)||!names.insert(d.value).second) error(id,"duplicate/reserved declaration "+d.value,"E210");
+            if(d.kind=="function") functions[d.value]=id; else if(u.aesop_syntax&&d.kind=="global") globals[d.value]=id;else aggregates[d.value]=id;
         }
         for(auto id:u.roots) if(n(id).kind=="struct"||n(id).kind=="union") layout(n(id).value,1);
         for(auto id:u.roots) {
             const auto &f=n(id); if(f.kind!="function") continue;
+            if(f.second.empty()) {
+                bool value_return=false;List stack={f.children[1]};
+                while(!stack.empty()) {
+                    const auto &node=n(stack.back());stack.pop_back();
+                    if(node.kind=="return"&&n(node.children.at(0)).kind!="unit") value_return=true;
+                    stack.insert(stack.end(),node.children.begin(),node.children.end());
+                }
+                if(!value_return) n(id).second="unit";
+            }
             Signature sig; sig.result=f.second;sig.owns_result=f.result_mode=="own";
             if(sig.owns_result&&(!u.project_syntax||!owner_type(f.second))) error(id,"owned results require a supported resource in native projects","E223");
             for(auto p:group(f.children[0])) if(n(p).second=="unit") error(id,"unit parameters are not permitted");
-            valid_type(id,f.second,true);
+            if(!f.second.empty()) valid_type(id,f.second,true);
             for(auto p:group(f.children[0])) { valid_type(p,n(p).second);const bool borrowed=n(p).kind=="borrow_param",owned=n(p).kind=="own_param",mutable_param=n(p).kind=="mut_param";
                 if((borrowed||owned)&&(!u.project_syntax||!owner_type(n(p).second))) error(p,"borrow/own parameters require a supported resource in native projects","E220");
                 if(mutable_param&&!structure_fields(n(p).second)) error(p,"@m parameters must be a struct type, not "+n(p).second,"E229");
-                if(!u.next_syntax&&mutable_param) error(p,"mutable borrows require next syntax","E229");
+                if(!u.aesop_syntax&&mutable_param) error(p,"mutable borrows require Aesop syntax","E229");
                 sig.parameters.push_back(n(p).second);sig.borrows.push_back(borrowed);sig.takes.push_back(owned);sig.mutables.push_back(mutable_param); }
             signatures[f.value]=std::move(sig);
         }
@@ -573,16 +592,46 @@ public:
             g.symbol=fresh();initialized_globals.insert(g.value);
         }
         initializing_global=false;
-        if(!signatures.contains("main")||signatures.at("main").result!="i64"||!signatures.at("main").parameters.empty()) throw Failure{{"E201","entry point must be function main() -> i64",UINT32_MAX}};
-        for(auto id:u.roots) {
-            const auto &f=n(id); if(f.kind!="function") continue;
-            current_file=file_of(f);Env env; result=f.second;owns_result=f.result_mode=="own";
+        // Only unknown result signatures create ordering edges, explicit annotations break inference cycles
+        std::unordered_map<Id,size_t> pending;
+        std::unordered_map<Id,List> users;
+        std::priority_queue<Id,std::vector<Id>,std::greater<Id>> ready;
+        List declarations;
+        for(auto id:u.roots) if(n(id).kind=="function") {
+            declarations.push_back(id);std::unordered_set<Id> dependencies;List stack={n(id).children[1]};
+            while(!stack.empty()) {
+                const auto node_id=stack.back();stack.pop_back();const auto &node=n(node_id);
+                if(node.kind=="call"&&functions.contains(node.value)) {
+                    const auto target=functions.at(node.value);
+                    if(n(target).second.empty()) dependencies.insert(target);
+                }
+                stack.insert(stack.end(),node.children.begin(),node.children.end());
+            }
+            pending[id]=dependencies.size();
+            for(auto target:dependencies) users[target].push_back(id);
+            if(dependencies.empty()) ready.push(id);
+        }
+        List order;
+        while(!ready.empty()) {
+            const auto id=ready.top();ready.pop();order.push_back(id);
+            for(auto user:users[id]) if(--pending[user]==0) ready.push(user);
+        }
+        if(order.size()!=declarations.size()) for(auto id:declarations) if(pending[id]&&n(id).second.empty()) error(id,"circular return-type inference, add an explicit [type] annotation to break the cycle","E233");
+        for(auto id:order) {
+            auto &f=n(id);
+            current_file=file_of(f);Env env;result=f.second;owns_result=f.result_mode=="own";inferring_result=f.second.empty();
             for(auto p:group(f.children[0])) {
                 auto &param=n(p);
                 if(env.contains(param.value)) error(p,"duplicate parameter "+param.value);
-                param.symbol=fresh(); env[param.value]={param.second,param.symbol,param.kind=="borrow_param"||param.kind=="own_param",param.kind=="own_param"};
+                param.symbol=fresh();env[param.value]={param.second,param.symbol,param.kind=="borrow_param"||param.kind=="own_param",param.kind=="own_param"};
             }
-            if(!block(group(f.children[1]),env,true)&&result!="unit") error(id,"not every path returns a value");
+            const auto total=block(group(f.children[1]),env,true);
+            if(inferring_result) {
+                if(result.empty()) result="unit";
+                valid_type(id,result,true);f.second=result;signatures.at(f.value).result=result;
+            }
+            if(!total&&result!="unit") error(id,"not every path returns a value");
         }
+        if(!signatures.contains("main")||signatures.at("main").result!="i64"||!signatures.at("main").parameters.empty()) throw Failure{{"E201","entry point must be a parameterless func main returning i64 (explicit or inferred)",UINT32_MAX}};
     }
 };

@@ -45,7 +45,7 @@ def main():
   stale=build('stale','@p b: buffer_new(1); buffer_free(b); stdout_write(b,0,0);');run('stale buffer rejected',stale,trap=True)
   for name,body,error in [('arity','stdin_read(1,2);','argument'),('type','stdout_write("bad",0,1);','i64'),('env-type','env_size(1);','string'),('flush-arity','stdout_flush(1);','argument')]:build(name,body,expected=error)
   build('global-effect',source='@p n: env_size("x"); func main()->i64 return 0; end;',expected='initializer')
-  app=build('kpipe',source=(ROOT/'examples-next/apps/kpipe/main.aw').read_text())
+  app=build('kpipe',source=(ROOT/'examples/apps/kpipe/main.aw').read_text())
   data=random.Random(20261106).randbytes(200003)+b'\0\xff\r\nhello WORLD\n'
   for mode in ['copy','upper','lower']:
    expected=data if mode=='copy' else data.upper() if mode=='upper' else data.lower()

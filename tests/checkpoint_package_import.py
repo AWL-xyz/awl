@@ -35,7 +35,7 @@ def main():
   if name=='process':assert d['cases']==103
   if name=='local':assert len(d['records'])==14 and d['harness_sha256']==sha(ROOT/'tests/local_packages.py')
   if name=='editor':assert d['html_sha256']==sha(ROOT/'editor/awl-editor.html')
- for name in ['env','json','fsp']:assert(ROOT/'packages'/name/(name+'.aw')).read_bytes()==(ROOT/'examples-next/packages-demo/packages'/name/(name+'.aw')).read_bytes()
+ for name in ['env','json','fsp']:assert(ROOT/'packages'/name/(name+'.aw')).read_bytes()==(ROOT/'examples/packages-demo/packages'/name/(name+'.aw')).read_bytes()
  p=ROOT/'tests/package-import-native.json.gz';native=json.loads(gzip.decompress(p.read_bytes()));assert native['status']=='PASS'and len(native['phases'])==15 and all(x['exit']==0 and not x['stderr']for x in native['phases'])
  for name,digest in native['native_sources_sha256'].items():assert sha(ROOT/'compiler/native'/name)==digest,name
  reports[str(p.relative_to(ROOT))]=sha(p)

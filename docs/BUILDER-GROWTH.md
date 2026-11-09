@@ -1,7 +1,7 @@
 # explicit UTF-8 builder growth and truncation, source candidate
 
 ```text
-func edit :: @b value:spool: bool {
+func edit[bool] :: @b value:spool {
     if not spool.reserve(value, 4096) { return false; };
     if spool.append(value, "café 🦉") != 0 { return false; };
     return spool.truncate(value, 4);

@@ -9,7 +9,7 @@ def main():
  env={k:v for k,v in os.environ.items() if not k.startswith('KPIPE_')};env['ASAN_OPTIONS']='detect_leaks=1:abort_on_error=1'
  def emitted(source):
   r=subprocess.run([str(binary),'emit-c',str(source),'--syntax','next'],capture_output=True,text=True,check=True);assert original in r.stdout;return r.stdout
- app=emitted(ROOT/'examples-next/apps/kpipe/main.aw')
+ app=emitted(ROOT/'examples/apps/kpipe/main.aw')
  prefix='''#include <sys/auxv.h>
 static unsigned fault_reads,fault_writes;
 static ssize_t fault_read(int fd,void *p,size_t n){READ}

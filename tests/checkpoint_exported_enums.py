@@ -16,7 +16,7 @@ def main():
  regressions=load('exported-enums-regressions.json.gz');assert regressions['status']=='PASS' and regressions['compiler_sha256']==compiler and len(regressions['records'])==10
  board=load('exported-enums-board-parity.json');assert board['status']=='PASS' and board['candidate_compiler_sha256']==compiler
  assert sha(ROOT/'compiler/native/bin/kcc')==board['accepted_compiler_sha256']=='21856c691451f9c6b1483b4940878dc5f5c0993d7e7c9dbd740be8fb449742f1'
- paths=[p for p in (ROOT/'compiler/native').iterdir() if p.suffix in ['.cpp','.h','.inc','.c']]+list((ROOT/'examples-next/exported-enums').rglob('*.aw'))+list((ROOT/'tests').glob('exported*'))+[Path(__file__).resolve(),ROOT/'docs/EXPORTED-ENUMS.md',ROOT/'history/pre-exported-enums.tar.xz']
+ paths=[p for p in (ROOT/'compiler/native').iterdir() if p.suffix in ['.cpp','.h','.inc','.c']]+list((ROOT/'examples/exported-enums').rglob('*.aw'))+list((ROOT/'tests').glob('exported*'))+[Path(__file__).resolve(),ROOT/'docs/EXPORTED-ENUMS.md',ROOT/'history/pre-exported-enums.tar.xz']
  archives={p.name:sha(p) for p in ROOT.parent.glob('*.tar.xz')}
  files=0;size=0
  for p in ROOT.parent.rglob('*'):

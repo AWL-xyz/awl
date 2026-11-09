@@ -1,4 +1,4 @@
-func contains_folded :: value:text, query:text: bool {
+func contains_folded[bool] :: value:text, query:text {
     @p at: 0;
     while at + string.bytes(query) <= string.bytes(value) {
         @p i: 0;
@@ -17,7 +17,7 @@ func contains_folded :: value:text, query:text: bool {
     return false;
 };
 exports{
-    @r func integer :: value:text: i64 {
+    @r func integer[i64] :: value:text {
         if string.bytes(value) == 0 or string.bytes(value) > 7 { return -1; };
         if string.bytes(value) > 1 and string.byte_at(value, 0) == 48u8 { return -1; };
         @p number: 0;
@@ -31,7 +31,7 @@ exports{
         };
         return number;
     };
-    @r func valid_title :: value:text: bool {
+    @r func valid_title[bool] :: value:text {
         if string.bytes(value) == 0 or string.bytes(value) > 160 { return false; };
         @p i: 0;
         @p nonspace: false;
@@ -43,7 +43,7 @@ exports{
         };
         return nonspace;
     };
-    @r func valid_note :: value:text: bool {
+    @r func valid_note[bool] :: value:text {
         if string.bytes(value) > 256 { return false; };
         @p i: 0;
         while i < string.length(value) {
@@ -53,10 +53,10 @@ exports{
         };
         return true;
     };
-    @r func valid_status :: value:text: bool {
+    @r func valid_status[bool] :: value:text {
         return value == "todo" or value == "doing" or value == "done";
     };
-    @r func visible :: title:text, note:text, status:text, query:text, filter:text: bool {
+    @r func visible[bool] :: title:text, note:text, status:text, query:text, filter:text {
         if filter != "all" and filter != status { return false; };
         return contains_folded(title, query) or contains_folded(note, query);
     };

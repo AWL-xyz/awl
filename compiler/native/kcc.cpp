@@ -34,10 +34,10 @@ int Awl_main(int argc,char **argv) {
 int Awl_compiler_main(int argc,char **argv) {
     if(argc==2&&std::string(argv[1])=="--version") {std::cout<<"Awl Compiler Collection (ACC) 0.26.0-dev development candidate\n";return 0;}
     if(argc<3) {
-        std::cerr<<"Usage: acc check|emit-ast|emit-checked-ast|emit-c|build|run source.aw [-o FILE] [-O 0|1|2|3] [--diagnostic-format text|json] [--syntax next|legacy] (default: next)\n"
+        std::cerr<<"Usage: acc check|emit-ast|emit-checked-ast|emit-c|build|run source.aw [-o FILE] [-O 0|1|2|3] [--diagnostic-format text|json] [--syntax aesop]\n"
                  <<"Build/run require the complete Linux or Windows x86-64 Awl bundle. Limits: --build-timeout 1..3600 (default 120s), --build-memory-mib 512..16384 (default 4096), --run-timeout 0..86400 (run only; default unlimited).\n";return 2;
     }
-    const std::string command=argv[1],path=argv[2]; bool json=false,next=true;std::string output;Awl_driver::Options options;
+    const std::string command=argv[1],path=argv[2]; bool json=false;std::string output;Awl_driver::Options options;
     const bool building=command=="build"||command=="run";
     if(command!="check"&&command!="emit-ast"&&command!="emit-checked-ast"&&command!="emit-c"&&!building) {
         std::cerr<<"acc: command not implemented in native-checker preview: "<<command<<"\n";return 2;
@@ -46,7 +46,7 @@ int Awl_compiler_main(int argc,char **argv) {
         const std::string option=argv[i];
         if(i+1>=argc) {std::cerr<<"acc: missing option value\n";return 2;}
         const std::string value=argv[++i];
-        if(option=="--syntax"&&(value=="next"||value=="legacy")) next=value=="next";
+        if(option=="--syntax"&&value=="aesop") {}
         else if(option=="--diagnostic-format"&&(value=="text"||value=="json")) json=value=="json";
         else if(option=="-o"&&command=="build") output=value;
         else if(option=="-O"&&building&&value.size()==1&&value[0]>='0'&&value[0]<='3') options.optimization=value[0]-'0';
@@ -57,7 +57,7 @@ int Awl_compiler_main(int argc,char **argv) {
     }
     if(!path.ends_with(".aw")) {std::cerr<<"acc: Awl source files must use .aw\n";return 1;}
     void *unit=nullptr;
-    if((next?Awl_parse_file_next(path.c_str(),&unit):Awl_parse_file(path.c_str(),&unit))||!unit) {std::cerr<<"acc: internal project parse failure\n";return 2;}
+    if(Awl_parse_file(path.c_str(),&unit)||!unit) {std::cerr<<"acc: internal project parse failure\n";return 2;}
     struct Cleanup { void *p; ~Cleanup(){Awl_parse_free(p);} } cleanup{unit};
     if(!Awl_diagnostic_count(unit)&&command!="emit-ast") {
         const auto status=Awl_check_unit(unit);

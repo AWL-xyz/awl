@@ -13,6 +13,6 @@ Awl performs file reading, UTF-8 validation, line indexing, checked view creatio
 
 bounded to16384 input bytes,4096 lines and4096 bytes per line, LF/CRLF/CR are line endings, a final terminator doesn't create an extra line, tabs and Unicode scalars are preserved, other ASCII controls including escape/NUL/DEL are rejected, this isn't a streaming or interactive viewer
 
-`File.aw` is the existing exported-enum file reader copied from `examples-next/exported-enums/File.aw`, source-level reuse rather than an installed Package, native file I/O isn't claimed for the bounded Node WASI host
+`File.aw` is the existing exported-enum file reader copied from `examples/exported-enums/File.aw`, source-level reuse rather than an installed Package, native file I/O isn't claimed for the bounded Node WASI host
 
 qualification, `tests/logwindow.py`,104 normal/public-driver/sanitized checks, no additional workload stage or capability percentage is awarded

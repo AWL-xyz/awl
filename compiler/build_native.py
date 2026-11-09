@@ -30,13 +30,13 @@ def main():
     else: flags+=['-static-libgcc','-static-libstdc++']
     if a.sanitize: p.error('Use the standalone native sanitizer harness; loading an ASan library into Python requires special runtime setup.')
     subprocess.run([cxx,*flags,str(ROOT/'native/klex.cpp'),str(ROOT/'native/kparse.cpp'),'-o',str(output)],check=True)
-    info={'abi_version':1,'toolchain_directory':str(Path(cxx).parent),'compiler':subprocess.check_output([cxx,'--version'],text=True).splitlines()[0],'flags':flags,'source_sha256':hashlib.sha256((ROOT/'native/klex.cpp').read_bytes()).hexdigest(),'header_sha256':hashlib.sha256((ROOT/'native/klex.h').read_bytes()).hexdigest(),'parser_source_sha256':hashlib.sha256((ROOT/'native/kparse.cpp').read_bytes()).hexdigest(),'parser_header_sha256':hashlib.sha256((ROOT/'native/kparse.h').read_bytes()).hexdigest(),'library':output.name}
+    info={'abi_version':2,'toolchain_directory':str(Path(cxx).parent),'compiler':subprocess.check_output([cxx,'--version'],text=True).splitlines()[0],'flags':flags,'source_sha256':hashlib.sha256((ROOT/'native/klex.cpp').read_bytes()).hexdigest(),'header_sha256':hashlib.sha256((ROOT/'native/klex.h').read_bytes()).hexdigest(),'parser_source_sha256':hashlib.sha256((ROOT/'native/kparse.cpp').read_bytes()).hexdigest(),'parser_header_sha256':hashlib.sha256((ROOT/'native/kparse.h').read_bytes()).hexdigest(),'library':output.name}
     info['frontend_sources_sha256']={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted((ROOT/'native').iterdir()) if p.suffix in ('.cpp','.h','.inc')}
     info['host']=platform.platform()
     info['target']=subprocess.check_output([cxx,'-dumpmachine'],text=True).strip()
     info['library_sha256']=hashlib.sha256(output.read_bytes()).hexdigest()
     if a.standalone:
-        exe=folder/('kcc.exe' if os.name=='nt' else 'kcc')
+        exe=folder/('acc.exe' if os.name=='nt' else 'acc')
         exe_flags=['-std=c++20','-O2','-Wall','-Wextra','-Werror']
         if a.strip: exe_flags+=['-s']
         if a.lto: exe_flags+=['-flto']

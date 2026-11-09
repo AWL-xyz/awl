@@ -27,14 +27,14 @@ def main():
         assert hashlib.sha256(text('bin/kcc')).hexdigest()==manifest['kcc_sha256']
         for name,digest in manifest['compiler_sources_sha256'].items():
             assert hashlib.sha256(text('src/'+name)).hexdigest()==digest,name
-        for name in ['editor/awl-editor.html','editor/Awl-studio.html','RELEASE-0.26.md','docs/NEXT-LANGUAGE.md','docs/RELEASE-0.26.md','validation/awl-editor.json']:
+        for name in ['editor/awl-editor.html','editor/Awl-studio.html','RELEASE-0.26.md','docs/AESOP.md','docs/RELEASE-0.26.md','validation/awl-editor.json']:
             assert 'Awl/'+name in members,name
         assert inventory['editor/awl-editor.html']['sha256']==editor['html_sha256']
         assert hashlib.sha256(text('editor/awl-editor.html')).hexdigest()==editor['html_sha256']
         assert manifest['editor']['next']=='editor/awl-editor.html'
-        assert b'func main: i64 {' in text('README.md')
+        assert b'func main[i64] {' in text('README.md')
         starter=text('src/ASDK.inc')
-        assert b'func main: i64 {\\n    print(\\"Hello from Awl!\\");\\n    return 0;\\n};\\n' in starter
+        assert b'func main[i64] {\\n    print(\\"Hello from Awl!\\");\\n    return 0;\\n};\\n' in starter
         assert b'next_syntax?"}":"end"' in text('src/kparse.cpp')
     info=json.loads((ROOT/'compiler/native/bin/build-info.json').read_text())
     assert sha(ROOT/'compiler/native/bin/kcc')==info['standalone']['sha256'],'workspace compiler diverged from build-info'
@@ -48,7 +48,7 @@ def main():
         'home':{'bytes':size,'regular_files':len(files)},
         'bound_sha256':{'tests/default-publication.json':sha(ROOT/'tests/default-publication.json'),'tests/successor-0.26.json':sha(ROOT/'tests/successor-0.26.json'),
             'tests/awl-editor.json':sha(ROOT/'tests/awl-editor.json'),'editor/awl-editor.html':sha(ROOT/'editor/awl-editor.html'),'RELEASE-0.26.md':sha(ROOT/'RELEASE-0.26.md'),
-            'docs/NEXT-LANGUAGE.md':sha(ROOT/'docs/NEXT-LANGUAGE.md'),'tests/default_next.py':sha(ROOT/'tests/default_next.py'),'tests/awl_editor.py':sha(ROOT/'tests/awl_editor.py')},
+            'docs/AESOP.md':sha(ROOT/'docs/AESOP.md'),'tests/default_next.py':sha(ROOT/'tests/default_next.py'),'tests/awl_editor.py':sha(ROOT/'tests/awl_editor.py')},
         'capability':'26.7%=12/45 unchanged',
         'qualification':'complete0.26 Linux SDK published, inherited upstream resources re-verified,0.25 retired only after the exact successor passed, Windows preview and board download unchanged and unaccepted, workspace compiler remains the historical published0.25 binary'}
     (ROOT/'tests/successor-checkpoint.json').write_text(json.dumps(result,separators=(',',':'))+'\n')

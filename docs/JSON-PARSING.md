@@ -1,6 +1,6 @@
 # bounded structured JSON and native jget
 
-new reusable `examples-next/parsing/Json.aw` implements nested JSON parsing and JSON Pointer selection in Awl source, no Python parser, eval or host JSON library runs inside the application
+new reusable `examples/parsing/Json.aw` implements nested JSON parsing and JSON Pointer selection in Awl source, no Python parser, eval or host JSON library runs inside the application
 
 this is a source-library feature, not a builtin generic DOM, associated-value enum, installed Package, browser implementation or new compiler release
 
@@ -9,7 +9,7 @@ this is a source-library feature, not a builtin generic DOM, associated-value en
 with the current complete development toolchain
 
 ```sh
-cd examples-next/parsing
+cd examples/parsing
 awl build
 ./build/jget config.json /database/port
 ./build/jget config.json /names/0

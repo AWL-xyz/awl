@@ -71,6 +71,6 @@ def main():
    for args,code,want in malformed:
     r=subprocess.run([str(exe.resolve()),*args],capture_output=True,env=env);assert (r.returncode,r.stdout,r.stderr)==(code,(want+'\n').encode(),b'')
    counts[mode]=len(inputs)+len(malformed)
- report={'status':'PASS','compiler_sha256':hashlib.sha256(kcc.read_bytes()).hexdigest(),'feature_cases':len(records),'records':records,'kcalc_cases_per_mode':counts,'source_sha256':hashlib.sha256((ROOT/'examples-next/enums/main.aw').read_bytes()).hexdigest(),'harness_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),'qualification':'private next enums with scalar/nested-enum payloads, no exported enum types, recursive/resource payloads or generic enum support'}
+ report={'status':'PASS','compiler_sha256':hashlib.sha256(kcc.read_bytes()).hexdigest(),'feature_cases':len(records),'records':records,'kcalc_cases_per_mode':counts,'source_sha256':hashlib.sha256((ROOT/'examples/enums/main.aw').read_bytes()).hexdigest(),'harness_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),'qualification':'private next enums with scalar/nested-enum payloads, no exported enum types, recursive/resource payloads or generic enum support'}
  a.report.write_text(json.dumps(report,separators=(',',':'))+'\n');print('PASS',len(records),'feature cases,',counts)
 if __name__=='__main__':main()

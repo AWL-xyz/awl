@@ -1,0 +1,6 @@
+format: 1
+kind: package
+name: time
+version: 0.1.0
+entry: time.aw
+syntax: aesop

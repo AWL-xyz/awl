@@ -6,7 +6,7 @@ from Xlib import X,display
 ROOT=Path(__file__).resolve().parents[2];out=Path(__file__).resolve().parent;binary=Path(os.environ.get('Awl_NET_BINARY','/var/tmp/Awl-net-sdk/Awl/bin/Awl'))
 with tempfile.TemporaryDirectory(prefix='Awl-net-photo-',dir='/var/tmp') as td:
  work=Path(td)
- for src in (ROOT/'examples-next/apps/kserve').iterdir():
+ for src in (ROOT/'examples/apps/kserve').iterdir():
   if src.is_file():(work/src.name).write_bytes(src.read_bytes())
  oracle=work/'client.py';oracle.write_text('''import http.client,subprocess
 p=subprocess.Popen(['./build/kserve','0','5'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)

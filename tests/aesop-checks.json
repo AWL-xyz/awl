@@ -1,0 +1,173 @@
+{
+  "status": "PASS",
+  "syntax": "Aesop",
+  "scope": "Aesop-only declaration, CLI, starter and generated-native execution checks",
+  "acc_sha256": "4f1fdd6a0cda6ccd7e80db38fc089ad355ac685f6eed126a1304c7e6742be43c",
+  "harness_sha256": "6cff86121392cf97359dbf2817b7de64c26a85413bf72dd02247d94c77904a85",
+  "native_sources_sha256": {
+    "compiler/native/ASDK.inc": "866c9216b03424c8f64f62f60c28e26abac0689ac10db463928ac50e09258ec7",
+    "compiler/native/kaesop_test.cpp": "7d252bbbed0171f4af78b31cfb510ee98903fe3c0f2bb300ef69052a7d1f898b",
+    "compiler/native/karguments.c": "8e3c99e20c3c461e92fe7bb78a2d4bca1be998c24c3df131272acec035fa7a58",
+    "compiler/native/karguments.inc": "ebdb67765075a52128181828cc7355cbd157f4f3a7824210de48214fa6fbd2ba",
+    "compiler/native/karrays.inc": "b86457d4ae05d89b5792506cdea1ad87d3b125e51490d8be1a0f5d44d582b672",
+    "compiler/native/kbuild.cpp": "596d0bd5a9da5056834ba57ad9adbd26afcc4184be1b57cf41515d30bf0caa34",
+    "compiler/native/kbuild.h": "5d6b683a2eafee496f6ae25bc4b32bf8e5761e5e1260e854c493c8c8a14b9243",
+    "compiler/native/kbuild_windows.inc": "dbd92f1e12b3652906f5efd051b2c50f71a81dde3f490e3ed6175cdb49ccbe0b",
+    "compiler/native/kbuilders.c": "8352db11b4e9b514a98243a5357778877fc4edfb34b75bb7980fb55f76d68909",
+    "compiler/native/kbuilders.inc": "cb91c597c6f4918cc3b9d7db9970edc27501822638baa887eb76ce1903ad1b64",
+    "compiler/native/kcc.cpp": "592cf2bcc762a045f91089be74aa5fed48a2f11e9fec9e540a4d6d1858c72db5",
+    "compiler/native/kcheck.inc": "7019e9b98b416159bd2cb3547ffac58734f376a73b74d692a9efa1993716d4dc",
+    "compiler/native/kclean_test.cpp": "ddb71ca2829c6e786e9f366b6281e79a8601cf77302471e3ab0b07215d271b55",
+    "compiler/native/kemit.inc": "71d2b04822c1ef7ddc8696244995cbca4b8cc8c29a8545b947644ce3f9ca1f8a",
+    "compiler/native/kenum_test.cpp": "53ddc9679e7ac8356a469523e2116a5501695a264d2036998f314825e2b27d58",
+    "compiler/native/kexport_test.cpp": "b37431dc55bfef32327ab0c65e018c38f024eb0bf6e271c9a24bb1cee73c975c",
+    "compiler/native/kfiles.c": "d6a9ad829a8b74d020a8b6c5b6ac4a573621d805802984324dc333f5ea47cf1a",
+    "compiler/native/kfiles.inc": "50b3897e3b13854972041951ce25db8d7698375673af04020236c5dde4432b04",
+    "compiler/native/kgeneric-types.inc": "5a2ecde7aa7d10e13d4a002d65f509624a2e103b7f51f8763f449d8d961636e2",
+    "compiler/native/kgeneric.c": "b650dc2b7c18936c0e3f8847e73312b8bb214b112efb03b488a9ceb4742faf94",
+    "compiler/native/kgeneric.inc": "4a66f7d2b6e3f638d296a8a9374543371b8802a0dfe52d707ca361a079ef8595",
+    "compiler/native/kgeneric_test.cpp": "470cad36f21d13f4918f1e9be771e2b3d6f8b9901d8b126bd72f1a7fb1eb5160",
+    "compiler/native/kinfer_test.cpp": "c15311cc0291fb5d1ec3444e2c6e4a040e7f6707a7134814f2d695e67093dcd3",
+    "compiler/native/klex.cpp": "54c81921e99a15abdd6f2acdab370d4eacd1cdc59c62ad5ded2980c4f4b8275b",
+    "compiler/native/klex.h": "bd18994ad3872800400b6df77115dbac1918469e4b5e1dbc9eb2a27ca25b4f0d",
+    "compiler/native/klex_test.cpp": "0d7010b30ae44d48240aaa4bb1f258e5b1f37f44cfc9764c960f86afbb4c7708",
+    "compiler/native/kmap-types.inc": "a1c479a9751b7297246583679dbcd246dc0005aa849345ff54bf6e270522bc0a",
+    "compiler/native/kmaps.c": "38c4dc22183d7c8c3793e27fd52fcd5ef9be76b533e9ebcb22defa45a5ec143c",
+    "compiler/native/kmaps.inc": "3d8f2e927358dd440a8e6ffb6e0e0f0188208507f2ba1f67d9c009b7f94b344b",
+    "compiler/native/kmath.inc": "5fd6bc8bbfc52b12090d4bfd80ffb06350278f078759e7c95556bddcc2663735",
+    "compiler/native/kmodule_numeric_test.cpp": "d1e41970802ca4ca1cb2f449953b05a6d19140f3ec8b2dc0346665313ad44f25",
+    "compiler/native/kparse.cpp": "3e8c29a86ccdeadd19629a5a52aac8574f12c20a8a1bbe7f0746a84d6f7795f2",
+    "compiler/native/kparse.h": "bf851cd7ddb95c347ac2d6dc0b354a3a53d5a8062322226a30b92784a9994618",
+    "compiler/native/kparse_test.cpp": "4079a498304dab6d73ee8c31435fa93753900e93bbb44492698326060a9ee891",
+    "compiler/native/kplatform-signatures.inc": "b55be4e1ecd5d87c2fbad3f9479d0c68be8bccc05377ddfe01b3bf433a8b20c2",
+    "compiler/native/kplatform.c": "a46c4d7ba6244c87a5a4c50fd884fa6ff1fd81643bf9bbcffab2aa7cd617b083",
+    "compiler/native/kplatform.inc": "c513533d7e628c1a84dba5b5fcf635fb9f53a492f7fc230bc6023c85d0f10bac",
+    "compiler/native/kprocess.c": "fad5223cf678936fe3200846300f4e28a97a2a55a5036ec4b33173cebccb3d9d",
+    "compiler/native/kprocess.inc": "a9e4008c458cc0b66eb8f6a482dec1f4735e0ab4d1faf43e0e70840452b07fbf",
+    "compiler/native/kprocess_test.cpp": "69aab089ebf9c59f8612dd2763f63704164848bd003d5ab3229bd07f6212adeb",
+    "compiler/native/kproject.inc": "1452220c40cfc68498d97cb779f9c4ce56129b3cb51f6ca9ab784a97f8f5be21",
+    "compiler/native/kproject_test.cpp": "baad18ff895152f91b8734e50296535006a335fa45f40a2df55b7004fa20d54e",
+    "compiler/native/kreplace_test.cpp": "8d0ac6e1b61498a3eaffb666d170107fa078b9667fb23d09c37072ebc67901fb",
+    "compiler/native/kruntime.inc": "33421e9fd95fb5801719a32e276f80e4aa2262cb477e1fddfb79adb311bcc7fd",
+    "compiler/native/kstreams.c": "bebbecdbef078710d22e7c837ddc597b52eb1887028f8071ef60e527818e1a51",
+    "compiler/native/kstreams.inc": "66ee465976a899ae70cca6b10f85454f9d999451ca238b84389035be9035bdba",
+    "compiler/native/kstreams_test.cpp": "a8db490b2d6c8d00239239381c7bb37950039cb5edd673b8fe37f28f01fe332f",
+    "compiler/native/kstrings.c": "f7cc9d71fffc70c04fdde0bc5790811feb59e43d702de1821f52b49a782c9449",
+    "compiler/native/kstrings.inc": "fb88bd59e7610727b7d2484e56423ff30859ab9423efe8d79fc4f7e10d2477b2",
+    "compiler/native/ktcp.c": "934670c3983ef7620d997bbea22f7be11ac753dc89f8644604316ece86a38e7b",
+    "compiler/native/ktcp.inc": "476f489de3e5a454cdcb485113a820ec657edfee56960e5cb2a104162a0a44aa",
+    "compiler/native/ktcp_test.cpp": "e3ac84695a441a64d2b11698af4fc4089dfd43c97fe7b26c92cf029a17d1e076",
+    "compiler/native/ktext.inc": "77973b9a2ab159424c47e6f9108de09730a52d2bf74dfd638e5220d9c5e1860f",
+    "compiler/native/kvectors.c": "51da3126b095142a7cd1a97a553e0be493a349ba5b3b0435fcc104250d1c1973",
+    "compiler/native/kvectors.inc": "b2d0f0d9c5ddf5744cde6905b3ce43a2f31d7c58be11c6f18d712de2619f187d",
+    "compiler/native/kverify.inc": "efc330db810013df602a82faf842e159dd50f459c100c790f9eb3d59722f07e5",
+    "compiler/native/kverify_test.cpp": "face29c108c5f37055fe20a2aabd490ab7b99c64a3f03823ba323cb829ce1547",
+    "compiler/native/kview_test.cpp": "b69aa3abcc12c97095af765af4205e5afb30f0b2cd50ccb5fa41f96fc48ea529",
+    "compiler/native/kwallclock.c": "0ddb58292900e258bdded9e624a070ee28dd4205bf02f6d784b48468d83082dc",
+    "compiler/native/kwallclock.inc": "b7f5575aeb6c9c12bab6694863be74e4a98d79349498240ff929679a7280989a",
+    "compiler/native/unicode_tables.inc": "5b0ca9a17b9ccdb6ce79f9370b8d46698895da9311c34f44a491643a3a3edd39"
+  },
+  "native_programs_executed": 14,
+  "generated_program_sanitizers": false,
+  "records": [
+    {
+      "case": "inferred requested vector signature",
+      "status": "PASS",
+      "output": "1\n"
+    },
+    {
+      "case": "inferred branch results",
+      "status": "PASS",
+      "output": "9\n"
+    },
+    {
+      "case": "inferred argument-independent text and bool",
+      "status": "PASS",
+      "output": "Awl\ntrue\n"
+    },
+    {
+      "case": "forward inferred call chain",
+      "status": "PASS",
+      "output": "42\n"
+    },
+    {
+      "case": "inferred local and nested result",
+      "status": "PASS",
+      "output": "42\n"
+    },
+    {
+      "case": "inferred aggregate and f64",
+      "status": "PASS",
+      "output": "42\n1.5\n"
+    },
+    {
+      "case": "annotated recursion breaks inference cycle",
+      "status": "PASS",
+      "output": "true\n"
+    },
+    {
+      "case": "requested vector signature",
+      "status": "PASS",
+      "output": "1\n"
+    },
+    {
+      "case": "scalar and f64 result",
+      "status": "PASS",
+      "output": "3.5\n"
+    },
+    {
+      "case": "owned vector result",
+      "status": "PASS",
+      "output": "42\n"
+    },
+    {
+      "case": "implicit and explicit unit",
+      "status": "PASS",
+      "output": "1\n2\n"
+    },
+    {
+      "case": "fixed array result",
+      "status": "PASS",
+      "output": "4\n"
+    },
+    {
+      "case": "nested helper",
+      "status": "PASS",
+      "output": "42\n"
+    },
+    {
+      "case": "text and bool result",
+      "status": "PASS",
+      "output": "Awl\ntrue\n"
+    },
+    {
+      "case": "retired syntax, malformed headers and invalid results rejected",
+      "count": 27,
+      "status": "PASS"
+    },
+    {
+      "case": "500-function inferred forward chain without recursive dependency traversal",
+      "status": "PASS"
+    },
+    {
+      "case": "cross-module exported return inference",
+      "status": "PASS"
+    },
+    {
+      "case": "only --syntax aesop is accepted",
+      "status": "PASS"
+    },
+    {
+      "case": "project and local Package starters use Aesop",
+      "status": "PASS"
+    },
+    {
+      "case": "retired manifest syntaxes rejected before backend invocation",
+      "status": "PASS"
+    },
+    {
+      "case": "Aesop-only byte-source ABI v2 and removed dialect exports",
+      "status": "PASS"
+    }
+  ]
+}

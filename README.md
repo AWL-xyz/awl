@@ -1,101 +1,170 @@
-## imported changes, current source versus SDK
+<p align="center">
+  <img src="assets/branding/awl-icon.png" width="104" height="104" alt="Awl owl logo">
+</p>
 
-local Packages now support `awl init --pkg NAME`, `.awpkg` manifests and `use NAME;`, see [Packages](docs/PACKAGES.md), `env`, `json` and `fsp` are present, `db`, `time`, `websocket` and `fetch` remain unfinished, no server add/install
+<h1 align="center">Awl</h1>
+<p align="center">an experimental native language, a single syntax, a growing compiler toolkit</p>
 
-current source includes the incoming `func main: i64 { ... };` / `func f :: arg:type: result { ... };` grammar, dotted builtins, spool, structs, maps/sets and loops, the collection name is Awl Compiler Collection (ACC), source `acc` entry with historical `kcc` compatibility
+<p align="center">
+  <a href="#quick-start-from-source">quick start</a> ·
+  <a href="docs/AESOP.md">syntax reference</a> ·
+  <a href="docs/PACKAGES.md">Packages</a> ·
+  <a href="#status-and-limitations">project status</a>
+</p>
 
-incoming complete Linux0.26 archive was independently inventoried and passed50offline isolated commands/348integer checks/5traps before0.25 retired, this unchanged archive predates the newer Package/ACC/struct/container source work, the root compiler binary remains historical0.25, use source-bound evidence rather than the repeated0.26 development version alone, current merge authority tests/package-import-checkpoint.json, score26.7% unchanged
+---
 
-# Awl
+## at a glance
 
-<img src="assets/branding/awl-icon.png" width="96" height="96" alt="Awl owl logo">
+| component | current state |
+| :--- | :--- |
+| language | **Awl** |
+| source syntax | **Aesop**, the only grammar accepted by the current compiler source |
+| compiler | **Awl Compiler Collection (ACC)**, native C++20 frontend with checked IR, an independent verifier and a C11 backend |
+| source files | `.aw` |
+| manifests | `.awproj` for projects, `.awpkg` for local Packages |
+| public toolkit | `awl`, currently `init` and `build` |
+| development version | `0.26.0-dev`, a development identifier, not a compatibility guarantee |
+| release readiness | experimental source candidate, not production-ready |
 
-an experimental native language and its **Awl Software Development Kit [Beta]**, current Linux development release `0.26.0-dev`
+> **source is ahead of distributed binaries**  
+> the older Linux `0.26.0-dev` SDK predates this syntax and the newer Package/container work, it does not implement the declarations below  
+> no source-current SDK release is claimed here, Windows native-host qualification remains deferred
 
-sources use **`.aw`**, project manifests use **`.awproj`**, the normal public command is **`awl`**
+## the language
 
-## complete downloads
-
-- [linux x86-64 SDK](../Awl-0.26.0-dev-linux-x86_64.tar.xz), complete compiler and bundled backend, current next syntax shipped, exported enums included, qualification is recorded in `tests/default-checkpoint.json` and `tests/awl-editor.json`
-- [older windows x86-64 preview](../Awl-0.24.0-dev-windows-x86_64-preview.tar.xz), complete cross-built preview, **not native windows-host accepted**, windows qualification stays deferred until language completion
-- each download has an adjacent `.sha256` sidecar
-
-extract the entire `Awl` directory, add its `bin` directory to `PATH`, keep `libexec` beside `bin`, no end-user Python, host compiler, SDK or separate backend download is needed
-
-```sh
-awl
-awl init Demo
-awl build
-awl build examples-next/collections/main.aw -o collections
-```
-
-`awl`, `Awl`, `AWL` and all other ASCII command-name casings work on linux, `init` and `build` verbs accept mixed case too, project names, aliases and import paths remain case-sensitive, `-o` and `-O` retain their distinct meanings
-
-public beta commands are still **init/build only**, `kcc` is internal compiler tooling, no public run/install/Packages/registry command is claimed
-
-## useful full-stack application
-
-[Awl Board](apps/board/README.md) is a persistent local taskboard, native Awl HTTP/schema/storage plus shared Awl WebAssembly filtering, tested in a real browser with stale-tab, storage-error and restart workflows, [standalone Linux application](../Awl-board-0.1-linux-x86_64.tar.xz), a separate complete app download, existing SDK archives are unchanged
-
-current practical capability assessment, **24.4% =11/45**, a coarse workload rubric rather than a claim of language completeness, Windows remains deferred
-
-## language and useful workloads
-
-next syntax uses `func name :: params: type { ... };` declarations, `@p` bindings, adjacent-colon initialization/assignment, mandatory semicolons, braced if/elseif/else and while blocks, module access through `exports{...}`
+function results are inferred from the body unless explicitly declared in brackets after the name, parameters follow `::`, calls still use parentheses
 
 ```text
-func size :: @b values[i64], etc[i64]: i64 {
+func size :: @b values[i64], etc[i64] {
     return vector_length(values) + vector_length(etc);
 };
-func main: i64 {
-    @p version: 128.59;
-    print(version);
+
+func main[i64] {
+    @p name: "Awl";
+    print("hello ${name}");
     return 0;
 };
 ```
 
-implemented foundations include checked scalar arithmetic, functions/control flow, project imports/private defining-file context/export permissions, scalar module state and f64 math, fixed arrays/structs, bounded typed scalar/text vectors with stale-safe O(1) identities, checked swap/truncate and copied slices, scoped ownership for supported resources, private associated-value enums/exhaustive matching, UTF-8 strings/builders, Linux files/streams/local TCP, strict JSON helpers and native framebuffer windows/primitives
+- `func answer[i64] { ... };` declares a parameterless value-returning function
+- `func greet[text] :: name:text { ... };` declares a function with a typed parameter
+- omitted results are inferred from every return path, no value-returning statements means `unit`
+- `func reset[unit] { ... };` explicitly requires a unit-returning body
+- incompatible return types are errors, an unresolved recursive inference cycle requires an explicit result annotation
+- `func make[@o vector<i64>] { ... };` declares an owned resource result
+- `@p count: 3;` declares a binding, `count: count - 1;` assigns it
+- braced functions/control flow and mandatory semicolons are part of Aesop, enums and matches retain their documented `end;` forms
+- `vector_length(value)` and `vector.length(value)` both query vector length, the underscore spelling is an intentional alias for the example above
 
-bounded examples include `kpipe`, `ksort`, `jget`, the local CRUD/persistence service, atomic file replacement, drawing/color tools and the donut, these are foundations, not equivalents of full desktop/media/browser/3D applications
+`@b` explicitly borrows a resource parameter, an unmarked parameter does not acquire borrow permission, scoped resources must still follow the ownership rules, resource results require an explicit result/ownership annotation
 
-- [SDK usage](docs/ASDK.md)
-- [next syntax](docs/NEXT-LANGUAGE.md)
-- [capability assessment](docs/CAPABILITY-ASSESSMENT.md), **26.7%, 12/45**, systems stage2 for the bounded task supervisor
-- [roadmap](docs/ROADMAP.md)
-- [performance and limits](docs/PERFORMANCE.md), prior measurements are historical, no new universal speed claim
+the previous trailing-result, parenthesized-declaration and legacy grammars are rejected, `--syntax next` and `--syntax legacy` are not compatibility modes
 
-## offline browser files
+see the [Aesop syntax reference](docs/AESOP.md) for declaration grammar, modifiers, imports, exports and resource rules
 
-- [awl. editor](editor/awl-editor.html), single-file next-syntax editor with the owl mark, highlighting, a structural aid, recorded visual frames and a source-level subset interpreter, **not the native compiler**
-- [Awl Studio](editor/Awl-studio.html), the older single-file legacy-subset playground, **not the native compiler** and not newly requalified
-- [JSON workbench](web/Awl-json-workbench.html), freshly compiled verified C → WebAssembly, bounded offline worker host, exact i64 results and explicit cancellation/timeout handling
+## quick start from source
 
-neither file needs a local service, neither editor implements native-equivalent ownership/type checking, typed vectors, general OS access or full 64-bit semantics
+**contributor prerequisites:** Python 3, a C++20 compiler and a C compiler for the generated-program example below, Linux is the currently exercised host
 
-## qualification and remaining work
+```sh
+python3 compiler/build_native.py --standalone --strip
 
-current Linux release authority is `tests/default-checkpoint.json`, app authority is `tests/board-checkpoint.json`, source-candidate process/view qualification is separate in `tests/process-checkpoint.json`, historical rename evidence remains preserved
+compiler/native/bin/acc check examples/collections/main.aw
+compiler/native/bin/acc emit-c examples/collections/main.aw > /tmp/awl-collections.c
+cc -std=c11 -O2 /tmp/awl-collections.c -lm -o /tmp/awl-collections
+/tmp/awl-collections
+```
 
-arbitrary owned/nested generics, static borrowing, generic/resource enum payloads, reclaimable strings, concurrency, broader networking/TLS/auth, general desktop widgets/input/media/accessibility, substantial full-stack workloads and real model/material/lighting/shadow 3D remain incomplete
+this builds a contributor compiler, not a complete redistributable SDK, `acc check` and `acc emit-c` work without the bundled backend
 
-historical source, compiler bytes, original reports, photos and development helpers are preserved losslessly in `history/pre-rename-evidence.tar.xz`, with a per-file SHA-256 index, immutable historical evidence and unmodified upstream/OS terminology are not relabelled as current Awl acceptance
+### toolkit workflow
 
-## contributors
+```sh
+compiler/native/bin/awl init Demo
+compiler/native/bin/awl init Greeting --pkg
+```
 
-`compiler/build_native.py` builds the native frontend/compiler, `compiler/package_linux.py` and `compiler/package_windows.py` build complete platform bundles from pinned toolchains, `compiler/package_sdk.py` verifies the entire upstream resource tree and packages rebuilt host binaries without overlays
+`init` writes Aesop starters without overwriting existing files, project initialization uses the current directory rather than creating a named child directory
 
-contributor Python/C++/Node/browser/sanitizer tools are test/build dependencies, not end-user SDK dependencies, keep generated toolchain and cache trees outside the saved workspace and audit the entire `/home/user` budget
+with a complete, matching SDK backend installed alongside the driver, project builds use:
 
-## compiler-source development
+```sh
+awl build
+awl build Demo
+awl build relative/main.aw -o program
+```
 
-[exported enums and typed results](docs/EXPORTED-ENUMS.md) now work across modules in the Linux0.25 SDK, including a native multi-file configuration validator, native compiler commands default to next syntax, use `--syntax legacy` for old examples, the workload score stays24.4%
+`awl build` selects the sole current-directory project manifest, `awl build Demo` searches immediate child folders for `Demo.awproj`, a `.aw` target compiles directly
 
-[checked read-only vector views](docs/VECTOR-VIEWS.md) now work in compiler source for the11 scalar/text vector types, with zero-allocation descriptors and runtime stale-owner/structural-epoch checks, not static lifetime checking, `apps/logwindow` exercises the API across modules, this source candidate is **not included in the published SDK archives**, score remains24.4%
+`awl` command-name casing and `init`/`build` verb casing are ASCII-insensitive, source paths, import paths, Package names and aliases remain case-sensitive, `-o` and `-O` are distinct
 
-[bounded native subprocess supervision](docs/SUBPROCESSES.md) and `apps/taskrun` now work in compiler source, including explicit argv, atomic dual-stream capture, timeouts, process-group/direct-leader cleanup and real bundled-SDK build→execution batches, this useful systems workload moves the coarse score to26.7%=12/45, **not shipped in the published SDK yet**, prior24.4% sections are historical
+[toolkit details →](docs/ASDK.md)
 
-## clean syntax, source candidate
+## local Packages
 
-current source replaces old next exports/control blocks/modifiers with `exports{...};`, `if ... { ... } elseif ... { ... } else { ... };`, `while ... { ... };`, `@s/@b/@o/@w`, vector arguments such as `@b result[i64]`, `${name}` string injection and scalar `..` concatenation, see [the current syntax reference](docs/NEXT-LANGUAGE.md),47source files migrated, **published Linux0.25 still uses its previous syntax**, older embedded test fixtures/editor interpreter remain unqualified for this revision, score stays26.7%
+```sh
+awl init Greeting --pkg
+```
 
-next function declarations now use `func size :: @b values[i64]: i64 { ... };` and `func main: i64 { ... };`, not parentheses, arrows or function `end;`, these forms are published in the0.26 SDK, see [the release notes](RELEASE-0.26.md)
+local Package imports resolve through `packages/NAME/NAME.awpkg`, project-local file imports use `use path/File.aw as alias;`
+
+| Package | source implementation |
+| :--- | :--- |
+| `env` | dotenv parsing and environment-file helpers |
+| `json` | JSON parsing and query helpers |
+| `fsp` | filesystem path helpers |
+| `time` | monotonic and wall clocks, bounded sleeps and checked deadlines |
+| `db`, `websocket`, `fetch` | unfinished, not advertised as usable standard Packages |
+
+registry publishing, server-based `awl add`/`install`, accounts and upload/review workflows are not implemented
+
+[Package layout and examples →](docs/PACKAGES.md)
+
+[time Package semantics and limitations →](docs/TIME.md)
+
+## examples and tools
+
+| location | purpose |
+| :--- | :--- |
+| [`examples/`](examples/) | the single current example tree, including collections, structs, loops, modules, local Packages and a standalone time demo |
+| [`apps/taskrun/`](apps/taskrun/) | a bounded native subprocess supervisor |
+| [`apps/logwindow/`](apps/logwindow/) | bounded UTF-8 log-window processing |
+| [`apps/board/`](apps/board/) | a local persistent taskboard with native service code and a shared WebAssembly filter |
+| [`editor/awl-editor.html`](editor/awl-editor.html) | a single-file offline Aesop subset editor/interpreter, **not the native compiler** |
+| [`web/`](web/) | bounded browser/WebAssembly demonstrations with separate historical qualification |
+
+existing prebuilt application artifacts and historical reports are not requalified by a source syntax migration
+
+## status and limitations
+
+implemented foundations include checked integer arithmetic, f64 values/math, typed functions, project imports and explicit exports, module-private context, fixed arrays, structs, bounded scalar/text vectors, checked runtime views, maps/sets, enums/matching, UTF-8 text/spools, local file/stream/TCP operations and native framebuffer primitives
+
+important gaps remain in arbitrary owned/nested generic collections, static lifetime checking, resource enum payloads, reclaimable text, language-level concurrency, comprehensive networking/TLS/auth, general desktop widgets/media/accessibility and full model/material/lighting/shadow 3D
+
+runtime views are not a static borrow checker, subprocess supervision is not a security sandbox, local demos are not substitutes for production browser, desktop, media or game engines
+
+the current coarse [workload capability assessment](docs/CAPABILITY-ASSESSMENT.md) remains **26.7% · 12/45**, syntax changes and test counts do not increase that score
+
+[performance methodology and limits →](docs/PERFORMANCE.md)
+
+## development and validation
+
+all current frontend, checker, verifier and emitter code lives in **`compiler/native/`**, there is no separate `compiler/next` frontend or Python language-parser fallback
+
+```sh
+python3 compiler/test_native.py
+python3 compiler/test_native.py --sanitize
+python3 tests/aesop.py --acc compiler/native/bin/acc
+python3 tests/aesop_time.py --acc compiler/native/bin/acc --sanitize --report tests/aesop-time.json
+python3 compiler/generate_runtime.py --check
+python3 compiler/generate_platform.py --check
+```
+
+current source evidence is recorded in `tests/aesop-native.json.gz`, `tests/aesop-checks.json`, `tests/aesop-program-sanitizers.json`, `tests/aesop-time.json`, `tests/aesop-migration.json` and `tests/aesop-editor.json`, these cover their stated source/native/editor scopes, not a complete standalone SDK or native Windows release
+
+older reports and test utilities may describe retired compiler versions, they are historical evidence rather than acceptance for the current source tree
+
+## license
+
+see [LICENSE](LICENSE) for this project and [`third-party/`](third-party/) for bundled-resource notices

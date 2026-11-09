@@ -1,6 +1,6 @@
 use vendor/Json.aw as json;
-func kind :: @b metadata[i64], i:i64: i64 { return vector.get(metadata,2+i*2); };
-func safe :: value:text: bool {
+func kind[i64] :: @b metadata[i64], i:i64 { return vector.get(metadata,2+i*2); };
+func safe[bool] :: value:text {
     if string.bytes(value)>4096 { return false; };
     @p i:0;
     while i<string.bytes(value) {
@@ -10,7 +10,7 @@ func safe :: value:text: bool {
     return true;
 };
 exports{
- @r func parse :: source:text,@b tokens[text],@b metadata[i64],@b ranges[i64]: bool {
+ @r func parse[bool] :: source:text,@b tokens[text],@b metadata[i64],@b ranges[i64] {
     if not json.parse(source,tokens,metadata) { return false; };
     if kind(metadata,0)!=2 { return false; };
     @p i:1; @p jobs:0;

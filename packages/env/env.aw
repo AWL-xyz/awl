@@ -4,7 +4,7 @@
 -- codes: 5 invalid input/buffers/allocation, 6 trailing quoted-value data
 -- 1 invalid key, 2 missing '=', 3 unterminated quote, 4 more than 256 entries
 exports{
-    @r func parse :: source:text, @b keys[text], @b values[text], @b result[i64]: bool {
+    @r func parse[bool] :: source:text, @b keys[text], @b values[text], @b result[i64] {
         if vector.length(result) < 2 { return false; };
         vector.set(result, 0, 0); vector.set(result, 1, 0);
         if string.bytes(source) > 16384 or vector.length(keys) != vector.length(values) or vector.length(keys) > 256 {
@@ -91,7 +91,7 @@ exports{
         };
         return true;
     };
-    @r func find :: name:text, @b keys[text]: i64 {
+    @r func find[i64] :: name:text, @b keys[text] {
         @p i: 0;
         while i < vector.length(keys) {
             if vector.get(keys, i) == name { return i; };
@@ -99,7 +99,7 @@ exports{
         };
         return -1;
     };
-    @r func get :: name:text, @b keys[text], @b values[text], fallback:text: text {
+    @r func get[text] :: name:text, @b keys[text], @b values[text], fallback:text {
         @p i: find(name, keys);
         if i < 0 or i >= vector.length(values) { return fallback; };
         return vector.get(values, i);

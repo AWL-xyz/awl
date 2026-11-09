@@ -56,5 +56,5 @@ try:
  d.close()
 finally:
  server.terminate();server.communicate(timeout=5)
-result={'status':'PASS','runs':records,'capture_sha256':hashlib.sha256(a.capture.read_bytes()).hexdigest(),'capture_method':'actual native X11 window XGetImage, no mock/generated image','qualification':'synthetic mouse events against real native processes on Xvfb, observed waits include polling and X server, not UI latency benchmark or physical input acceptance','source_sha256':{str(f.relative_to(ROOT)):hashlib.sha256(f.read_bytes()).hexdigest() for f in (ROOT/'examples-next/apps/colorlab').iterdir() if f.is_file()}}
+result={'status':'PASS','runs':records,'capture_sha256':hashlib.sha256(a.capture.read_bytes()).hexdigest(),'capture_method':'actual native X11 window XGetImage, no mock/generated image','qualification':'synthetic mouse events against real native processes on Xvfb, observed waits include polling and X server, not UI latency benchmark or physical input acceptance','source_sha256':{str(f.relative_to(ROOT)):hashlib.sha256(f.read_bytes()).hexdigest() for f in (ROOT/'examples/apps/colorlab').iterdir() if f.is_file()}}
 a.report.write_text(json.dumps(result,separators=(',',':'))+'\n');print('PASS',[(r['mode'],len(r['checks'])) for r in records])

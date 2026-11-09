@@ -19,7 +19,7 @@ def main():
  sdk={}
  for name,digest in [('Awl-0.24.0-dev-linux-x86_64.tar.xz','b8d14d845a1b3c730fac028f775c0c8e276a5e49c8d4b76b56623db1b0f1a1df'),('Awl-0.24.0-dev-windows-x86_64-preview.tar.xz','50d6a7a914b2c75639c95be645cfb36555996e906dee718178b8bf72ccc565ec')]:
   assert sha(ROOT.parent/name)==digest;sdk[name]=digest
- assert (ROOT/'apps/board/vendor/Json.aw').read_bytes()==(ROOT/'examples-next/parsing/Json.aw').read_bytes().replace(b'if string_bytes(source) > 16384 then fail(result, 2, 16384);',b'if string_bytes(source) > 65536 then fail(result, 2, 65536);')
+ assert (ROOT/'apps/board/vendor/Json.aw').read_bytes()==(ROOT/'examples/parsing/Json.aw').read_bytes().replace(b'if string_bytes(source) > 16384 then fail(result, 2, 16384);',b'if string_bytes(source) > 65536 then fail(result, 2, 65536);')
  files=0;size=0;links=0
  for p in ROOT.parent.rglob('*'):
   if p.is_symlink():links+=1

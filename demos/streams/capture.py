@@ -7,7 +7,7 @@ ROOT=Path(__file__).resolve().parents[2];out=Path(__file__).resolve().parent
 binary=Path(os.environ.get('Awl_STREAMS_BINARY','/tmp/Awl-streams-bundle/Awl/bin/Awl'))
 with tempfile.TemporaryDirectory(prefix='Awl-stream-photo-',dir='/var/tmp') as td:
  work=Path(td)
- for name in ['main.aw','kpipe.awproj']:(work/name).write_bytes((ROOT/'examples-next/apps/kpipe'/name).read_bytes())
+ for name in ['main.aw','kpipe.awproj']:(work/name).write_bytes((ROOT/'examples/apps/kpipe'/name).read_bytes())
  transcript=work/'transcript.txt';script=work/'demo.sh';oracle=work/'oracle.py'
  oracle.write_text('''import hashlib,os,subprocess
 payload=bytes(range(256))*1024

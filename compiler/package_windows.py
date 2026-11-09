@@ -5,6 +5,7 @@ Real-Windows execution acceptance is separate from producing this archive.
 """
 import argparse,hashlib,json,os,platform,shutil,subprocess,tarfile,urllib.request,zipfile
 from pathlib import Path
+from distribution_privacy import scrub_private
 ROOT=Path(__file__).resolve().parents[1]
 def digest(p):
  h=hashlib.sha256()
@@ -41,12 +42,12 @@ def main():
  shutil.copy2(ROOT/'docs/STREAMS.md',package/'STREAMS.md')
  shutil.copy2(ROOT/'docs/NETWORK.md',package/'NETWORK.md')
  shutil.copy2(ROOT/'docs/TYPED-VECTORS.md',package/'TYPED-VECTORS.md')
- for name in ['examples','examples-next','third-party']:shutil.copytree(ROOT/name,package/name,dirs_exist_ok=True)
+ for name in ['examples','third-party']:shutil.copytree(ROOT/name,package/name,dirs_exist_ok=True)
  src=package/'src';src.mkdir(exist_ok=True)
  for f in native.iterdir():
   if f.suffix in ['.cpp','.h','.inc','.c']:shutil.copy2(f,src/f.name)
  shutil.copy2(ROOT/'LICENSE',package/'LICENSE');shutil.copy2(ROOT/'docs/WINDOWS.md',package/'README.md')
- for name in ['MATH.md','MODULE-STATE.md','NEXT-LANGUAGE.md','INT-VECTORS.md','ROADMAP.md','WIN32-GUI.md','FILES.md','CAPABILITY-ASSESSMENT.md','PIXELBOARD-FILES.md']:shutil.copy2(ROOT/'docs'/name,package/name)
+ for name in ['MATH.md','MODULE-STATE.md','AESOP.md','INT-VECTORS.md','WIN32-GUI.md','FILES.md','CAPABILITY-ASSESSMENT.md','PIXELBOARD-FILES.md']:shutil.copy2(ROOT/'docs'/name,package/name)
  validation=package/'validation'
  if validation.exists():shutil.rmtree(validation)
  validation.mkdir()
@@ -54,7 +55,8 @@ def main():
   if f.is_file() and not f.name.startswith(('windows-exact-','windows-preview-','persistence-linux-exact','persistence-windows-exact','persistence-release-acceptance','persistence-parent-audit','persistence-linux-extracted')):shutil.copy2(f,validation/f.name)
  for bench in [ROOT/'benchmarks'/n for n in ['files-latest.json','persistence-latest.json','persistence-build-latest.json']]:
   if bench.is_file():shutil.copy2(bench,validation/bench.name)
- manifest={'toolkit':{'name':'Awl Software Development Kit [Beta]','command':'bin/awl.exe','commands':['init','build']},'version':'0.24.0-dev','status':'experimental next-syntax development candidate; public SDK defaults next, internal kcc defaults legacy; real-Windows end-to-end acceptance pending','host':'x86_64-windows','toolchain':lock,'compiler_build_flags':flags,'compiler_link_libraries':['bcrypt','advapi32'],'program_link_libraries':['user32','gdi32','shell32'],'kcc_sha256':digest(package/'bin/kcc.exe'),'zig_sha256':digest(tool/'zig.exe'),'compiler_sources_sha256':{f.name:digest(f) for f in sorted(src.iterdir())},'resources':'Complete unmodified upstream Windows Zig distribution, libc/linker/headers/resources/licenses retained. No host compiler/SDK/Python/download needed by installed kcc.','execution_evidence':'See validation; Wine is not real Windows. Current Wine10 fails in upstream Zig self-executable-path resolution; check/emit and separate driver fixtures do not substitute for actual backend acceptance.'}
+ scrub_private(package)
+ manifest={'toolkit':{'name':'Awl Software Development Kit [Beta]','command':'bin/awl.exe','commands':['init','build']},'version':'0.24.0-dev','status':'experimental source candidate using Aesop syntax; real-Windows end-to-end acceptance pending','host':'x86_64-windows','toolchain':lock,'compiler_build_flags':flags,'compiler_link_libraries':['bcrypt','advapi32'],'program_link_libraries':['user32','gdi32','shell32'],'kcc_sha256':digest(package/'bin/kcc.exe'),'zig_sha256':digest(tool/'zig.exe'),'compiler_sources_sha256':{f.name:digest(f) for f in sorted(src.iterdir())},'resources':'Complete unmodified upstream Windows Zig distribution, libc/linker/headers/resources/licenses retained. No host compiler/SDK/Python/download needed by installed kcc.','execution_evidence':'See validation; Wine is not real Windows. Current Wine10 fails in upstream Zig self-executable-path resolution; check/emit and separate driver fixtures do not substitute for actual backend acceptance.'}
  (package/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
  print(package,flush=True)
  if not a.no_archive:

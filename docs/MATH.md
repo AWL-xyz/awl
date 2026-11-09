@@ -1,6 +1,6 @@
-# Experimental next-syntax f64 and math
+# Experimental Aesop-syntax f64 and math
 
-Source candidate only, opt-in `--syntax next`; not contained in protected 0.23 downloads.
+Source candidate only, opt-in `--syntax aesop`; not contained in protected 0.23 downloads.
 
 ```Awl
 func scale(value:f64): f64
@@ -29,4 +29,4 @@ end;
 
 The native checker and separate read-only verifier both enforce types and allowed math signatures. Numeric literal payloads are validated before C emission, not pasted as unchecked C. Existing integer overflow/bounds checks remain separate and unchanged in the legacy dialect.
 
-Examples: `examples-next/numeric/main.aw`, `examples-next/modules/`. Current evidence lives in `tests/module-numeric-*`; earlier func/next reports predate these features. Native Windows-host and complete successor artifact acceptance remain separate gates.
+Examples: `examples/numeric/main.aw`, `examples/modules/`. Current evidence lives in `tests/module-numeric-*`; earlier func/next reports predate these features. Native Windows-host and complete successor artifact acceptance remain separate gates.

@@ -86,6 +86,7 @@ const std::unordered_map<std::string,PlatformSignature> platform_signatures=[] {
     {"buffer_set",{{"i64","i64","u8"},"unit"}},
     {"buffer_free",{{"i64"},"unit"}},
     {"clock_millis",{{},"i64"}},
+    {"wall_clock_millis",{{},"i64"}},
     {"sleep_millis",{{"i64"},"unit"}},
     {"window_open",{{"i64","i64"},"i64"}},
     {"window_width",{{"i64"},"i64"}},

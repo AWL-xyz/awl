@@ -257,7 +257,7 @@ footer b{font-weight:500;color:var(--text)}
   <span id="pos">Ln 1, Col 1</span>
   <span>Spaces: 4</span>
   <span>UTF-8</span>
-  <span><b>Awl</b> .aw · next syntax</span>
+  <span><b>Awl</b> .aw · current source syntax</span>
   <span class="r" id="stat">in-browser runner · not kcc</span>
 </footer>
 
@@ -271,7 +271,7 @@ footer b{font-weight:500;color:var(--text)}
 const KEYWORDS = new Set(['func','use','exports','enum','if','elseif','else','while','return','match','case','then','end','as','and','or','not','defer','move']);
 const CONSTS = new Set(['true','false','pi','tau']);
 const TYPES = new Set(['i8','i16','i32','i64','u8','u16','u32','u64','f64','bool','unit','string','text','spool','vector','view']);
-const BUILTIN_EXACT = new Set(['print','clock_millis','sleep_millis','sin','cos','sqrt','atan2']);
+const BUILTIN_EXACT = new Set(['print','clock_millis','wall_clock_millis','sleep_millis','sin','cos','sqrt','atan2']);
 const BUILTIN_PREFIX = /^(spool_|text_vector_|i64_vector_|window_|buffer_|file_|arg_|string_)\w*$/;
 
 /* ---------- example sources ---------- */
@@ -280,20 +280,20 @@ const LIB_AW = `@p version: 128.59;
 exports{
     @r fixed: 42;
     @w count: 1;
-    @r func get_version: f64 {
-        @p func helper: f64 {
+    @r func get_version[f64] {
+        @p func helper[f64] {
             calls: calls + 1;
             return version;
         };
         return helper();
     };
-    @r func call_count: i64 {
+    @r func call_count[i64] {
         return calls;
     };
 };
 `;
 const VISUAL_AW = `-- Visual demo: a scrolling colour gradient, opens the Visual tab
-func main: i64 {
+func main[i64] {
     @p w: window_open(48, 32);
     if w == 0 { return 3; };
     window_set_title(w, "gradient");
@@ -320,8 +320,8 @@ func main: i64 {
 `;
 const EXAMPLES = {
 'hello.aw':
-`-- Awl (next syntax): func with :: parameters, @p bindings, colon assignment
-func factorial :: n:i64: i64 {
+`-- Awl source: func with :: parameters, @p bindings, colon assignment
+func factorial[i64] :: n:i64 {
     if n <= 1 {
         return 1;
     } else {
@@ -329,7 +329,7 @@ func factorial :: n:i64: i64 {
     };
 };
 
-func main: i64 {
+func main[i64] {
     @p i: 1;
     while i <= 10 {
         print(factorial(i));
@@ -345,7 +345,7 @@ func main: i64 {
     Overflow();
 end;
 
-func divide :: a:i64, b:i64: Divide {
+func divide[Divide] :: a:i64, b:i64 {
     if b == 0 { return Divide.ZeroDivisor(); };
     if a == -9223372036854775808 and b == -1 { return Divide.Overflow(); };
     return Divide.Ok(a / b);
@@ -359,7 +359,7 @@ func show :: r:Divide {
     end;
 };
 
-func main: i64 {
+func main[i64] {
     show(divide(42, 6));
     show(divide(1, 0));
     show(divide(-9223372036854775808, -1));
@@ -368,11 +368,11 @@ func main: i64 {
 `,
 'math.aw':
 `-- f64 math: radians, atan2(y, x), pi and tau
-func area :: radius:f64: f64 {
+func area[f64] :: radius:f64 {
     return pi * radius * radius;
 };
 
-func main: i64 {
+func main[i64] {
     print(area(2.5));
     print(sqrt(81));
     print(sin(pi / 2));
@@ -387,7 +387,7 @@ func main: i64 {
   { name: 'modules.aw', text: `-- Run this file: it imports Library.aw (another file in the sidebar)
 use Library.aw as lib;
 @p version: 999.0;
-func main: i64 {
+func main[i64] {
     print(lib.get_version());
     print(lib.fixed);
     lib.count: lib.count + 1;
@@ -400,7 +400,7 @@ func main: i64 {
 ],
 'bounce.aw':
 `-- Visual output: a bouncing square, frames are recorded then played back
-func main: i64 {
+func main[i64] {
     @p w: window_open(80, 50);
     if w == 0 { return 3; };
     window_set_title(w, "bouncing square");
@@ -649,7 +649,7 @@ function renderRun() {
     ['init', 'awl init NAME'],
     ['check', 'kcc check ' + f]
   ];
-  pane.innerHTML = '<div class="note">Run these where the Awl Software Development Kit is installed. The public beta only ships <b>awl init</b> and <b>awl build</b>, the <b>kcc check</b> line is internal compiler tooling. This editor\u2019s runner is a JavaScript interpreter of the next syntax, not the native compiler.</div>';
+  pane.innerHTML = '<div class="note">Run these where the Awl Software Development Kit is installed. The public beta only ships <b>awl init</b> and <b>awl build</b>, the <b>kcc check</b> line is internal compiler tooling. This editor\u2019s runner is a JavaScript interpreter of the current syntax, not the native compiler.</div>';
   cmds.forEach(([, c]) => {
     const d = document.createElement('div');
     d.className = 'cmd';
@@ -1058,7 +1058,7 @@ $('fileIn').onchange = e => { readFiles(e.target.files); e.target.value = ''; };
 $('btnFmt').onclick = reindent;
 $('menu').onclick = () => document.body.classList.toggle('nav');
 $('newFile').onclick = () => {
-  addFile('untitled', '-- new Awl file\nfunc main: i64 {\n    return 0;\n};\n');
+  addFile('untitled', '-- new Awl file\nfunc main[i64] {\n    return 0;\n};\n');
   const row = $('files').children[files.length - 1];
   if (row) startRename(files.length - 1, row);
 };
@@ -1093,7 +1093,7 @@ scroll.addEventListener('mousedown', e => { if (e.target === scroll || e.target 
 window.addEventListener('resize', () => { layout(); });
 window.addEventListener('beforeunload', () => { try { persist(); } catch (e) {} });
 
-/* ---------- in-browser next-syntax interpreter ---------- */
+/* ---------- in-browser Aesop-syntax interpreter ---------- */
 const INT = { i8: [-128n, 127n], i16: [-32768n, 32767n], i32: [-(2n ** 31n), 2n ** 31n - 1n], i64: [-(2n ** 63n), 2n ** 63n - 1n], u8: [0n, 255n], u16: [0n, 65535n], u32: [0n, 2n ** 32n - 1n], u64: [0n, 2n ** 64n - 1n] };
 const ATS = new Set(['@p', '@s', '@b', '@o', '@r', '@w']);
 class KErr extends Error { constructor(m, n, trap) { super(m); this.line = n && n.line; this.col = n && n.col; this.trap = !!trap; } }
@@ -1139,6 +1139,8 @@ function parse(src) {
 
   function funcDecl(exp, perm) {
     const t = eat('func'), name = id();
+    let ret = null;
+    if (acc('[')) { acc('@o'); ret = type(); eat(']'); }
     const params = [];
     if (acc('::')) {
       for (;;) {
@@ -1151,8 +1153,6 @@ function parse(src) {
         if (!acc(',')) break;
       }
     }
-    let ret = 'unit';
-    if (acc(':')) { acc('@o'); ret = type(); }
     eat('{'); const body = block(); eat('}'); eat(';');
     return { name, params, ret, body, exp: !!exp, perm, line: t.line, col: t.col };
   }
@@ -1277,7 +1277,7 @@ function kernRun(src, out, vis, lib) {
   const kind = v => isInt(v) ? v.t : isF(v) ? 'f64' : typeof v === 'boolean' ? 'bool' : typeof v === 'string' ? 'string' : v && v.u ? v.u : 'unit';
   const isLit = n => n.k === 'num';
   const coerce = (ty, node, v) => ty === 'f64' && isInt(v) && isLit(node) ? f64(Number(v.v)) : v;
-  const chk = (ty, v, n) => { if (ty !== 'unit' && kind(v) !== ty) throw err('type mismatch: expected ' + ty + ' but got ' + kind(v), n); };
+  const chk = (ty, v, n) => { if (kind(v) !== ty) throw err('type mismatch: expected ' + ty + ' but got ' + kind(v), n); };
   const find = (sc, name) => { for (; sc; sc = sc.up) if (sc.m.has(name)) return sc; return null; };
   const helper = (sc, name) => { for (; sc; sc = sc.hup || sc.up) if (sc.h && sc.h.has(name)) return sc.h.get(name); return null; };
   const need = (v, t, n, what) => { if (kind(v) !== t) throw err(what + ' needs ' + t + ', got ' + kind(v), n); return v; };
@@ -1298,6 +1298,7 @@ function kernRun(src, out, vis, lib) {
     window_set_title: a => { vis.title = String(a[1]); return true; },
     window_close: () => { vis.closed = true; return null; },
     clock_millis: () => i64(vis.clock),
+    wall_clock_millis: () => i64(Date.now()),
     sleep_millis: (a, n) => { const ms = Number(a[0].v); if (ms < 0 || ms > 60000) throw trap('sleep out of range', n); vis.clock += ms; vis.slept = true; return null; }
   };
   const MATH = { sin: Math.sin, cos: Math.cos, sqrt: Math.sqrt, atan2: Math.atan2 };
@@ -1371,7 +1372,76 @@ function kernRun(src, out, vis, lib) {
     }
     throw err('internal: ' + n.k, n);
   }
+  const inferring = new Set();
+  function inferEditorResult(fn, mod) {
+    if (fn.ret !== null) return fn.ret;
+    const valueReturns = body => body.some(st => st.k === 'ret' ? !!st.e : st.k === 'if' ? st.branches.some(b => valueReturns(b[1])) || !!st.no && valueReturns(st.no) : st.k === 'while' ? valueReturns(st.b) : st.k === 'match' ? st.cases.some(c => valueReturns(c.body)) : false);
+    if (!valueReturns(fn.body)) { fn.ret = 'unit';return fn.ret; }
+    if (inferring.has(fn)) throw err('circular return-type inference, add an explicit [type] annotation', fn);
+    inferring.add(fn);
+    const helpers = new Map(), returns = new Set();
+    const builtinTypes = { print:'unit', string_length:'i64', string_bytes:'i64', string_slice:'string', string_codepoint:'u32', string_from_i64:'string', window_open:'i64', window_width:'i64', window_height:'i64', window_present:'bool', window_close:'unit', window_set_pixel:'unit', window_set_title:'bool', window_poll:'i64', window_key:'i64', window_mouse_x:'i64', window_mouse_y:'i64', clock_millis:'i64', wall_clock_millis:'i64', sleep_millis:'unit' };
+    const unsupported = n => { throw err('this editor subset cannot infer this expression, add [type] or use ACC', n); };
+    function expressionType(e, env) {
+      if (e.k === 'num') return e.t;
+      if (e.k === 'str') return 'string';
+      if (e.k === 'bool' || e.k === 'not') return 'bool';
+      if (e.k === 'neg') return expressionType(e.e, env);
+      if (e.k === 'var') {
+        if (env.has(e.name)) return env.get(e.name);
+        if (mod.scope.m.has(e.name)) return kind(mod.scope.m.get(e.name));
+      }
+      if (e.k === 'bin') {
+        const a = expressionType(e.a, env), b = expressionType(e.b, env);
+        if (e.op === '..') return 'string';
+        if (a !== b && !(a === 'f64' && isLit(e.b) || b === 'f64' && isLit(e.a))) throw err('incompatible inferred operand types', e);
+        if (['==','!=','<','>','<=','>=','and','or'].includes(e.op)) return 'bool';
+        return a === 'f64' || b === 'f64' ? 'f64' : a;
+      }
+      if (e.k === 'call') {
+        const f = e.f;
+        if (f.k === 'var') {
+          if (helpers.has(f.name)) return inferEditorResult(helpers.get(f.name), mod);
+          if (mod.prog.fns[f.name]) return inferEditorResult(mod.prog.fns[f.name], mod);
+          if (INT[f.name] || f.name === 'f64') return f.name;
+          if (MATH[f.name]) return 'f64';
+          if (builtinTypes[f.name]) return builtinTypes[f.name];
+        }
+        if (f.k === 'mem' && f.e.k === 'var') {
+          const other = mod.al[f.e.name];
+          if (other && other.prog.fns[f.name] && other.prog.fns[f.name].exp) return inferEditorResult(other.prog.fns[f.name], other);
+          if (mod.prog.enums[f.e.name]) return f.e.name;
+          if (builtinTypes[f.e.name + '_' + f.name]) return builtinTypes[f.e.name + '_' + f.name];
+        }
+      }
+      return unsupported(e);
+    }
+    function walk(body, outer) {
+      const env = new Map(outer);let total = false;
+      for (const st of body) {
+        if (total) throw err('unreachable statement', st);
+        if (st.k === 'local') env.set(st.name, st.ty || expressionType(st.e, env));
+        else if (st.k === 'nfunc') helpers.set(st.fn.name, st.fn);
+        else if (st.k === 'ret') { returns.add(st.e ? expressionType(st.e, env) : 'unit');total = true; }
+        else if (st.k === 'if') {
+          const branches = st.branches.map(b => walk(b[1], env));
+          const no = st.no ? walk(st.no, env) : false;total = no && branches.every(Boolean);
+        } else if (st.k === 'while') walk(st.b, env);
+        else if (st.k === 'match') return unsupported(st);
+      }
+      return total;
+    }
+    try {
+      const total = walk(fn.body, new Map(fn.params.map(p => [p.name, p.ty])));
+      if (returns.size > 1) throw err('incompatible inferred return types: ' + [...returns].join(' and '), fn);
+      const result = returns.size ? [...returns][0] : 'unit';
+      if (result !== 'unit' && !total) throw err('not every path returns a value', fn);
+      fn.ret = result;return result;
+    } finally { inferring.delete(fn); }
+  }
+
   function invoke(fn, a, nodes, mod, hup, n) {
+    inferEditorResult(fn, mod);
     if (a.length !== fn.params.length) throw err(fn.name + ' takes ' + fn.params.length + ' argument(s), got ' + a.length, n);
     const m = new Map();
     fn.params.forEach((pm, i) => { const v = coerce(pm.ty, nodes[i], a[i]); chk(pm.ty, v, n); m.set(pm.name, v); });
@@ -1492,6 +1562,7 @@ function kernRun(src, out, vis, lib) {
   }
   const entry = load('<entry>', src, undefined), main = entry.prog.fns.main;
   if (!main) throw new KErr("no 'func main' entry point", { line: 1, col: 1 });
+  inferEditorResult(main, entry);
   if (main.ret !== 'i64') throw new KErr("'main' must return i64", { line: 1, col: 1 });
   cur = entry;
   const r = invoke(main, [], [], entry, null, { line: 1, col: 1 });

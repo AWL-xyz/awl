@@ -7,7 +7,7 @@ static Id find(const Unit &u,const std::string &kind,const std::string &value) {
     throw std::runtime_error("missing node "+value);
 }
 static std::unique_ptr<Unit> checked(const std::string &source) {
-    auto u=parse_source(source.data(),source.size(),true,true);expect(u->diagnostics.empty(),"seed parse");Checker(*u).run();Verifier(*u).run();return u;
+    auto u=parse_source(source.data(),source.size());expect(u->diagnostics.empty(),"seed parse");Checker(*u).run();Verifier(*u).run();return u;
 }
 static void verify(Unit &u,bool good=false) {
     serialize(u);const auto before=u.json;bool rejected=false;
@@ -15,7 +15,7 @@ static void verify(Unit &u,bool good=false) {
     serialize(u);expect(u.json==before,"verifier mutated arena");expect(good!=rejected,"incorrect verifier result");
 }
 int main() {try {
-    const std::string source="func main: i64 { @p v vector<f64>: vector.new<f64>(0); vector.valid(v); vector.length(v); vector.capacity(v); vector.reserve(v,9); vector.push(v,1); vector.get(v,0); vector.swap(v,0,0); vector.truncate(v,0); vector.set(v,0,2); vector.insert(v,0,3); vector.remove(v,0); vector.pop(v); vector.clear(v); vector.slice(v,0,0); vector.free(v); return 0; };";
+    const std::string source="func main[i64] { @p v vector<f64>: vector.new<f64>(0); vector.valid(v); vector.length(v); vector.capacity(v); vector.reserve(v,9); vector.push(v,1); vector.get(v,0); vector.swap(v,0,0); vector.truncate(v,0); vector.set(v,0,2); vector.insert(v,0,3); vector.remove(v,0); vector.pop(v); vector.clear(v); vector.slice(v,0,0); vector.free(v); return 0; };";
     auto seed=checked(source);verify(*seed,true);unsigned cases=1;
     for(const std::string method:{"new","valid","length","capacity","reserve","push","get","set","insert","remove","pop","clear","slice","free","swap","truncate"}) {
         const auto id=find(*seed,"call","vector_"+method+"_f64");
@@ -23,13 +23,13 @@ int main() {try {
         run([&](Unit &u) {u.arena[id].type=u.arena[id].type=="bool"?"i64":"bool";});
         run([&](Unit &u) {u.arena[id].value="vector_"+method+"_i64";});
         run([&](Unit &u) {u.arena[id].children.pop_back();});
-        run([&](Unit &u) {u.next_syntax=false;});
+        run([&](Unit &u) {u.aesop_syntax=false;});
         run([&](Unit &u) {u.arena[id].value="vector_"+method;});
     }
     for(const auto &ty:{"vector<text>","vector<vector<i64>>","vector<spool>","vector<bad>","vector< f64>","vector<f64 >"}) {
         Unit u=*seed;u.arena[find(u,"local","v")].second=ty;verify(u);++cases;
     }
-    const std::string ownership="func finish :: @o v[f64] {}; func main: i64 { @s v vector<f64>: vector.new<f64>(0); @s copy vector<f64>: vector.slice(v,0,0); finish(move copy); copy: vector.new<f64>(0); return 0; };";
+    const std::string ownership="func finish :: @o v[f64] {}; func main[i64] { @s v vector<f64>: vector.new<f64>(0); @s copy vector<f64>: vector.slice(v,0,0); finish(move copy); copy: vector.new<f64>(0); return 0; };";
     auto owned=checked(ownership);verify(*owned,true);++cases;
     for(const std::string name:{"vector_free_f64","vector_get_f64","vector_push_f64"}) {
         Unit u=*owned;const auto id=find(u,"call","vector_slice_f64");u.arena[id].value=name;verify(u);++cases;

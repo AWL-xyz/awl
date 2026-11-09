@@ -3,7 +3,7 @@ import argparse,hashlib,json,os,random,subprocess,tempfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 def main():
- p=argparse.ArgumentParser();p.add_argument('--sdk',type=Path,required=True);p.add_argument('--report',type=Path,required=True);a=p.parse_args();sdk=a.sdk.resolve();env={**os.environ,'XDG_CACHE_HOME':'/var/tmp/Awl-export-cache'};entry=ROOT/'examples-next/exported-enums/web.aw';cases=[];rng=random.Random(711)
+ p=argparse.ArgumentParser();p.add_argument('--sdk',type=Path,required=True);p.add_argument('--report',type=Path,required=True);a=p.parse_args();sdk=a.sdk.resolve();env={**os.environ,'XDG_CACHE_HOME':'/var/tmp/Awl-export-cache'};entry=ROOT/'examples/exported-enums/web.aw';cases=[];rng=random.Random(711)
  for i in range(96):
   host=rng.choice(['localhost','café.example','日本語.example','dev.example']);port=rng.randrange(1,65536);debug=bool(rng.randrange(2));source=json.dumps({'host':host,'port':port,'debug':debug},ensure_ascii=False);cases.append((source,0,f'{host}\n{port}\n{str(debug).lower()}\n'))
  for field,value in [('host',''),('host',42),('host','a\n'),('port',-1),('port',65536),('port',80.0),('debug',0),('debug','false')]:

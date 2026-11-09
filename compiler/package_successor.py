@@ -9,9 +9,10 @@ partial resource tree can be published.
 """
 import argparse,hashlib,json,os,shutil,tarfile
 from pathlib import Path
+from distribution_privacy import scrub_private
 ROOT=Path(__file__).resolve().parents[1]
 ALIASES=['acc','awl','awL','aWl','aWL','Awl','AwL','AWl','AWL']
-COPY=['docs','examples','examples-next','third-party','assets','apps','web','editor','packages']
+COPY=['docs','examples','third-party','assets','apps','web','editor','packages']
 def sha(path):
     h=hashlib.sha256()
     with path.open('rb') as f:
@@ -37,7 +38,7 @@ def main():
     for name in COPY:
         target=prefix/name
         if target.exists():shutil.rmtree(target)
-        shutil.copytree(ROOT/name,target)
+        shutil.copytree(ROOT/name,target,ignore=shutil.ignore_patterns("[Rr][Oo][Aa][Dd][Mm][Aa][Pp].md", "agents.md", "memory.md", "to-do.md", "history"))
     src=prefix/'src'
     if src.exists():shutil.rmtree(src)
     src.mkdir()
@@ -48,7 +49,6 @@ def main():
     shutil.copytree(ROOT/'compiler',comp,ignore=shutil.ignore_patterns('bin','__pycache__','.cache'))
     for name in ['LICENSE','CHANGELOG.md']:
         if (ROOT/name).is_file():shutil.copy2(ROOT/name,prefix/name)
-    shutil.copy2(ROOT/'docs/ROADMAP.md',prefix/'ROADMAP.md')
     readme=('''# Awl Software Development Kit [Beta]
 
 0.26.0-dev
@@ -61,16 +61,16 @@ extract the entire Awl directory and add its bin directory to PATH, keep libexec
 awl
 awl init Demo
 awl build
-awl build examples-next/collections/main.aw -o collections
+awl build examples/collections/main.aw -o collections
 ```
 
 no end-user Python, host compiler, SDK or additional backend download is needed
 
-next syntax is the default, functions are declared `func size :: @b values[i64]: i64 { ... };` or `func main: i64 { ... };`, use `--syntax legacy` for the explicit compatibility grammar
+Aesop is the only syntax, function results may be inferred, `func size :: @b values[i64] { ... };` and `func main[i64] { ... };` are both supported
 
-public beta commands remain init/build only, kcc is internal compiler tooling, run/install/Packages/registry are not public beta commands
+public beta commands remain init/build only, acc is the compiler driver and kcc is a compatibility filename, run/install/Packages/registry are not public beta commands
 
-editor/awl-editor.html is the current single-file next-syntax editor, editor/Awl-studio.html is the older limited legacy-subset playground, neither is the native compiler, web/Awl-json-workbench.html runs freshly compiled WebAssembly with a bounded browser host
+editor/awl-editor.html is the single-file Aesop subset editor, not the native compiler, web/Awl-json-workbench.html runs freshly compiled WebAssembly with a bounded browser host
 
 bundled upstream resources are inherited byte-for-byte from the0.25 archive and re-verified by compiler/package_successor.py, see manifest.json and RELEASE-0.26.md
 
@@ -88,11 +88,15 @@ see docs for syntax, runtime limits and workload assessment, native Windows acce
     (prefix/'validation'/'README.md').write_text('historical rename-* and default-* reports in this directory bind the previous0.25 compiler, not the current binary, the0.26 editor evidence is validation/awl-editor.json, exact successor acceptance is recorded in the workspace tests/ directory\n')
     if (ROOT/'tests/awl-editor.json').is_file():shutil.copy2(ROOT/'tests/awl-editor.json',prefix/'validation/awl-editor.json')
     manifest=json.loads((prefix/'manifest.json').read_text())
-    manifest.update(version='0.26.0-dev',kcc_sha256=sha(binary),default_syntax='next',legacy_requires_explicit_syntax=True,
-        windows_native_host_accepted=False,editor={'next':'editor/awl-editor.html','legacy_subset':'editor/Awl-studio.html'},
+    scrub_private(prefix)
+    manifest.pop('legacy_requires_explicit_syntax',None)
+    old_examples=prefix/'examples-next'
+    if old_examples.is_dir():shutil.rmtree(old_examples)
+    manifest.update(version='0.26.0-dev',kcc_sha256=sha(binary),default_syntax='aesop',supported_syntaxes=['aesop'],
+        windows_native_host_accepted=False,editor={'aesop':'editor/awl-editor.html'},
         resources_inherited_from={'archive':a.base.name,'sha256':sha(a.base),'libexec_tree_sha256':resources,'files_verified':manifest.get('upstream_files_verified',0)},
         compiler_sources_sha256={f.name:sha(f) for f in sorted(src.iterdir()) if f.is_file()},
-        status='experimental Linux SDK, current next syntax, separately qualify the exact distribution archive')
+        status='experimental Linux SDK, current Aesop syntax, separately qualify the exact distribution archive')
     (prefix/'manifest.json').write_text(json.dumps(manifest,separators=(',',':'))+'\n')
     # files.json cannot list its own digest, it is verified by archive member count instead
     inventory={str(f.relative_to(prefix)):({'symlink':os.readlink(f)} if f.is_symlink() else {'sha256':sha(f),'bytes':f.stat().st_size}) for f in sorted(prefix.rglob('*')) if (f.is_file() or f.is_symlink()) and f.name!='files.json'}

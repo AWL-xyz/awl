@@ -5,8 +5,10 @@
 #include <cmath>
 #include <filesystem>
 #include <fstream>
+#include <functional>
 #include <memory>
 #include <optional>
+#include <queue>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -33,7 +35,7 @@ struct Stop {};
 #include "karrays.inc"
 struct Origin { uint32_t file,start,end; };
 struct Unit {
-    bool project_syntax=false,next_syntax=false;
+    bool project_syntax=true,aesop_syntax=true;
     std::unordered_set<std::string> public_functions;
     std::unordered_set<Id> mutable_arguments;
     std::unordered_set<uint32_t> dotted_tokens;
@@ -99,15 +101,15 @@ class Parser {
         const auto index=function_scopes.size()-1;
         if(function_scopes.back().locals.insert(name).second&&!local_logs.empty()) local_logs.back().emplace_back(index,name);
     }
-    std::string function_keyword() const {return u.next_syntax?"func":"function";}
+    std::string function_keyword() const {return "func";}
     std::string peek() const { return u.text(position); }
     uint32_t pop() { const auto t=position; if(position+1<u.tokens.size()) ++position; return t; }
     [[noreturn]] void error(uint32_t token,std::string message,std::string code="E100") const { throw Failure{{std::move(code),std::move(message),token}}; }
     [[noreturn]] void fail(const std::string &message) const { error(position,message+"; got '"+peek()+"'"); }
     uint32_t take(const std::string &s) { if(peek()!=s) fail("expected '"+s+"'"); return pop(); }
-    uint32_t ident() { if((u.next_syntax&&(peek()=="elseif"||peek()=="enum"||peek()=="struct"||peek()=="for"||peek()=="in"||peek()=="break"||peek()=="continue"||peek()=="map"||peek()=="set"||peek()=="view"||peek()=="vector"||peek()=="f64"||peek()=="pi"||peek()=="tau"||peek()=="func"||peek()=="text"||peek()=="use"||peek()=="exports"||peek().starts_with("kn_nested_")))||!identifier(peek())||(u.project_syntax&&(peek()=="defer"||peek()=="scoped"||peek()=="borrow"||peek()=="int_vector"))) fail("expected identifier"); return pop(); }
+    uint32_t ident() { if((u.aesop_syntax&&(peek()=="elseif"||peek()=="enum"||peek()=="struct"||peek()=="for"||peek()=="in"||peek()=="break"||peek()=="continue"||peek()=="map"||peek()=="set"||peek()=="view"||peek()=="vector"||peek()=="f64"||peek()=="pi"||peek()=="tau"||peek()=="func"||peek()=="text"||peek()=="use"||peek()=="exports"||peek().starts_with("kn_nested_")))||!identifier(peek())||(u.project_syntax&&(peek()=="defer"||peek()=="scoped"||peek()=="borrow"||peek()=="int_vector"))) fail("expected identifier"); return pop(); }
     void nonlocal_value(const std::string &name,uint32_t token) {
-        if(!u.next_syntax) return;
+        if(!u.aesop_syntax) return;
         for(size_t i=function_scopes.size();i>0;--i) {
             const auto &scope=function_scopes[i-1];
             if(scope.locals.contains(name)) {if(i==function_scopes.size()) return;error(token,"parent-local capture is not implemented; pass "+name+" explicitly","E232");}
@@ -115,12 +117,12 @@ class Parser {
         }
     }
     void colon() {
-        if(peek()!=":") error(position,"next syntax requires ':' instead of '='","E110");
+        if(peek()!=":") error(position,"Aesop syntax requires ':' instead of '='","E110");
         if(position==0||u.tokens[position-1].end!=u.tokens[position].start) error(position,"no whitespace allowed before ':'","E110");
         pop();
     }
     std::string called(const std::string &name,uint32_t token) {
-        if(u.next_syntax) for(auto it=function_scopes.rbegin();it!=function_scopes.rend();++it) {
+        if(u.aesop_syntax) for(auto it=function_scopes.rbegin();it!=function_scopes.rend();++it) {
             if(it->helpers.contains(name)) return it->helpers.at(name);
             if(it->locals.contains(name)) error(token,"local value is not a callable function: "+name,"E110");
         }
@@ -134,17 +136,17 @@ class Parser {
         return static_cast<uint32_t>(count);
     }
     std::string type() {
-        if(u.next_syntax&&peek()=="view") {Guard guard(*this);const auto t=pop();take("<");const auto element=type();take(">");if(!generic_element(element)) error(t,"view elements must be scalar integer, bool, f64 or text");return "view<"+element+">";}
-        if(u.next_syntax&&peek()=="vector") {Guard guard(*this);const auto t=pop();take("<");const auto element=type();take(">");if(!generic_element(element)) error(t,"vector elements must be scalar integer, bool, f64 or text");return "vector<"+element+">";}
-        if(u.next_syntax&&(peek()=="map"||peek()=="set")) {
+        if(u.aesop_syntax&&peek()=="view") {Guard guard(*this);const auto t=pop();take("<");const auto element=type();take(">");if(!generic_element(element)) error(t,"view elements must be scalar integer, bool, f64 or text");return "view<"+element+">";}
+        if(u.aesop_syntax&&peek()=="vector") {Guard guard(*this);const auto t=pop();take("<");const auto element=type();take(">");if(!generic_element(element)) error(t,"vector elements must be scalar integer, bool, f64 or text");return "vector<"+element+">";}
+        if(u.aesop_syntax&&(peek()=="map"||peek()=="set")) {
             Guard guard(*this);const auto t=pop();take("<");const auto first=type();
             if(u.text(t)=="set") {take(">");if(!set_type(set_name(first))) error(t,"set elements must be an integer, bool or text");return set_name(first);}
             take(",");const auto second=type();take(">");
             if(!map_type(map_name(first,second))) error(t,"map keys are an integer, bool or text and values are a scalar or text");
             return map_name(first,second);
         }
-        if(u.next_syntax&&peek()=="f64") return u.text(pop());
-        if(u.next_syntax&&peek()=="text") {pop();return "string";}
+        if(u.aesop_syntax&&peek()=="f64") return u.text(pop());
+        if(u.aesop_syntax&&peek()=="text") {pop();return "string";}
         if(u.project_syntax&&peek()=="[") {
             Guard guard(*this);const auto t=pop();const auto element=type();take(";");const auto count=array_count(t);take("]");
             auto name=array_name(element,count);if(name.size()>128) error(t,"array type exceeds 128 characters","E007");return name;
@@ -174,7 +176,7 @@ class Parser {
         List result;
         if(comma&&peek()==")") return result;
         while(true) {
-            const auto f=ident(); if(u.next_syntax) colon(); else take(":"); const auto ty=type();
+            const auto f=ident(); if(u.aesop_syntax) colon(); else take(":"); const auto ty=type();
             result.push_back(add("field_decl",f,{},"pair",u.text(f),ty));
             if(!comma||peek()!=",") break;
             pop();
@@ -183,25 +185,18 @@ class Parser {
     }
     Id structure() {
         const auto t=take("struct"); const auto name=u.text(ident()); List members;
-        if(u.next_syntax) {
-            take("{");
-            while(peek()!="}") {if(peek()==";") error(position,"empty struct field statement","E110");const auto f=fields(false);members.insert(members.end(),f.begin(),f.end());take(";");}
-            take("}"); take(";"); return add("struct",t,std::move(members),"string",name);
-        }
-        while(peek()!="end") {
-            if(peek()==";") {pop();continue;}
-            auto f=fields(false); members.insert(members.end(),f.begin(),f.end());
-        }
-        take("end"); return add("struct",t,std::move(members),"string",name);
+        take("{");
+        while(peek()!="}") {if(peek()==";") error(position,"empty struct field statement","E110");const auto f=fields(false);members.insert(members.end(),f.begin(),f.end());take(";");}
+        take("}");take(";");return add("struct",t,std::move(members),"string",name);
     }
     Id tagged_union() {
-        const auto t=take(u.next_syntax?"enum":"union"); const auto name=u.text(ident()); List variants;
+        const auto t=take("enum"); const auto name=u.text(ident()); List variants;
         while(peek()!="end") {
-            if(peek()==";") {if(u.next_syntax) error(position,"empty enum variants are not allowed","E110");pop();continue;}
-            const auto v=ident(); take("("); auto payload=fields(true); take(")"); if(u.next_syntax) take(";");
+            if(peek()==";") {if(u.aesop_syntax) error(position,"empty enum variants are not allowed","E110");pop();continue;}
+            const auto v=ident(); take("("); auto payload=fields(true); take(")"); if(u.aesop_syntax) take(";");
             variants.push_back(add("variant_decl",v,std::move(payload),"string",u.text(v)));
         }
-        take("end"); if(u.next_syntax) take(";"); return add("union",t,std::move(variants),"string",name);
+        take("end"); if(u.aesop_syntax) take(";"); return add("union",t,std::move(variants),"string",name);
     }
     Id function(bool nested=false) {
         const auto t=take(function_keyword()); const auto name_token=ident();auto name=u.text(name_token);
@@ -211,27 +206,30 @@ class Parser {
             if(scope.helpers.contains(name)||scope.locals.contains(name)) error(name_token,"duplicate nested helper/binding "+name,"E210");
             const auto linked="kn_nested_"+std::to_string(nested_serial++);u.nested_parents[linked]=scope.function_name;scope.helpers[name]=linked;name=linked;
         }
-        if(u.next_syntax) {function_scopes.emplace_back();function_scopes.back().function_name=name;}
-        List parameters;if(!u.next_syntax) take("(");
-        if(u.next_syntax?peek()=="::":peek()!=")") {
-            if(u.next_syntax) pop();
+        function_scopes.emplace_back();function_scopes.back().function_name=name;
+        bool result_owned=false;std::string ret;
+        if(peek()=="[") {
+            pop();
+            if(peek()=="@") {pop();take("o");result_owned=true;}
+            ret=type();take("]");
+        }
+        List parameters;
+        if(peek()=="::") {
+            pop();
             while(true) {
                 bool borrowed=false,owned=false,mutable_param=false;
-                if(u.next_syntax&&peek()=="@") {pop();const auto mode=pop();borrowed=u.text(mode)=="b";owned=u.text(mode)=="o";mutable_param=u.text(mode)=="m";if(!borrowed&&!owned&&!mutable_param) error(mode,"argument modifiers are @b, @o or @m","E110");}
-                else if(!u.next_syntax) {borrowed=u.project_syntax&&peek()=="borrow";owned=u.project_syntax&&peek()=="own";if(borrowed||owned)pop();}
+                if(peek()=="@") {pop();const auto mode=pop();borrowed=u.text(mode)=="b";owned=u.text(mode)=="o";mutable_param=u.text(mode)=="m";if(!borrowed&&!owned&&!mutable_param) error(mode,"argument modifiers are @b, @o or @m","E110");}
                 const auto p=ident();std::string ty;
-                if(u.next_syntax&&peek()=="[") {pop();const auto element=type();take("]");if(!generic_element(element))error(p,"vector argument elements must be scalar or text");ty="vector<"+element+">";}
-                else {if(u.next_syntax)colon();else take(":");ty=type();if(u.next_syntax&&generic_type(ty))error(p,"vector arguments use name[element]","E110");}
-                if(u.next_syntax)function_scopes.back().locals.insert(u.text(p));
+                if(peek()=="[") {pop();const auto element=type();take("]");if(!generic_element(element))error(p,"vector argument elements must be scalar or text");ty="vector<"+element+">";}
+                else {colon();ty=type();if(generic_type(ty))error(p,"vector arguments use name[element]","E110");}
+                function_scopes.back().locals.insert(u.text(p));
                 parameters.push_back(add(owned?"own_param":borrowed?"borrow_param":mutable_param?"mut_param":"param",p,{},"pair",u.text(p),ty));
                 if(peek()!=",") break;
                 pop();
             }
         }
-        if(!u.next_syntax) {take(")");} const bool result_annotation=peek()==(u.next_syntax?":":"->");if(result_annotation) pop();else if(!u.next_syntax) take("->");
-        const auto next=position+1<u.tokens.size()?u.text(position+1):"<eof>";const bool owned=!u.next_syntax&&u.project_syntax&&peek()=="own"&&(next=="spool"||next=="bool"||next=="string"||next=="unit"||next=="["||integers.contains(next)||identifier(next));
-        bool result_owned=owned;if(owned)pop();if(result_annotation&&u.next_syntax&&peek()=="@") {pop();take("o");result_owned=true;}
-        const auto ret=result_annotation||!u.next_syntax?type():"unit";if(u.next_syntax) {take("{");} auto body=block({u.next_syntax?"}":"end"},u.next_syntax); take(u.next_syntax?"}":"end");if(u.next_syntax) {take(";");function_scopes.pop_back();}
+        if(peek()==":"||peek()=="->") error(position,"Aesop function results follow the name: func name[type] :: arguments { ... };","E110");
+        take("{");auto body=block({"}"},true);take("}");take(";");function_scopes.pop_back();
         const auto params_id=list(std::move(parameters)); const auto body_id=list(std::move(body));
         const auto id=add("function",t,{params_id,body_id},"pair",name,ret);u.arena[id].result_mode=result_owned?"own":"";return id;
     }
@@ -241,12 +239,12 @@ class Parser {
         struct LocalRestore {Parser &p;~LocalRestore(){for(const auto &[index,name]:p.local_logs.back()) p.function_scopes[index].locals.erase(name);p.local_logs.pop_back();}} locals_restore{*this};
         Guard guard(*this); List body;
         while(!stops.contains(peek())) {
-            if(peek()=="<eof>"||peek()==function_keyword()||peek()=="struct"||peek()=="union"||(u.next_syntax&&peek()=="enum")) fail("unterminated block");
-            if(peek()==";") {if(u.next_syntax) error(position,"empty commands/double semicolons are not allowed","E110"); pop(); continue; }
+            if(peek()=="<eof>"||peek()==function_keyword()||peek()=="struct"||peek()=="union"||(u.aesop_syntax&&peek()=="enum")) fail("unterminated block");
+            if(peek()==";") {if(u.aesop_syntax) error(position,"empty commands/double semicolons are not allowed","E110"); pop(); continue; }
             const auto start=position;
-            try { const auto id=statement();if(id!=UINT32_MAX) {if(u.next_syntax) take(";");body.push_back(id);} }
+            try { const auto id=statement();if(id!=UINT32_MAX) {if(u.aesop_syntax) take(";");body.push_back(id);} }
             catch(const Failure &e) {
-                if(u.next_syntax) {u.diagnostics={e.diagnostic};throw Stop{};}
+                if(u.aesop_syntax) {u.diagnostics={e.diagnostic};throw Stop{};}
                 record(e.diagnostic);
                 if(position==start) pop();
                 while(!stops.contains(peek())&&peek()!="<eof>"&&peek()!=function_keyword()&&peek()!="struct"&&peek()!="union"&&peek()!=";") {
@@ -274,13 +272,13 @@ class Parser {
             }
             take(")"); take("then");
             std::vector<std::string> introduced;
-            if(u.next_syntax) for(auto id:binders) {
+            if(u.aesop_syntax) for(auto id:binders) {
                 const auto &name=u.arena[id].value;
                 if(function_scopes.back().helpers.contains(name)) error(u.arena[id].token,"pattern shadows nested helper "+name,"E210");
                 if(name!="_"&&function_scopes.back().locals.insert(name).second) introduced.push_back(name);
             }
             auto body=block({"case","end"});
-            if(u.next_syntax) for(const auto &name:introduced) function_scopes.back().locals.erase(name);
+            if(u.aesop_syntax) for(const auto &name:introduced) function_scopes.back().locals.erase(name);
             const auto bind_id=list(std::move(binders)); const auto body_id=list(std::move(body));
             arms.push_back(add("case",c,{bind_id,body_id},"pair",owner,variant));
         }
@@ -293,7 +291,7 @@ class Parser {
         return add("if",t,{cond,list(std::move(yes)),list(std::move(no))});
     }
     Id string_value(const std::string &raw,uint32_t t) {
-        if(!u.next_syntax)return add("string",t,{},"string",text_literal(raw,t));
+        if(!u.aesop_syntax)return add("string",t,{},"string",text_literal(raw,t));
         std::string part="\"";Id result=UINT32_MAX;
         auto append=[&](Id value){result=result==UINT32_MAX?value:add("concat",t,{result,value});};
         for(size_t i=1;i+1<raw.size();) {
@@ -317,7 +315,7 @@ class Parser {
     }
     Id statement() {
         const auto t=pop(); const auto s=u.text(t);
-        if(u.next_syntax&&s=="@") {
+        if(u.aesop_syntax&&s=="@") {
             const auto modifier=pop();const auto mode=u.text(modifier);if(mode!="p"&&mode!="s")error(modifier,"local modifiers are @p or @s","E110");
             if(peek()==function_keyword()) {if(mode!="p")error(modifier,"nested helpers use @p","E110");const auto fn=function(true);u.roots.push_back(fn);return UINT32_MAX;}
             const bool owned=mode=="s";
@@ -327,15 +325,14 @@ class Parser {
             local_name(name);
             return add(owned?"scoped_local":"local",t,{value},"pair",name,ty);
         }
-        if(u.next_syntax&&(s=="local"||s=="scoped")) error(t,"use @p name [type]: initializer; (@s for a scoped local)","E110");
+        if(u.aesop_syntax&&(s=="local"||s=="scoped")) error(t,"use @p name [type]: initializer; (@s for a scoped local)","E110");
         if(u.project_syntax&&s=="defer") {const auto call=expression();return add("defer",t,{call});}
-        if(s=="local"||(u.project_syntax&&s=="scoped")) { const auto name=u.text(ident()); take(":"); const auto ty=type(); take("="); const auto expr=expression(); return add(s=="scoped"?"scoped_local":"local",t,{expr},"pair",name,ty); }
-        if(s=="return") {if(u.next_syntax&&peek()==";") return add("return",t,{add("unit",t,{})}); const auto value=expression(); return add("return",t,{value}); }
+        if(s=="return") {if(u.aesop_syntax&&peek()==";") return add("return",t,{add("unit",t,{})}); const auto value=expression(); return add("return",t,{value}); }
         if(s=="match") return match(t);
-        if(u.next_syntax&&s=="if") return conditional(t);
-        if(u.next_syntax&&s=="while") {const auto cond=expression();take("{");auto body=block({"}"});take("}");return add("while",t,{cond,list(std::move(body))});}
-        if(u.next_syntax&&(s=="break"||s=="continue")) return add(s,t,{});
-        if(u.next_syntax&&s=="for") {
+        if(u.aesop_syntax&&s=="if") return conditional(t);
+        if(u.aesop_syntax&&s=="while") {const auto cond=expression();take("{");auto body=block({"}"});take("}");return add("while",t,{cond,list(std::move(body))});}
+        if(u.aesop_syntax&&(s=="break"||s=="continue")) return add(s,t,{});
+        if(u.aesop_syntax&&s=="for") {
             const auto name_token=ident();const auto name=u.text(name_token);
             take("in");
             auto first=expression(6);
@@ -348,16 +345,10 @@ class Parser {
             local_name(name);
             return add("for_each",t,{first,list(std::move(body))},"pair",name);
         }
-        if(s=="if") {
-            const auto cond=expression(); take("then"); auto yes=block({"else","end"}); List no;
-            if(peek()=="else") { pop(); no=block({"end"}); }
-            take("end"); const auto y=list(std::move(yes)); const auto n=list(std::move(no)); return add("if",t,{cond,y,n});
-        }
-        if(s=="while") { const auto cond=expression(); take("do"); auto body=block({"end"}); take("end"); const auto b=list(std::move(body)); return add("while",t,{cond,b}); }
-        if(identifier(s)&&((!u.next_syntax&&peek()=="=")||(u.next_syntax&&peek()==":"))) { nonlocal_value(s,t);if(u.next_syntax) colon();else pop(); const auto value=expression(); return add("assign",t,{value},"string",s); }
+        if(identifier(s)&&(peek()==":")) { nonlocal_value(s,t);colon(); const auto value=expression(); return add("assign",t,{value},"string",s); }
         --position;
         const auto target=expression();
-        if((!u.next_syntax&&peek()=="=")||(u.next_syntax&&peek()==":")) { if(u.next_syntax) colon();else pop(); const auto value=expression(); return add("store",t,{target,value}); }
+        if(peek()==":") { colon(); const auto value=expression(); return add("store",t,{target,value}); }
         return add("expr",t,{target});
     }
     List arguments() {
@@ -374,26 +365,26 @@ class Parser {
     Id expression(int minimum=0) {
         Guard guard(*this); const auto t=pop(); std::string s=u.text(t); Id left=0; bool dotted=false;
         // category.function(...) calls, e.g. spool.new(16), map.get(m,k), spell the builtin spool_new, map_get
-        if(u.next_syntax&&position+2<u.tokens.size()&&u.text(position)=="."&&(identifier(u.text(position+1))||integers.contains(u.text(position+1))||u.text(position+1)=="f64")&&(u.text(position+2)=="("||u.text(position+2)=="<")) {
+        if(u.aesop_syntax&&position+2<u.tokens.size()&&u.text(position)=="."&&(identifier(u.text(position+1))||integers.contains(u.text(position+1))||u.text(position+1)=="f64")&&(u.text(position+2)=="("||u.text(position+2)=="<")) {
             static const std::unordered_set<std::string> categories={"spool","map","set","vector","view","string","int_vector"};
             bool local=false;for(const auto &scope:function_scopes) if(scope.locals.contains(s)) local=true;
             if(categories.contains(s)&&!local) {pop();s+="_"+u.text(position);pop();dotted=true;}
         }
-        if(u.next_syntax&&s.starts_with("kn_nested_")) error(t,"reserved internal nested-function identifier","E110");
+        if(u.aesop_syntax&&s.starts_with("kn_nested_")) error(t,"reserved internal nested-function identifier","E110");
         const auto next=s=="-"?number(peek()):std::pair<std::string,std::string>{};
         const auto current=number(s);
-        if(s=="-"&&!next.first.empty()&&next.first==minimum_magnitude(next.second)&&!(u.next_syntax&&position+1<u.tokens.size()&&u.text(position+1)==".")) {
+        if(s=="-"&&!next.first.empty()&&next.first==minimum_magnitude(next.second)&&!(u.aesop_syntax&&position+1<u.tokens.size()&&u.text(position+1)==".")) {
             pop(); left=add("int",t,{},"integer","-"+next.first,{},next.second);
         } else if(s=="-"||s=="not") { const auto rhs=expression(7); left=add("unary",t,{rhs},"string",s); }
         else if(s=="(") { left=expression(); take(")"); }
-        else if(u.next_syntax&&!current.first.empty()&&peek()=="."&&position+1<u.tokens.size()&&u.tokens[position+1].flags==1) {
+        else if(u.aesop_syntax&&!current.first.empty()&&peek()=="."&&position+1<u.tokens.size()&&u.tokens[position+1].flags==1) {
             const auto dot=pop(),fraction=pop();const auto tail=u.text(fraction);const auto decimal=s+"."+tail;
             if(u.tokens[t].end!=u.tokens[dot].start||u.tokens[dot].end!=u.tokens[fraction].start||!finite_decimal(decimal)) error(t,"invalid, nonfinite or out-of-range f64 decimal literal","E102");
             left=add("float",t,{},"string",decimal);
         }
-        else if(u.next_syntax&&(s=="pi"||s=="tau")) left=add("float",t,{},"string",s=="pi"?"3.141592653589793238462643383279502884":"6.283185307179586476925286766559005768");
+        else if(u.aesop_syntax&&(s=="pi"||s=="tau")) left=add("float",t,{},"string",s=="pi"?"3.141592653589793238462643383279502884":"6.283185307179586476925286766559005768");
         else if(!current.first.empty()) left=add(current.second[0]=='i'?"int":"uint",t,{},"integer",current.first,{},current.second);
-        else if(integers.contains(s)||(u.next_syntax&&s=="f64")) { auto args=arguments(); left=add("convert",t,std::move(args),"string",s); }
+        else if(integers.contains(s)||(u.aesop_syntax&&s=="f64")) { auto args=arguments(); left=add("convert",t,std::move(args),"string",s); }
         else if(u.project_syntax&&!s.empty()&&s[0]=='"') left=string_value(s,t);
         else if(u.project_syntax&&s=="move"&&identifier(peek())) {
             const auto name=ident();left=add("move",t,{add("name",name,{},"string",u.text(name))});
@@ -410,12 +401,12 @@ class Parser {
             }
         }
         else if(s=="true"||s=="false") left=add("bool",t,{},"bool",s);
-        else if(u.next_syntax&&(s=="map_new"||s=="set_new")&&peek()=="<") {
+        else if(u.aesop_syntax&&(s=="map_new"||s=="set_new")&&peek()=="<") {
             called(s,t);pop();const auto first=type();
             if(s=="set_new") {take(">");if(!set_type(set_name(first))) error(t,"set elements must be an integer, bool or text");auto args=arguments();left=add("call",t,std::move(args),"string","set_new_"+first);}
             else {take(",");const auto second=type();take(">");if(!map_type(map_name(first,second))) error(t,"map keys are an integer, bool or text and values are a scalar or text");auto args=arguments();left=add("call",t,std::move(args),"string","map_new_"+first+"_"+second);}
         }
-        else if(u.next_syntax&&s=="vector_new"&&peek()=="<") {
+        else if(u.aesop_syntax&&s=="vector_new"&&peek()=="<") {
             called(s,t);pop();const auto element=type();take(">");if(!generic_element(element)) error(t,"vector elements must be scalar integer, bool, f64 or text");auto args=arguments();left=add("call",t,std::move(args),"string","vector_new_"+element);
         }
         else if(identifier(s)) {
@@ -437,7 +428,7 @@ class Parser {
             else {const auto t=pop();const auto index=expression();take("]");left=add("index",t,{left,index});}
         }
         while(precedence(peek())>=minimum) {
-            const auto op=pop(); const auto rhs=expression(precedence(u.text(op))+1); if(u.text(op)=="..") {if(!u.next_syntax)error(op,"concatenation requires next syntax");left=add("concat",op,{add("format",op,{left}),add("format",op,{rhs})});}else left=add("binary",op,{left,rhs},"string",u.text(op));
+            const auto op=pop(); const auto rhs=expression(precedence(u.text(op))+1); if(u.text(op)=="..") {if(!u.aesop_syntax)error(op,"concatenation requires Aesop syntax");left=add("concat",op,{add("format",op,{left}),add("format",op,{rhs})});}else left=add("binary",op,{left,rhs},"string",u.text(op));
         }
         return left;
     }
@@ -469,16 +460,6 @@ class Parser {
         if(!identifier(alias)) error(t,"file basename requires an explicit identifier alias with as","E300");
         take(";");return add("import",t,{},"pair",path,alias);
     }
-    Id import() {
-        const auto t=take("import"); auto path=u.text(ident()); auto alias=path;
-        unsigned segments=1;
-        while(peek()==".") {
-            pop();alias=u.text(ident());path+="."+alias;
-            if(++segments>16||path.size()>128) error(t,"module path exceeds budget","E300");
-        }
-        if(peek()=="as") {pop();alias=u.text(ident());}
-        return add("import",t,{},"pair",path,alias);
-    }
     void tree_limits() {
         std::vector<std::pair<Id,uint32_t>> stack;
         for(auto root:u.roots) stack.emplace_back(root,1);
@@ -498,13 +479,13 @@ public:
         try {
             bool declarations=false;
             while(peek()!="<eof>") {
-                if(u.project_syntax&&peek()==";") {if(u.next_syntax) error(position,"unexpected semicolon","E110");pop();continue;}
+                if(u.project_syntax&&peek()==";") {if(u.aesop_syntax) error(position,"unexpected semicolon","E110");pop();continue;}
                 const auto start=position;
                 try {
-                    if(u.next_syntax&&peek()=="use") {
+                    if(u.aesop_syntax&&peek()=="use") {
                         if(declarations) error(position,"use declarations must precede other declarations","E300");
                         u.roots.push_back(use());
-                    } else if(u.next_syntax&&peek()=="exports") {
+                    } else if(u.aesop_syntax&&peek()=="exports") {
                         declarations=true;pop();take("{");
                         while(peek()!="}") {
                             const auto token=take("@");const auto mode=peek();
@@ -526,23 +507,20 @@ public:
                             } else u.roots.push_back(global(mode=="w"?"rw":mode,token));
                         }
                         take("}");take(";");
-                    } else if(u.next_syntax&&peek()=="@") {
+                    } else if(u.aesop_syntax&&peek()=="@") {
                         declarations=true;const auto token=pop();
                         if(peek()!="p") error(position,"@r/@rw are only valid inside exports{...}; use @p for private declarations","E110");
                         pop();
                         if(peek()==function_keyword()) u.roots.push_back(function());
                         else if(peek()=="struct") u.roots.push_back(structure());
                         else u.roots.push_back(global("p",token));
-                    } else if(u.next_syntax&&peek()=="import") {error(position,"next syntax uses use file.aw; rather than import","E110");
-                    } else if(peek()=="import") {
-                        if(declarations) error(position,"imports must precede declarations","E300");
-                        u.roots.push_back(import());
+                    } else if(u.aesop_syntax&&peek()=="import") {error(position,"Aesop syntax uses use file.aw; rather than import","E110");
                     } else {declarations=true;
-                        if(u.next_syntax&&peek()=="union") error(position,"next syntax uses enum for tagged values, not union","E110");
-                        u.roots.push_back(peek()=="struct"?structure():(peek()=="union"||(u.next_syntax&&peek()=="enum"))?tagged_union():function());}
+                        if(u.aesop_syntax&&peek()=="union") error(position,"Aesop syntax uses enum for tagged values, not union","E110");
+                        u.roots.push_back(peek()=="struct"?structure():(peek()=="union"||(u.aesop_syntax&&peek()=="enum"))?tagged_union():function());}
                 }
                 catch(const Failure &e) {
-                    if(u.next_syntax) {u.diagnostics={e.diagnostic};throw Stop{};}
+                    if(u.aesop_syntax) {u.diagnostics={e.diagnostic};throw Stop{};}
                     record(e.diagnostic);
                     if(position==start) pop();
                     while(peek()!=function_keyword()&&peek()!="struct"&&peek()!="union"&&peek()!="<eof>") pop();
@@ -656,11 +634,11 @@ std::string character_repr(const Unit &u,uint32_t position) {
     for(size_t i=width;i>0;--i) result+=hex[(cp>>(4*(i-1)))&15];
     return result+"'";
 }
-std::unique_ptr<Unit> parse_source(const char *source,size_t size,bool project_syntax=false,bool next_syntax=false) {
-    auto u=std::make_unique<Unit>();u->project_syntax=project_syntax;u->next_syntax=next_syntax;
+std::unique_ptr<Unit> parse_source(const char *source,size_t size) {
+    auto u=std::make_unique<Unit>();
     AwlLexResult raw{};
     struct Cleanup { AwlLexResult &r; ~Cleanup(){Awl_lex_free(&r);} } cleanup{raw};
-    const auto status=next_syntax?Awl_lex_next(source,size,&raw):project_syntax?Awl_lex_project(source,size,&raw):Awl_lex(source,size,&raw);
+    const auto status=Awl_lex(source,size,&raw);
     if(status==5) throw std::runtime_error("native scanner failure");
     if(status==3||status==4) {
         source_map(*u,"",0); u->tokens.push_back({0,0,1,1,0});
@@ -723,7 +701,7 @@ std::string render(Unit &u,const std::string &filename,bool json) {
 
 }
 extern "C" {
-uint32_t Awl_parse_abi_version(void) { return 1; }
+uint32_t Awl_parse_abi_version(void) { return 2; }
 int Awl_parse_tokens(const char *source,size_t size,const AwlLexToken *tokens,uint32_t count,void **out) {
     if(!out) return 1;
     *out=nullptr;
@@ -743,11 +721,6 @@ int Awl_parse_file(const char *path,void **out) {
     if(!path||!out) return 1;
     *out=nullptr;
     try {auto unit=parse_project(path);*out=unit.release();return 0;} catch(...) {return 2;}
-}
-int Awl_parse_file_next(const char *path,void **out) {
-    if(!path||!out) return 1;
-    *out=nullptr;
-    try {auto unit=parse_project(path,true);*out=unit.release();return 0;}catch(...){return 2;}
 }
 uint32_t Awl_source_file_count(void *opaque) {return opaque?static_cast<uint32_t>(static_cast<Unit*>(opaque)->files.size()):0;}
 const char *Awl_source_file_path(void *opaque,uint32_t index) {

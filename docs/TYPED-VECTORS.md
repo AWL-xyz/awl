@@ -1,4 +1,4 @@
-# typed growable vectors, native next syntax
+# typed growable vectors, native Aesop syntax
 
 restricted scalar/text collections are implemented in the development compiler, not arbitrary user generics, not a published release
 
@@ -55,7 +55,7 @@ fixed arrays and the older i64-only int_vector remain supported, the browser edi
 
 ## useful workload
 
-`examples-next/apps/ksort` is a real two-file manifest project, stable bytewise UTF-8 line sorting and optional `--unique`, bottom-up merge sort uses a detached vector scratch copy, private module helpers retain their defining-file context
+`examples/apps/ksort` is a real two-file manifest project, stable bytewise UTF-8 line sorting and optional `--unique`, bottom-up merge sort uses a detached vector scratch copy, private module helpers retain their defining-file context
 
 input is bounded to 1 MiB and 32768 lines, LF separates lines, CR and NUL remain data, an unterminated final line is accepted, empty input yields no output, output normalizes each line to a final LF, this isn't locale-aware collation, an external-memory sorter or a reusable parser Package
 

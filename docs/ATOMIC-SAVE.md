@@ -36,7 +36,7 @@ native qualification is Linux local storage only, distributed/NFS rename-error a
 ## real ksave workload
 
 ```sh
-cd examples-next/apps/ksave
+cd examples/apps/ksave
 awl build
 mkdir -p /var/tmp/settings
 printf '{"port":5432}\n' | ./build/ksave /var/tmp/settings scratch config.json

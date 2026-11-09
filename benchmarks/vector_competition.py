@@ -35,7 +35,7 @@ def main():
     start=time.perf_counter_ns();r=subprocess.run([str(binaries[key]),'K'],capture_output=True,check=True);elapsed=(time.perf_counter_ns()-start)/1e6;assert r.stdout==want and not r.stderr;samples[key].append(elapsed)
   lines=[f'{rng.randrange(100000):06d}'.encode() for _ in range(10000)];payload=b'\n'.join(lines);apps={};app_samples={}
   for name,compiler in [('before',a.before),('after',kcc)]:
-   c=work/(name+'-ksort.c');exe=work/(name+'-ksort');r=subprocess.run([str(compiler),'emit-c',str(ROOT/'examples-next/apps/ksort/main.aw'),'--syntax','next'],capture_output=True,text=True,check=True,env=env);c.write_text(r.stdout);subprocess.run([str(zig),'cc','-std=c11','-target','x86_64-linux-musl','-mcpu=baseline','-static','-O3',str(c),'-lm','-o',str(exe)],check=True,env=env,capture_output=True)
+   c=work/(name+'-ksort.c');exe=work/(name+'-ksort');r=subprocess.run([str(compiler),'emit-c',str(ROOT/'examples/apps/ksort/main.aw'),'--syntax','next'],capture_output=True,text=True,check=True,env=env);c.write_text(r.stdout);subprocess.run([str(zig),'cc','-std=c11','-target','x86_64-linux-musl','-mcpu=baseline','-static','-O3',str(c),'-lm','-o',str(exe)],check=True,env=env,capture_output=True)
    for unique in [False,True]:apps[name+('/unique' if unique else '/sort')]=(exe,unique);app_samples[name+('/unique' if unique else '/sort')]=[]
   for repeat in range(8):
    order=list(apps);rng.shuffle(order)

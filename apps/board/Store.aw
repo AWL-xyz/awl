@@ -1,6 +1,6 @@
 use vendor/Json.aw as json;
 use Rules.aw as rules;
-func quote :: @b builder:spool, payload:text: bool {
+func quote[bool] :: @b builder:spool, payload:text {
     if spool.append(builder, "\"") < 0 { return false; };
     @p i: 0;
     while i < string.length(payload) {
@@ -19,7 +19,7 @@ func quote :: @b builder:spool, payload:text: bool {
     };
     return spool.append(builder, "\"") >= 0;
 };
-func decode_into :: source:text, @b rows[text], @b meta[i64]: bool {
+func decode_into[bool] :: source:text, @b rows[text], @b meta[i64] {
     @s tokens vector<text>: vector.new<text>(0);
     @s result vector<i64>: vector.new<i64>(0);
     if not vector.valid(tokens) or not vector.valid(result) { return false; };
@@ -64,13 +64,13 @@ func decode_into :: source:text, @b rows[text], @b meta[i64]: bool {
     return false;
 };
 exports{
-    @r func field :: pointer:text, kind:i64, @b tokens[text], @b result[i64]: i64 {
+    @r func field[i64] :: pointer:text, kind:i64, @b tokens[text], @b result[i64] {
         @p found: json.locate(pointer, tokens, result);
         if found < 0 { return -1; };
         if vector.get(result, 2 + found * 2) != kind { return -1; };
         return found;
     };
-    @r func decode :: source:text, @b rows[text], @b meta[i64]: bool {
+    @r func decode[bool] :: source:text, @b rows[text], @b meta[i64] {
         if vector.length(rows) != 0 or vector.length(meta) != 2 { return false; };
         @s staged vector<text>: vector.new<text>(128);
         @s next vector<i64>: vector.new<i64>(2);
@@ -88,7 +88,7 @@ exports{
         vector.set(meta, 1, vector.get(next, 1));
         return true;
     };
-    @r func encode :: @b rows[text], @b meta[i64], @b output[text]: bool {
+    @r func encode[bool] :: @b rows[text], @b meta[i64], @b output[text] {
         if vector.length(meta) != 2 or vector.length(rows) > 128 or vector.length(rows) % 4 != 0 { return false; };
         @s builder spool: spool.new(65536);
         if not spool.valid(builder) { return false; };
@@ -110,7 +110,7 @@ exports{
         if spool.append(builder, "]}\n") < 0 { return false; };
         return vector.push(output, spool.snapshot(builder));
     };
-    @r func load :: directory:text, buffer:i64, @b rows[text], @b meta[i64]: bool {
+    @r func load[bool] :: directory:text, buffer:i64, @b rows[text], @b meta[i64] {
         @p file: file_open(directory + "/board.json", 0);
         if file == -2 { return true; };
         if file < 0 { return false; };
@@ -126,7 +126,7 @@ exports{
         if not buffer_text_valid(buffer, 0, size) { return false; };
         return decode(buffer_text(buffer, 0, size), rows, meta);
     };
-    @r func save :: directory:text, source:text, buffer:i64: i64 {
+    @r func save[i64] :: directory:text, source:text, buffer:i64 {
         @p file: file_open(directory + "/.board.tmp", 2);
         if file < 0 { return -1; };
         @p size: buffer_write_text(buffer, 0, source);

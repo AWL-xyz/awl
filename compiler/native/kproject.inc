@@ -1,6 +1,6 @@
 // Native filesystem project loader and static namespace lowering. Included
 // after parse_source; byte-source APIs intentionally remain filesystem-free.
-// Legacy declarations are exported; next functions require explicit exports. No
+// Aesop functions require explicit exports. No
 // runtime initializers, wildcard imports, re-exports or binary separate objects.
 // Public provenance paths are UTF-8 on Windows, not the active ANSI codepage.
 static std::string project_path_text(const std::filesystem::path &path) {
@@ -19,7 +19,7 @@ class Project {
         unsigned state=1;
     };
     Path root;
-    bool next=false;
+    static constexpr bool aesop=true;
     std::vector<Module> modules;
     std::vector<uint32_t> module_order;
     size_t source_bytes=0,tokens=0,nodes=0,edges=0;
@@ -32,10 +32,10 @@ class Project {
         for(;r!=root.end();++r,++p) if(p==path.end()||*r!=*p) return false;
         return true;
     }
-    bool builtin(const std::string &name) const {return (next&&(generic_call(name)||view_call(name)||map_call(name)||set_call(name)||map_specialization(name)||set_specialization(name)||bool(new_container_type(name))))||name=="print"||name=="array_length"||platform_signatures.contains(name)||(next&&(name=="pi"||name=="tau"||math_signatures.contains(name)));}
+    bool builtin(const std::string &name) const {return (aesop&&(generic_call(name)||view_call(name)||map_call(name)||set_call(name)||map_specialization(name)||set_specialization(name)||bool(new_container_type(name))))||name=="print"||name=="array_length"||platform_signatures.contains(name)||(aesop&&(name=="pi"||name=="tau"||math_signatures.contains(name)));}
     size_t load(const Path &requested,unsigned depth,size_t importer=SIZE_MAX,uint32_t token=0) {
         std::error_code ec;
-        if(next) {
+        if(aesop) {
             const auto absolute=std::filesystem::absolute(requested).lexically_normal();auto current=absolute.root_path();
             for(const auto &part:absolute.relative_path()) {
                 bool exact=false;
@@ -72,7 +72,7 @@ class Project {
         std::string source(1048577,'\0');file.read(source.data(),static_cast<std::streamsize>(source.size()));source.resize(static_cast<size_t>(file.gcount()));
         if(file.bad()) problem("cannot read module source: "+project_path_text(path));
         file.close();
-        auto unit=parse_source(source.data(),source.size(),true,next);
+        auto unit=parse_source(source.data(),source.size());
         const auto id=modules.size();
         modules.push_back({path,std::move(unit),{},{},1});
         if(!modules[id].unit->diagnostics.empty()) throw ProjectAbort{id};
@@ -90,7 +90,7 @@ class Project {
             if(++edges>256) fail(id,node.token,"module import edge count exceeds 256");
             if(builtin(node.second)) fail(id,node.token,"reserved import alias "+node.second,"E303");
             if(modules[id].aliases.contains(node.second)) fail(id,node.token,"duplicate import alias "+node.second,"E303");
-            if(next) {
+            if(aesop) {
                 Path target=modules[id].path.parent_path();
                 std::string spelled=node.value;
                 if(spelled.starts_with("pkg:")) {
@@ -120,17 +120,6 @@ class Project {
                 }
                 const auto target_id=load(target,depth+1,id,node.token);modules[id].aliases[node.second]=target_id;continue;
             }
-            Path relative;
-            size_t begin=0;
-            while(begin<node.value.size()) {
-                const auto end=node.value.find('.',begin);
-                relative/=node.value.substr(begin,end==std::string::npos?std::string::npos:end-begin);
-                if(end==std::string::npos) break;
-                begin=end+1;
-            }
-            relative+=".aw";
-            const auto target=load(root/relative,depth+1,id,node.token);
-            modules[id].aliases[node.second]=target;
         }
         modules[id].state=2;module_order.push_back(static_cast<uint32_t>(id));return id;
     }
@@ -157,13 +146,13 @@ class Project {
         }
         const auto found=modules[owner].definitions.find(member);
         if(found==modules[owner].definitions.end()) fail(module,token,"unknown module declaration "+name,"E302");
-        if(next&&owner!=module&&!modules[owner].unit->public_functions.contains(member)&&!(found->second.kind=="global"&&(found->second.mode=="r"||found->second.mode=="rw"))&&!((found->second.kind=="union"||found->second.kind=="struct")&&found->second.mode=="r")) fail(module,token,"module member is private/not exported: "+name,"E302");
+        if(aesop&&owner!=module&&!modules[owner].unit->public_functions.contains(member)&&!(found->second.kind=="global"&&(found->second.mode=="r"||found->second.mode=="rw"))&&!((found->second.kind=="union"||found->second.kind=="struct")&&found->second.mode=="r")) fail(module,token,"module member is private/not exported: "+name,"E302");
         return found->second;
     }
     std::string type(size_t module,const std::string &name,uint32_t token) {
         if(auto a=array_type(name)) {const auto resolved=array_name(type(module,a->element,token),a->count);if(resolved.size()>128) fail(module,token,"resolved array type exceeds budget","E302");return resolved;}
-        if(next&&name.empty()) return name;
-        if((next&&(name=="f64"||generic_type(name)||view_type(name)||map_type(name)||set_type(name)))||name=="unit"||name=="bool"||name=="string"||name=="spool"||name=="int_vector"||integers.contains(name)) return name;
+        if(aesop&&name.empty()) return name;
+        if((aesop&&(name=="f64"||generic_type(name)||view_type(name)||map_type(name)||set_type(name)))||name=="unit"||name=="bool"||name=="string"||name=="spool"||name=="int_vector"||integers.contains(name)) return name;
         const auto &d=definition(module,name,token);
         if(d.kind!="struct"&&d.kind!="union") fail(module,token,"declaration is not a type: "+name,"E302");
         return d.name;
@@ -190,14 +179,14 @@ class Project {
                         if(d.kind=="union") fail(i,n.token,"union construction requires a variant: "+n.value+"."+n.second,"E302");
                         n.kind="call";n.value_kind="string";n.value=d.name;n.second.clear();
                     } else n.value=type(i,n.value,n.token);
-                } else if(next&&kind=="field"&&n.children.size()==1) {
+                } else if(aesop&&kind=="field"&&n.children.size()==1) {
                     const auto &base=m.unit->arena.at(n.children[0]);
                     if(base.kind=="name"&&m.aliases.contains(base.value)) {
                         const auto &d=definition(i,base.value+"."+n.value,n.token);
                         if(d.kind!="global") fail(i,n.token,"module member is not a variable: "+base.value+"."+n.value,"E302");
                         n.kind="global_ref";n.value=d.name;n.children.clear();
                     }
-                } else if(next&&kind=="store"&&m.unit->arena.at(n.children[0]).kind=="global_ref") {
+                } else if(aesop&&kind=="store"&&m.unit->arena.at(n.children[0]).kind=="global_ref") {
                     n.value=m.unit->arena.at(n.children[0]).value;n.kind="global_assign";n.value_kind="string";n.children.erase(n.children.begin());
                 } else if(kind=="case") n.value=type(i,n.value,n.token);
                 if(roots.contains(id)) n.value=m.definitions.at(n.value).name;
@@ -209,7 +198,7 @@ class Project {
         for(const auto &t:u.tokens) u.origins.push_back({0,t.start,t.end});
     }
     std::unique_ptr<Unit> merge() {
-        auto result=std::make_unique<Unit>();result->project_syntax=true;result->next_syntax=next;
+        auto result=std::make_unique<Unit>();result->project_syntax=true;result->aesop_syntax=true;
         result->module_order=module_order;result->module_dependencies.assign(modules.size(),{});std::vector<Id> node_bases;
         for(size_t i=0;i<modules.size();++i) {
             const auto &m=modules[i];const auto &u=*m.unit;
@@ -242,7 +231,6 @@ class Project {
         return result;
     }
 public:
-    explicit Project(bool dialect=false):next(dialect) {}
     std::unique_ptr<Unit> run(const Path &entry) {
         try {
             load(entry,1);
@@ -257,8 +245,8 @@ public:
         }
     }
 };
-std::unique_ptr<Unit> parse_project(const char *path,bool next=false) {
-    try {Project project(next);return project.run(std::filesystem::path(std::u8string(reinterpret_cast<const char8_t*>(path))));}
+std::unique_ptr<Unit> parse_project(const char *path) {
+    try {Project project;return project.run(std::filesystem::path(std::u8string(reinterpret_cast<const char8_t*>(path))));}
     catch(const std::filesystem::filesystem_error &e) {
         auto unit=parse_source("",0);unit->diagnostics={{"E300",e.what(),0}};return unit;
     } catch(const ProjectReadError &e) {

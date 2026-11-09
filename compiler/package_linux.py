@@ -12,6 +12,7 @@ import shutil
 import subprocess
 import tarfile
 import urllib.request
+from distribution_privacy import scrub_private
 ROOT=Path(__file__).resolve().parents[1]
 
 def digest(path):
@@ -58,7 +59,7 @@ def main():
     shutil.copy2(ROOT/'docs/STREAMS.md',package/'STREAMS.md')
     shutil.copy2(ROOT/'docs/NETWORK.md',package/'NETWORK.md')
     shutil.copy2(ROOT/'docs/TYPED-VECTORS.md',package/'TYPED-VECTORS.md')
-    for directory in ['examples','examples-next','third-party']:
+    for directory in ['examples','third-party']:
         shutil.copytree(ROOT/directory,package/directory,dirs_exist_ok=True)
     src=package/'src';src.mkdir(exist_ok=True)
     for file in native.iterdir():
@@ -74,7 +75,6 @@ def main():
     shutil.copy2(ROOT/'docs/MODULES.md',package/'MODULES.md')
     shutil.copy2(ROOT/'docs/STRINGS.md',package/'STRINGS.md')
     shutil.copy2(ROOT/'docs/SPOOLS.md',package/'SPOOLS.md')
-    shutil.copy2(ROOT/'docs/ROADMAP.md',package/'ROADMAP.md')
     shutil.copy2(ROOT/'docs/SCOPED-CLEANUP.md',package/'SCOPED-CLEANUP.md')
     shutil.copy2(ROOT/'docs/ARRAYS.md',package/'ARRAYS.md')
     shutil.copy2(ROOT/'docs/REPEATED-ARRAYS.md',package/'REPEATED-ARRAYS.md')
@@ -89,14 +89,15 @@ def main():
     shutil.copy2(ROOT/'docs/LOOP-OWNERSHIP.md',package/'LOOP-OWNERSHIP.md')
     shutil.copy2(ROOT/'docs/MATH.md',package/'MATH.md')
     shutil.copy2(ROOT/'docs/MODULE-STATE.md',package/'MODULE-STATE.md')
-    shutil.copy2(ROOT/'docs/NEXT-LANGUAGE.md',package/'NEXT-LANGUAGE.md')
+    shutil.copy2(ROOT/'docs/AESOP.md',package/'AESOP.md')
     shutil.copy2(ROOT/'docs/INT-VECTORS.md',package/'INT-VECTORS.md')
     shutil.copy2(ROOT/'docs/WINDOWS.md',package/'WINDOWS.md')
     shutil.copy2(ROOT/'docs/WIN32-GUI.md',package/'WIN32-GUI.md')
     shutil.copy2(ROOT/'docs/FILES.md',package/'FILES.md')
     shutil.copy2(ROOT/'docs/PIXELBOARD-FILES.md',package/'PIXELBOARD-FILES.md')
     shutil.copy2(ROOT/'docs/CAPABILITY-ASSESSMENT.md',package/'CAPABILITY-ASSESSMENT.md')
-    manifest={'toolkit':{'name':'Awl Software Development Kit [Beta]','command':'bin/awl','commands':['init','build']},'version':'0.24.0-dev','status':'experimental next-syntax development candidate; public SDK defaults next, internal kcc defaults legacy; Linux x86-64 only','toolchain':lock,'compiler_build_flags':flags,
+    scrub_private(package)
+    manifest={'toolkit':{'name':'Awl Software Development Kit [Beta]','command':'bin/awl','commands':['init','build']},'version':'0.24.0-dev','status':'experimental source candidate using Aesop syntax; Linux x86-64 only','toolchain':lock,'compiler_build_flags':flags,
         'kcc_sha256':digest(package/'bin/kcc'),'zig_sha256':digest(tool/'zig'),
         'compiler_sources_sha256':{f.name:digest(f) for f in sorted(src.iterdir()) if f.suffix in ['.cpp','.h','.inc','.c']},
         'resources':'Complete upstream Zig distribution, including libc sources/headers, compiler-rt, libc++/libc++abi/libunwind resources and notices. No host development tools required at runtime.',

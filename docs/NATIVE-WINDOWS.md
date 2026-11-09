@@ -7,7 +7,9 @@ Windows validation. The details below describe the original Linux X11 backend.
 
 **Implemented and locally tested, experimental. Not a full language or GUI toolkit.**
 
-The native compiler recognizes the original17 platform/resource intrinsics plus0.8.2 `window_set_title` and9 string intrinsics. The independent arena verifier validates their exact signatures; native C emission embeds the runtime only when used. No general foreign-call escape hatch was added. Python's reference compiler does not implement these new intrinsics; it remains a contributor reference for the older value-language subset.
+current source note, `wall_clock_millis()` is a newer checked intrinsic described in [TIME.md](TIME.md), it is not part of the historical0.8.2 release below
+
+The historical native compiler recognizes the original17 platform/resource intrinsics plus0.8.2 `window_set_title` and9 string intrinsics. The independent arena verifier validates their exact signatures; native C emission embeds the runtime only when used. No general foreign-call escape hatch was added. Python's reference compiler does not implement these new intrinsics; it remains a contributor reference for the older value-language subset.
 
 ## A real window, not stdout graphics
 

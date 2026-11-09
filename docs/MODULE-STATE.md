@@ -1,6 +1,6 @@
 # Next-syntax module scalar variables and exports
 
-Experimental production source candidate, `--syntax next`, not a new accepted release.
+Experimental production source candidate, `--syntax aesop`, not a new accepted release.
 
 ```Awl
 -- Template.aw
@@ -54,4 +54,4 @@ Source resolution and an independent verifier enforce ownership of module declar
 
 Case-sensitive project-file imports, aliases, canonical deduplication and cycle detection remain active. **Installed Package lookup/install is deferred until after the command-line tool/ASDK.**
 
-`examples-next/exports` is now executable by the experimental production path, not just the structural checker. New evidence is in `tests/module-numeric-*`; old reports and captures are historical. Native Windows-host/complete successor release acceptance is not implied by Linux development gates.
+`examples/exports` is now executable by the experimental production path, not just the structural checker. New evidence is in `tests/module-numeric-*`; old reports and captures are historical. Native Windows-host/complete successor release acceptance is not implied by Linux development gates.

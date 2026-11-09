@@ -2,7 +2,7 @@
 
 ## delivery status
 
-implemented and qualified in the **Linux0.25 SDK**, including no-flag next-syntax compiler commands, the earlier0.24 binaries and Windows preview don't contain exported-enum support, Windows native-host qualification remains deferred
+implemented and qualified in the **Linux0.25 SDK**, including no-flag Aesop-syntax compiler commands, the earlier0.24 binaries and Windows preview don't contain exported-enum support, Windows native-host qualification remains deferred
 
 private enums keep their existing behavior, an exported enum is explicitly declared inside `exports{...}`
 
@@ -50,7 +50,7 @@ text retains process-lifetime storage, scalar/text/nonrecursive enum payloads av
 
 ## useful multi-file workload
 
-`examples-next/exported-enums/configcheck.awproj` is a native JSON settings validator, `File.aw` returns nested exported read/error enums, `Config.aw` returns typed settings, JSON/schema/resource failures or the original typed file issue, `main.aw` handles every public variant from both defining modules
+`examples/exported-enums/configcheck.awproj` is a native JSON settings validator, `File.aw` returns nested exported read/error enums, `Config.aw` returns typed settings, JSON/schema/resource failures or the original typed file issue, `main.aw` handles every public variant from both defining modules
 
 it accepts exactly `host`, `port` and `debug`, host is nonempty and control/space-free with at most253 UTF-8 bytes, this is a display/configuration field rather than a DNS validator, port is an integer from1 through65535, debug is a JSON boolean
 
@@ -67,7 +67,7 @@ c++ -std=c++20 -O2 -Wall -Wextra -Werror -s -static \
   compiler/native/klex.cpp compiler/native/kparse.cpp \
   compiler/native/kcc.cpp compiler/native/kbuild.cpp \
   -o /path/to/staged-Awl/bin/kcc
-/path/to/staged-Awl/bin/awl build examples-next/exported-enums/main.aw -o /var/tmp/configcheck
+/path/to/staged-Awl/bin/awl build examples/exported-enums/main.aw -o /var/tmp/configcheck
 python3 tests/exported_enums.py --sdk /path/to/staged-Awl --report /var/tmp/exported-enums.json
 ```
 

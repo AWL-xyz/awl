@@ -6,7 +6,7 @@ use Assets.aw as assets;
 func error :: connection:i64, buffer:i64, status:i64 {
     http.respond(connection, buffer, status, "{\"error\":" + string.from_i64(status) + "}\n", "application/json", "Allow: GET, PUT, DELETE\r\n");
 };
-func snapshot :: connection:i64, buffer:i64, status:i64, uncertain:bool, download:bool, @b rows[text], @b meta[i64]: i64 {
+func snapshot[i64] :: connection:i64, buffer:i64, status:i64, uncertain:bool, download:bool, @b rows[text], @b meta[i64] {
     @s output vector<text>: vector.new<text>(1);
     if not vector.valid(output) { error(connection, buffer, 503); return 0; };
     if not store.encode(rows, meta, output) { error(connection, buffer, 503); return 0; };
@@ -17,7 +17,7 @@ func snapshot :: connection:i64, buffer:i64, status:i64, uncertain:bool, downloa
     http.respond(connection, buffer, status, vector.get(output, 0), "application/json; charset=utf-8", headers);
     return 0;
 };
-func handle :: connection:i64, buffer:i64, directory:text, port:i64, @b rows[text], @b meta[i64]: i64 {
+func handle[i64] :: connection:i64, buffer:i64, directory:text, port:i64, @b rows[text], @b meta[i64] {
     defer tcp_close(connection);
     @s input vector<text>: vector.new<text>(0);
     if not vector.valid(input) { return -1; };
@@ -129,7 +129,7 @@ func handle :: connection:i64, buffer:i64, directory:text, port:i64, @b rows[tex
     snapshot(connection, buffer, status, result == 1, false, rows, meta);
     return result;
 };
-func main: i64 {
+func main[i64] {
     if arg_count() < 1 or arg_count() > 3 { print("usage: awl-board DATA_DIRECTORY [PORT] [REQUEST_LIMIT]"); return 2; };
     if not arg_text_valid(0) { return 2; };
     @p directory: arg_text(0);

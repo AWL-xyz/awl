@@ -6,7 +6,7 @@ p=argparse.ArgumentParser();p.add_argument('--awl',type=Path,required=True);a=p.
 rng=random.Random(20261106);lines=[f'{rng.randrange(100000):06d}'.encode() for _ in range(10000)];data=b'\n'.join(lines);expected=b''.join(x+b'\n' for x in sorted(lines));unique=b''.join(x+b'\n' for x in sorted(set(lines)))
 with tempfile.TemporaryDirectory(prefix='Awl-vectors-bench-',dir='/var/tmp') as td:
  work=Path(td)
- for src in (ROOT/'examples-next/apps/ksort').iterdir():
+ for src in (ROOT/'examples/apps/ksort').iterdir():
   if src.is_file():(work/src.name).write_bytes(src.read_bytes())
  def measure(command,payload=None,out=None):
   values=[]

@@ -10,6 +10,7 @@
 #include "kstreams.inc"
 #include "ktcp.inc"
 #include "kplatform.inc"
+#include "kwallclock.inc"
 #include "kprocess.inc"
 #include "kmaps.inc"
 class CEmitter {
@@ -23,15 +24,15 @@ class CEmitter {
     std::vector<size_t> loop_scopes;
     std::unordered_set<std::string> pointers;
     uint32_t serial=0,depth=0;
-    bool process_used=false,tcp_used=false,streams_used=false,files_used=false,arguments_used=false,vectors_used=false,platform_used=false,strings_used=false,builders_used=false,arrays_used=false;
+    bool process_used=false,tcp_used=false,streams_used=false,files_used=false,arguments_used=false,vectors_used=false,platform_used=false,wall_clock_used=false,strings_used=false,builders_used=false,arrays_used=false;
     const Node &n(Id id) const {return u.arena.at(id);}
     const List &list(Id id) const {return n(id).children;}
     std::string ct(const std::string &ty) const {
         if(arrays.contains(ty)) return arrays.at(ty);
-        if(u.next_syntax&&ty=="f64") return "double";
-        if(u.next_syntax&&generic_type(ty)) return "KGenericVector";
-        if(u.next_syntax&&(map_type(ty)||set_type(ty))) return "KMap";
-        if(u.next_syntax&&view_type(ty)) return "KGenericView";
+        if(u.aesop_syntax&&ty=="f64") return "double";
+        if(u.aesop_syntax&&generic_type(ty)) return "KGenericVector";
+        if(u.aesop_syntax&&(map_type(ty)||set_type(ty))) return "KMap";
+        if(u.aesop_syntax&&view_type(ty)) return "KGenericView";
         if(ty=="bool") return "bool";
         if(ty=="string") return "KString";
         if(ty=="spool") return "KSpool";
@@ -253,11 +254,11 @@ class CEmitter {
         if(k=="call") {
             const auto args=arguments(node);
             if(aggregates.contains(node.value)) return temp(node.type,"("+ct(node.type)+"){"+initializers(n(aggregates.at(node.value)).children,args)+"}");
-            if(u.next_syntax&&math_signatures.contains(node.value)) return temp("f64",node.value+"("+join(args)+")");
+            if(u.aesop_syntax&&math_signatures.contains(node.value)) return temp("f64",node.value+"("+join(args)+")");
             if(node.value=="array_length") return temp("i64",std::to_string(array_type(n(node.children[0]).type)->count));
             if(generic_specialization(node.value)||view_specialization(node.value)) return temp(node.type,"k_"+node.value+"("+join(args)+")");
             if(map_specialization(node.value)||set_specialization(node.value)||new_container_type(node.value)) return temp(node.type,"k_"+node.value+"("+join(args)+")");
-            if(platform_signatures.contains(node.value)) {if(node.value=="process_capture") {process_used=true;platform_used=true;strings_used=true;builders_used=true;generic_used.insert("string");}else if(node.value.starts_with("tcp_")) {tcp_used=true;platform_used=true;}else if(node.value.starts_with("stdin_")||node.value.starts_with("stdout_")||node.value.starts_with("stderr_")||node.value.starts_with("env_")) {streams_used=true;files_used=true;strings_used=true;platform_used=true;}else if(node.value.starts_with("spool_")) {builders_used=true;strings_used=true;} else if(node.value.starts_with("int_vector_")) vectors_used=true;else if(node.value=="buffer_text"||node.value=="buffer_text_valid"||node.value=="buffer_write_text") {strings_used=true;platform_used=true;}else if(node.value.starts_with("file_")) {files_used=true;strings_used=true;platform_used=true;} else if(node.value.starts_with("arg_")) {arguments_used=true;if(node.value=="arg_text"||node.value=="arg_text_valid") strings_used=true;}else if(!node.value.starts_with("string_")) platform_used=true;return temp(node.type,"k_"+node.value+"("+join(args)+")");}
+            if(platform_signatures.contains(node.value)) {if(node.value=="wall_clock_millis") {wall_clock_used=true;platform_used=true;}else if(node.value=="process_capture") {process_used=true;platform_used=true;strings_used=true;builders_used=true;generic_used.insert("string");}else if(node.value.starts_with("tcp_")) {tcp_used=true;platform_used=true;}else if(node.value.starts_with("stdin_")||node.value.starts_with("stdout_")||node.value.starts_with("stderr_")||node.value.starts_with("env_")) {streams_used=true;files_used=true;strings_used=true;platform_used=true;}else if(node.value.starts_with("spool_")) {builders_used=true;strings_used=true;} else if(node.value.starts_with("int_vector_")) vectors_used=true;else if(node.value=="buffer_text"||node.value=="buffer_text_valid"||node.value=="buffer_write_text") {strings_used=true;platform_used=true;}else if(node.value.starts_with("file_")) {files_used=true;strings_used=true;platform_used=true;} else if(node.value.starts_with("arg_")) {arguments_used=true;if(node.value=="arg_text"||node.value=="arg_text_valid") strings_used=true;}else if(!node.value.starts_with("string_")) platform_used=true;return temp(node.type,"k_"+node.value+"("+join(args)+")");}
             const auto name=node.value=="print"?"k_print_"+n(node.children[0]).type:"k_fn_"+node.value;
             return temp(node.type,node.value=="print"?helper(name,args):name+"("+join(args)+")");
         }
@@ -446,7 +447,7 @@ public:
         std::string runtime;for(const auto &entry:c_helpers) if(helpers.contains(entry.name)) runtime+=entry.body;
         if(helpers.contains("k_print_f64")) runtime+="\nstatic void k_print_f64(double x) {printf(\"%.17g\\n\", x); }\n";
         if(runtime.empty()) runtime="\n";
-        auto output=((tcp_used||process_used)?std::string("#define _GNU_SOURCE 1\n"):std::string())+(platform_used?std::string("#define _POSIX_C_SOURCE 200809L\n"):std::string())+c_runtime+(u.next_syntax?std::string("\n#include <math.h>\n"):std::string())+runtime+(arrays_used?std::string("\nstatic size_t k_array_index(int64_t i,size_t n) {if(i<0 || (uint64_t)i>=n) {fputs(\"Awl array bounds trap\\n\",stderr);abort();}return (size_t)i;}\n"):std::string())+(strings_used?c_strings:std::string())+(builders_used?c_builders:std::string())+(vectors_used?c_vectors:std::string())+(!generic_used.empty()?std::string(c_generic)+generic_wrappers():std::string())+(!containers_used.empty()?std::string(c_maps)+container_wrappers():std::string())+(arguments_used?c_arguments:std::string())+(platform_used?c_platform:std::string())+(files_used?c_files:std::string())+(streams_used?c_streams:std::string())+(tcp_used?c_tcp:std::string())+(process_used?c_process:std::string())+body;
+        auto output=((tcp_used||process_used)?std::string("#define _GNU_SOURCE 1\n"):std::string())+(platform_used?std::string("#define _POSIX_C_SOURCE 200809L\n"):std::string())+c_runtime+(u.aesop_syntax?std::string("\n#include <math.h>\n"):std::string())+runtime+(arrays_used?std::string("\nstatic size_t k_array_index(int64_t i,size_t n) {if(i<0 || (uint64_t)i>=n) {fputs(\"Awl array bounds trap\\n\",stderr);abort();}return (size_t)i;}\n"):std::string())+(strings_used?c_strings:std::string())+(builders_used?c_builders:std::string())+(vectors_used?c_vectors:std::string())+(!generic_used.empty()?std::string(c_generic)+generic_wrappers():std::string())+(!containers_used.empty()?std::string(c_maps)+container_wrappers():std::string())+(arguments_used?c_arguments:std::string())+(platform_used?c_platform:std::string())+(wall_clock_used?c_wall_clock:std::string())+(files_used?c_files:std::string())+(streams_used?c_streams:std::string())+(tcp_used?c_tcp:std::string())+(process_used?c_process:std::string())+body;
         if(output.size()>67108864) throw Failure{{"E501","C emission budget exceeded",UINT32_MAX}};
         return output;
     }

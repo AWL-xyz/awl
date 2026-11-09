@@ -14,7 +14,7 @@ class Verifier {
     std::unordered_set<std::string> initialized_globals;
     bool initializing_global=false;
     const Node &global_access(const std::string &name,bool write=false) const {
-        need(u.next_syntax&&globals.contains(name),"unknown global reference");const auto &g=at(globals.at(name));
+        need(u.aesop_syntax&&globals.contains(name),"unknown global reference");const auto &g=at(globals.at(name));
         need(file_of(g)==current_file||(g.result_mode!="p"&&(!write||g.result_mode=="rw")),"private/readonly module variable access");
         need(!initializing_global||initialized_globals.contains(name),"initializer reads uninitialized module variable");return g;
     }
@@ -39,22 +39,22 @@ class Verifier {
         need(n.children.size()==arity,"invalid child count for "+kind); return n;
     }
     const List &list(Id id) const { const auto &n=at(id); need(n.kind=="#list","expected list node"); return n.children; }
-    bool ident(const std::string &name) const { return name.size()<=128&&identifier(name)&&!(u.project_syntax&&name=="int_vector")&&!(u.next_syntax&&(name=="elseif"||name=="vector"||name=="view")); }
+    bool ident(const std::string &name) const { return name.size()<=128&&identifier(name)&&!(u.project_syntax&&name=="int_vector")&&!(u.aesop_syntax&&(name=="elseif"||name=="vector"||name=="view")); }
     bool flat_struct(const std::string &ty,uint32_t depth=0) const {
         const auto it=records.find(ty);
         if(it==records.end()||depth>64) return false;
         for(auto f:at(it->second).children) {const auto &t=at(f).second;if(!scalar(t)&&!flat_struct(t,depth+1)) return false;}
         return true;
     }
-    bool scalar(const std::string &ty) const { return ty=="bool"||ty=="string"||(u.next_syntax&&ty=="f64")||integers.contains(ty); }
+    bool scalar(const std::string &ty) const { return ty=="bool"||ty=="string"||(u.aesop_syntax&&ty=="f64")||integers.contains(ty); }
     bool resource_struct(const std::string &ty,uint32_t depth=0) const {
         const auto it=records.find(ty);
-        if(!u.next_syntax||depth>64||it==records.end()) return false;
+        if(!u.aesop_syntax||depth>64||it==records.end()) return false;
         for(auto f:at(it->second).children) {const auto &t=at(f).second;if(generic_type(t)||map_type(t)||set_type(t)||t=="spool"||resource_struct(t,depth+1)) return true;}
         return false;
     }
-    bool resource(const std::string &ty) const {return resource_struct(ty)|| (u.next_syntax&&(generic_type(ty)||map_type(ty)||set_type(ty)))||ty=="spool"||(u.project_syntax&&ty=="int_vector");}
-    bool value(const std::string &ty,uint32_t depth=0) const {if(depth>64) return false;if(auto a=array_type(ty)) return u.project_syntax&&value(a->element,depth+1);return scalar(ty)||resource(ty)||(u.next_syntax&&view_type(ty))||records.contains(ty)||sums.contains(ty); }
+    bool resource(const std::string &ty) const {return resource_struct(ty)|| (u.aesop_syntax&&(generic_type(ty)||map_type(ty)||set_type(ty)))||ty=="spool"||(u.project_syntax&&ty=="int_vector");}
+    bool value(const std::string &ty,uint32_t depth=0) const {if(depth>64) return false;if(auto a=array_type(ty)) return u.project_syntax&&value(a->element,depth+1);return scalar(ty)||resource(ty)||(u.aesop_syntax&&view_type(ty))||records.contains(ty)||sums.contains(ty); }
     void graph() const {
         need(u.source.size()<=1048576&&u.arena.size()<=max_nodes,"arena/source budget exceeded");
         need(!u.bytes.empty()&&u.bytes.front()==0&&u.bytes.back()==u.source.size(),"invalid source map");
@@ -84,7 +84,7 @@ class Verifier {
             need(n.kind.size()<=32&&n.value.size()<=(n.kind=="string"?65536u:257u)&&n.second.size()<=128&&n.type.size()<=128&&n.symbol.size()<=128&&n.literal.size()<=3,"node string budget exceeded");
             need(n.children.size()<=u.arena.size()-edges,"edge budget exceeded"); edges+=n.children.size();
             const auto &k=n.kind;
-            need(n.result_mode.empty()||(k=="function"&&n.result_mode=="own")||(u.next_syntax&&k=="global"&&(n.result_mode=="p"||n.result_mode=="r"||n.result_mode=="rw"))||(u.next_syntax&&(k=="union"||k=="struct")&&n.result_mode=="r"),"invalid result mode annotation");
+            need(n.result_mode.empty()||(k=="function"&&n.result_mode=="own")||(u.aesop_syntax&&k=="global"&&(n.result_mode=="p"||n.result_mode=="r"||n.result_mode=="rw"))||(u.aesop_syntax&&(k=="union"||k=="struct")&&n.result_mode=="r"),"invalid result mode annotation");
             if(k=="defer"||k=="scoped_local"||k=="own_param") need(u.project_syntax&&++deferred_count<=256,"deferred release project budget/syntax");
             if(k=="string") {literal_bytes+=n.value.size();need(literal_bytes<=1048576,"aggregate string literal budget exceeded");}
             const bool expression=k=="unit"||k=="format"||k=="concat"||k=="global_ref"||k=="float"||k=="move"||k=="array_repeat"||k=="array"||k=="index"||k=="string"||k=="int"||k=="uint"||k=="bool"||k=="name"||k=="field"||k=="convert"||k=="unary"||k=="binary"||k=="call"||k=="union_ctor";
@@ -112,7 +112,7 @@ class Verifier {
             const auto &f=shape(id,"field_decl",0);
             need(ident(f.value)&&names.insert(f.value).second,"invalid/duplicate field name");
             need(value(f.second),"invalid field type");
-            if(u.next_syntax) need(scalar(f.second)||sums.contains(f.second)||records.contains(f.second)||resource(f.second),"invalid aggregate field type");
+            if(u.aesop_syntax) need(scalar(f.second)||sums.contains(f.second)||records.contains(f.second)||resource(f.second),"invalid aggregate field type");
         }
     }
     Layout payload(const List &items,uint32_t depth) {
@@ -127,7 +127,7 @@ class Verifier {
     }
     Layout layout(const std::string &ty,uint32_t depth) {
         if(layouts.contains(ty)) return layouts.at(ty);
-        if(u.next_syntax&&(generic_type(ty)||map_type(ty)||set_type(ty)||ty=="spool")) return layouts[ty]=Layout{16,8,0};
+        if(u.aesop_syntax&&(generic_type(ty)||map_type(ty)||set_type(ty)||ty=="spool")) return layouts[ty]=Layout{16,8,0};
         need(depth<=64,"aggregate nesting limit exceeded");
         need(active.insert(ty).second,"recursive value layout"); Layout out{};
         if(auto a=array_type(ty)) {const auto e=layout(a->element,depth+1);need(e.size<=1048576/a->count,"array size budget");out={e.size*a->count,e.align,e.height+1};}
@@ -151,7 +151,7 @@ class Verifier {
     }
     Id variant(const std::string &owner,const std::string &name) const {
         need(sums.contains(owner),"unknown union constructor");
-        if(u.next_syntax) need(file_of(at(sums.at(owner)))==current_file||at(sums.at(owner)).result_mode=="r","cross-module access to private enum variant");
+        if(u.aesop_syntax) need(file_of(at(sums.at(owner)))==current_file||at(sums.at(owner)).result_mode=="r","cross-module access to private enum variant");
         for(auto id:at(sums.at(owner)).children) if(at(id).value==name) return id;
         fail("unknown variant");
     }
@@ -194,34 +194,34 @@ class Verifier {
         } else if(k=="index") {
             shape(id,k,2);need(u.project_syntax,"index requires project syntax");const auto a=array_type(expression(n.children[0],env));need(bool(a),"index on non-array");
             need(expression(n.children[1],env)=="i64","index type");ty=a->element;
-        } else if(k=="float") {shape(id,k,0);need(u.next_syntax&&finite_decimal(n.value),"invalid f64 literal");ty="f64";
+        } else if(k=="float") {shape(id,k,0);need(u.aesop_syntax&&finite_decimal(n.value),"invalid f64 literal");ty="f64";
         } else if(k=="int"||k=="uint") { shape(id,k,0); literal(n); ty=n.literal; }
         else if(k=="string") {shape(id,k,0);size_t count=0;need(text_scalars(n.value,count),"invalid UTF-8 string literal");ty="string";}
         else if(k=="bool") { shape(id,k,0); need(n.value=="true"||n.value=="false","invalid boolean literal"); ty="bool"; }
-        else if(k=="unit") { shape(id,k,0); need(u.next_syntax,"unit literal outside next syntax"); ty="unit"; }
+        else if(k=="unit") { shape(id,k,0); need(u.aesop_syntax,"unit literal outside Aesop syntax"); ty="unit"; }
         else if(k=="global_ref") {shape(id,k,0);const auto &g=global_access(n.value);need(n.symbol==g.symbol,"global read symbol mismatch");ty=g.second;}
         else if(k=="name") {
             shape(id,k,0); need(ident(n.value)&&env.contains(n.value),"free local name");
             const auto &local=env.at(n.value);need(!local.moved,"use of moved builder"); need(!local.scoped||borrow,"scoped builder copied/released/escaped"); need(n.symbol==local.symbol,"incorrect resolved local symbol"); ty=local.type;
         } else if(k=="field") { shape(id,k,1); need(ident(n.value),"invalid field name"); ty=projection(expression(n.children[0],env,true),n.value); }
-        else if(k=="format") {shape(id,k,1);need(u.next_syntax&&scalar(expression(n.children[0],env)),"invalid string injection");ty="string";}
-        else if(k=="concat") {shape(id,k,2);need(u.next_syntax&&expression(n.children[0],env)=="string"&&expression(n.children[1],env)=="string","invalid concatenation");ty="string";}
-        else if(k=="convert") { shape(id,k,1); const auto source=expression(n.children[0],env);need((integers.contains(n.value)&&integers.contains(source))||(u.next_syntax&&n.value=="f64"&&(integers.contains(source)||source=="f64")),"invalid numeric conversion"); ty=n.value; }
+        else if(k=="format") {shape(id,k,1);need(u.aesop_syntax&&scalar(expression(n.children[0],env)),"invalid string injection");ty="string";}
+        else if(k=="concat") {shape(id,k,2);need(u.aesop_syntax&&expression(n.children[0],env)=="string"&&expression(n.children[1],env)=="string","invalid concatenation");ty="string";}
+        else if(k=="convert") { shape(id,k,1); const auto source=expression(n.children[0],env);need((integers.contains(n.value)&&integers.contains(source))||(u.aesop_syntax&&n.value=="f64"&&(integers.contains(source)||source=="f64")),"invalid numeric conversion"); ty=n.value; }
         else if(k=="unary") {
             shape(id,k,1); ty=expression(n.children[0],env);
-            need(n.value=="not"?ty=="bool":n.value=="-"&&((integers.contains(ty)&&ty[0]=='i')||(u.next_syntax&&ty=="f64")),"invalid unary operation");
+            need(n.value=="not"?ty=="bool":n.value=="-"&&((integers.contains(ty)&&ty[0]=='i')||(u.aesop_syntax&&ty=="f64")),"invalid unary operation");
         } else if(k=="binary") {
             shape(id,k,2); const auto a=expression(n.children[0],env),b=expression(n.children[1],env); const auto &op=n.value;
             if(op=="and"||op=="or") { need(a=="bool"&&b==a,"invalid logical operands"); ty="bool"; }
-            else if(op=="=="||op=="!=") {need(a==b&&(scalar(a)||(u.next_syntax&&flat_struct(a))),"invalid equality operands"); ty="bool";}
+            else if(op=="=="||op=="!=") {need(a==b&&(scalar(a)||(u.aesop_syntax&&flat_struct(a))),"invalid equality operands"); ty="bool";}
             else if(op=="+"&&a=="string"&&b=="string") ty="string";
             else {
                 need(op=="+"||op=="-"||op=="*"||op=="/"||op=="%"||op=="<"||op==">"||op=="<="||op==">=","invalid binary operator");
-                need((integers.contains(a)||(u.next_syntax&&a=="f64"&&op!="%"))&&a==b,"invalid arithmetic/comparison operands");
+                need((integers.contains(a)||(u.aesop_syntax&&a=="f64"&&op!="%"))&&a==b,"invalid arithmetic/comparison operands");
                 ty=(op=="<"||op==">"||op=="<="||op==">=")?"bool":a;
             }
         } else if(k=="call"||k=="union_ctor") {
-            if(k=="call"&&(generic_specialization(n.value)||view_specialization(n.value))) need(u.next_syntax,"generic vector outside next syntax");
+            if(k=="call"&&(generic_specialization(n.value)||view_specialization(n.value))) need(u.aesop_syntax,"generic vector outside Aesop syntax");
             if(k=="call"&&n.value.starts_with("int_vector_")) need(u.project_syntax,"vector call outside project syntax");
             need(ident(n.value),"invalid callee name");
             const auto resolved=container_signature(n.value);
@@ -232,7 +232,7 @@ class Verifier {
             std::unordered_set<std::string> lent,taken;
             for(size_t i=0;i<n.children.size();++i) {
                 const bool user_borrow=functions.contains(n.value)&&i<functions.at(n.value).borrows.size()&&functions.at(n.value).borrows[i];
-                const bool taking=(k=="call"&&functions.contains(n.value)&&i<functions.at(n.value).takes.size()&&functions.at(n.value).takes[i])||(k=="call"&&u.next_syntax&&!functions.contains(n.value)&&records.contains(n.value)&&resource_struct(n.value)&&i<at(records.at(n.value)).children.size()&&resource(at(at(records.at(n.value)).children[i]).second));
+                const bool taking=(k=="call"&&functions.contains(n.value)&&i<functions.at(n.value).takes.size()&&functions.at(n.value).takes[i])||(k=="call"&&u.aesop_syntax&&!functions.contains(n.value)&&records.contains(n.value)&&resource_struct(n.value)&&i<at(records.at(n.value)).children.size()&&resource(at(at(records.at(n.value)).children[i]).second));
                 const auto &arg=at(n.children[i]);
                 if(k=="call"&&functions.contains(n.value)&&i<functions.at(n.value).mutables.size()&&functions.at(n.value).mutables[i]) {
                     need(u.mutable_arguments.contains(n.children[i]),"mutable argument must be an in-place borrow");
@@ -254,7 +254,7 @@ class Verifier {
             if(k=="union_ctor") {need(ident(n.second),"invalid variant name"); need(args==field_types(at(variant(n.value,n.second)).children),"invalid union arguments"); ty=n.value;}
             else if(n.value=="print") {need(args.size()==1&&scalar(args[0]),"invalid print call"); ty="unit";}
             else if(n.value=="array_length") {need(args.size()==1&&array_type(args[0]),"invalid array_length call");ty="i64";}
-            else if(u.next_syntax&&math_signatures.contains(n.value)) {const auto &sig=math_signatures.at(n.value);need(args==sig.parameters,"invalid math arguments");ty=sig.result;}
+            else if(u.aesop_syntax&&math_signatures.contains(n.value)) {const auto &sig=math_signatures.at(n.value);need(args==sig.parameters,"invalid math arguments");ty=sig.result;}
             else if(auto container=new_container_type(n.value)) {need(args.size()==1&&args[0]=="i64","invalid container allocation");ty=*container;}
             else if(resolved) {
                 const auto &expected=resolved->first;
@@ -265,7 +265,7 @@ class Verifier {
             }
             else if(platform_signatures.contains(n.value)) {const auto &sig=platform_signatures.at(n.value); need(args==sig.parameters,"invalid platform arguments"); ty=sig.result;}
             else if(records.contains(n.value)) {need(args==field_types(at(records.at(n.value)).children),"invalid constructor arguments"); ty=n.value;}
-            else {need(functions.contains(n.value),"unknown callee"); const auto &f=functions.at(n.value); if(u.next_syntax) function_access(n.value); need(args==f.arguments,"invalid call arguments"); ty=f.result;}
+            else {need(functions.contains(n.value),"unknown callee"); const auto &f=functions.at(n.value); if(u.aesop_syntax) function_access(n.value); need(args==f.arguments,"invalid call arguments"); ty=f.result;}
         } else fail("invalid expression kind");
         need(n.type==ty,"incorrect expression type annotation"); return ty;
     }
@@ -379,9 +379,9 @@ class Verifier {
                 }
             }
             else if(k=="break"||k=="continue") {
-                shape(id,k,0);need(u.next_syntax&&loop_depth>0,"break/continue outside a loop");
+                shape(id,k,0);need(u.aesop_syntax&&loop_depth>0,"break/continue outside a loop");
             } else if(k=="for_range") {
-                need(u.next_syntax&&list(n.children[2]).size()<=100000,"invalid range loop");
+                need(u.aesop_syntax&&list(n.children[2]).size()<=100000,"invalid range loop");
                 need(expression(n.children[0],env)=="i64"&&expression(n.children[1],env)=="i64","range loop bounds must be i64");
                 need(ident(n.value)&&!declared.contains(n.value)&&n.second=="i64","invalid range loop binding");
                 binding(n,"i64");declared.insert(n.value);
@@ -392,7 +392,7 @@ class Verifier {
             } else if(k=="for_each") {
                 const auto collection=expression(n.children[0],env,true);
                 std::string element;
-                if(auto e=generic_type(collection)) element=*e;else if(auto v=view_type(collection)) element=*v;else if(collection=="int_vector") element="i64";else if(auto a=array_type(collection)) element=a->element;else if(auto m=map_type(collection)) element=m->first;else if(auto t=set_type(collection)) element=*t;else if(u.next_syntax&&collection=="string") element="u32";
+                if(auto e=generic_type(collection)) element=*e;else if(auto v=view_type(collection)) element=*v;else if(collection=="int_vector") element="i64";else if(auto a=array_type(collection)) element=a->element;else if(auto m=map_type(collection)) element=m->first;else if(auto t=set_type(collection)) element=*t;else if(u.aesop_syntax&&collection=="string") element="u32";
                 need(!element.empty(),"for iteration requires a vector, view, int_vector or fixed array");
                 need(ident(n.value)&&!declared.contains(n.value)&&n.second==element,"invalid iteration binding");
                 binding(n,element);declared.insert(n.value);
@@ -412,13 +412,13 @@ public:
     void run() {
         need(u.diagnostics.empty(),"unit contains diagnostics"); graph(); std::unordered_set<std::string> names;
         for(const auto &ty:integers) {const uint64_t bytes=std::stoul(ty.substr(1))/8; layouts[ty]={bytes,bytes,0};} layouts["bool"]={1,1,0};layouts["string"]={24,8,0};layouts["spool"]={8,8,0};
-        if(u.next_syntax) layouts["f64"]={8,8,0};
+        if(u.aesop_syntax) layouts["f64"]={8,8,0};
         if(u.project_syntax) layouts["int_vector"]={8,8,0};
-        if(u.next_syntax) for(const auto &e:generic_elements) {layouts["vector<"+e+">"]={8,8,0};layouts["view<"+e+">"]={32,8,0};}
+        if(u.aesop_syntax) for(const auto &e:generic_elements) {layouts["vector<"+e+">"]={8,8,0};layouts["view<"+e+">"]={32,8,0};}
         for(auto id:u.roots) {
-            const auto &d=at(id); need(d.kind=="struct"||d.kind=="union"||d.kind=="function"||(u.next_syntax&&d.kind=="global"),"invalid declaration kind");
-            need(!(u.next_syntax&&(generic_call(d.value)||view_call(d.value)||d.value=="pi"||d.value=="tau"||math_signatures.contains(d.value)))&&ident(d.value)&&d.value!="print"&&d.value!="array_length"&&!platform_signatures.contains(d.value)&&names.insert(d.value).second,"invalid/duplicate declaration name");
-            if(u.next_syntax) {if((d.kind=="union"||d.kind=="struct")&&!u.origins.empty()) need(d.value.starts_with("km_"+std::to_string(file_of(d))+"_"),"enum or struct/module provenance mismatch");}
+            const auto &d=at(id); need(d.kind=="struct"||d.kind=="union"||d.kind=="function"||(u.aesop_syntax&&d.kind=="global"),"invalid declaration kind");
+            need(!(u.aesop_syntax&&(generic_call(d.value)||view_call(d.value)||d.value=="pi"||d.value=="tau"||math_signatures.contains(d.value)))&&ident(d.value)&&d.value!="print"&&d.value!="array_length"&&!platform_signatures.contains(d.value)&&names.insert(d.value).second,"invalid/duplicate declaration name");
+            if(u.aesop_syntax) {if((d.kind=="union"||d.kind=="struct")&&!u.origins.empty()) need(d.value.starts_with("km_"+std::to_string(file_of(d))+"_"),"enum or struct/module provenance mismatch");}
             if(d.kind=="struct") records[d.value]=id; else if(d.kind=="union") sums[d.value]=id;
         }
         for(auto id:u.roots) {
@@ -432,22 +432,22 @@ public:
                 if(!u.origins.empty()) need(d.value.starts_with("km_"+std::to_string(file_of(d))+"_"),"global/module provenance mismatch");
             } else {
                 shape(id,"function",2);
-                if(u.next_syntax&&!u.origins.empty()) need(d.value=="main"?file_of(d)==0:d.value.starts_with("km_"+std::to_string(file_of(d))+"_"),"function/module provenance mismatch");
+                if(u.aesop_syntax&&!u.origins.empty()) need(d.value=="main"?file_of(d)==0:d.value.starts_with("km_"+std::to_string(file_of(d))+"_"),"function/module provenance mismatch");
                 need(d.second=="unit"||value(d.second),"invalid return type"); if(array_type(d.second)) layout(d.second,1);Function f;f.result=d.second;f.owns_result=d.result_mode=="own";need(!f.owns_result||(u.project_syntax&&resource(d.second)),"invalid owned result declaration");std::unordered_set<std::string> params;
                 for(auto p:list(d.children[0])) {const auto &n=at(p);need(n.kind=="param"||n.kind=="borrow_param"||n.kind=="own_param"||n.kind=="mut_param","invalid parameter kind");shape(p,n.kind,0);
                     const bool borrowed=n.kind=="borrow_param",owned=n.kind=="own_param",mutable_param=n.kind=="mut_param";need(!(borrowed||owned)||(u.project_syntax&&resource(n.second)),"invalid borrowed parameter type/syntax");
-                    need(!mutable_param||(u.next_syntax&&records.contains(n.second)),"invalid mutable parameter type/syntax");
+                    need(!mutable_param||(u.aesop_syntax&&records.contains(n.second)),"invalid mutable parameter type/syntax");
                     need(ident(n.value)&&params.insert(n.value).second,"invalid/duplicate parameter");binding(n,n.second);f.arguments.push_back(n.second);f.borrows.push_back(borrowed);f.takes.push_back(owned);f.mutables.push_back(mutable_param);}
                 list(d.children[1]); functions[d.value]=std::move(f);function_files[d.value]=file_of(d);
             }
         }
-        if(u.next_syntax) for(const auto &[child,parent]:u.nested_parents) {
+        if(u.aesop_syntax) for(const auto &[child,parent]:u.nested_parents) {
             need(functions.contains(child)&&functions.contains(parent)&&child!=parent&&function_files.at(child)==function_files.at(parent),"invalid nested-function parent");
             auto name=child;uint32_t depth=0;while(u.nested_parents.contains(name)) {need(++depth<=64,"nested parent cycle/depth exceeded");name=u.nested_parents.at(name);}
         }
-        if(u.next_syntax) for(const auto &name:u.public_functions) need(functions.contains(name),"export refers to missing function");
+        if(u.aesop_syntax) for(const auto &name:u.public_functions) need(functions.contains(name),"export refers to missing function");
         for(auto id:u.roots) if(at(id).kind=="struct"||at(id).kind=="union") layout(at(id).value,1);
-        if(u.next_syntax) {
+        if(u.aesop_syntax) {
             const auto files=u.origins.empty()?size_t(1):u.files.size();
             need(u.module_order.size()==files&&u.module_dependencies.size()==files&&files<=64,"invalid module initialization graph size");
             std::vector<size_t> position(files,files);size_t edges=0;

@@ -95,6 +95,6 @@ def main():
   finally:
    for proc in active:
     if proc.poll() is None:proc.kill();proc.communicate(timeout=5)
- report={'status':'PASS','executable_sha256':hashlib.sha256(exe.read_bytes()).hexdigest(),'source_sha256':{str(f.relative_to(ROOT)):hashlib.sha256(f.read_bytes()).hexdigest() for f in sorted((ROOT/'examples-next/apps/kvserve').glob('*'))},'cases':len(cases),'records':cases,'benchmark':{'requests':len(latencies),'median_ms':sorted(latencies)[len(latencies)//2],'max_ms':max(latencies),'qualification':'sequential local clients, includes deliberately fragmented requests and 500ms timeout, not throughput or production load'}}
+ report={'status':'PASS','executable_sha256':hashlib.sha256(exe.read_bytes()).hexdigest(),'source_sha256':{str(f.relative_to(ROOT)):hashlib.sha256(f.read_bytes()).hexdigest() for f in sorted((ROOT/'examples/apps/kvserve').glob('*'))},'cases':len(cases),'records':cases,'benchmark':{'requests':len(latencies),'median_ms':sorted(latencies)[len(latencies)//2],'max_ms':max(latencies),'qualification':'sequential local clients, includes deliberately fragmented requests and 500ms timeout, not throughput or production load'}}
  a.report.write_text(json.dumps(report,separators=(',',':'))+'\n');print('PASS',len(cases),'cases')
 if __name__=='__main__':main()

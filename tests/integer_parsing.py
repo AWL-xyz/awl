@@ -21,7 +21,7 @@ for _ in range(1000):
  n=rng.randrange(2**64);b=rng.randrange(2,37);unsigned.append((digits(n,b).upper(),b,n))
 unsigned += [('+',10,None),('-0',10,None),('+42',10,42),('',10,None),('1',1,None),('1',37,None),('1 ',10,None)]
 with tempfile.TemporaryDirectory(prefix='Awl-parsing-',dir='/var/tmp') as td:
- w=Path(td);(w/'Integer.aw').write_bytes((R/'examples-next/parsing/Integer.aw').read_bytes());s=w/'main.aw'
+ w=Path(td);(w/'Integer.aw').write_bytes((R/'examples/parsing/Integer.aw').read_bytes());s=w/'main.aw'
  template='use Integer.aw as parse; func main()->i64 @p scoped v vector<i64>: vector_new<i64>(1); vector_push(v,42); print(parse.parse(arg_text(1),arg_i64(0),v)); print(vector_length(v)); print(vector_get(v,vector_length(v)-1)); return 0; end;'
  env={**os.environ,'PATH':'/no-host-tools','XDG_CACHE_HOME':'/var/tmp/Awl-parsing-cache'}
  for kind,mode in [(k,m) for k in ['signed','unsigned'] for m in ['native','sanitized']]:
@@ -38,4 +38,4 @@ with tempfile.TemporaryDirectory(prefix='Awl-parsing-',dir='/var/tmp') as td:
    subprocess.run([shutil.which('cc'),'-std=c11','-O1','-fsanitize=address,undefined',str(c),'-lm','-o',str(exe)],check=True)
    r=subprocess.run([str(exe),'10','123'],capture_output=True,text=True);assert (r.returncode,r.stdout,r.stderr)==(0,'false\n1\n42\n','')
 
-report={'status':'PASS','compiler_sha256':hashlib.sha256(K.read_bytes()).hexdigest(),'source_sha256':hashlib.sha256((R/'examples-next/parsing/Integer.aw').read_bytes()).hexdigest(),'runs':rows};(R/'tests/integer-parsing.json').write_text(json.dumps(report)+'\n');print(report)
+report={'status':'PASS','compiler_sha256':hashlib.sha256(K.read_bytes()).hexdigest(),'source_sha256':hashlib.sha256((R/'examples/parsing/Integer.aw').read_bytes()).hexdigest(),'runs':rows};(R/'tests/integer-parsing.json').write_text(json.dumps(report)+'\n');print(report)

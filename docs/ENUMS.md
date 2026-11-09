@@ -1,6 +1,6 @@
 # associated-value enums
 
-next syntax now has nominal enums, typed payloads and exhaustive statement matches, this is a native development feature, not an updated downloadable distribution
+Aesop syntax now has nominal enums, typed payloads and exhaustive statement matches, this is a native development feature, not an updated downloadable distribution
 
 ```Awl
 enum Outcome
@@ -37,7 +37,7 @@ legacy `union` syntax is unchanged, native enum parsing lowers to the existing n
 
 ## runnable workload and evidence
 
-`examples-next/enums` contains `kcalc.awproj`, run `awl build` there, then `./build/kcalc + 40 2`, operators are `+`, `-`, `*` and `/`, quote `'*'` in a shell
+`examples/enums` contains `kcalc.awproj`, run `awl build` there, then `./build/kcalc + 40 2`, operators are `+`, `-`, `*` and `/`, quote `'*'` in a shell
 
 nested result enums distinguish invalid input/byte position, signed-i64 parse overflow, arithmetic overflow and division by zero, division truncates toward zero, exits0 success,2 arguments/operator,3 parsing and4 arithmetic error
 

@@ -8,7 +8,7 @@ exports{
         Text(value:text);
         Failed(issue:Issue);
     end;
-    @r func read :: path:text: Read {
+    @r func read[Read] :: path:text {
         @p file: file_open(path, 0);
         if file == -2 { return Read.Failed(Issue.Missing()); };
         if file < 0 { return Read.Failed(Issue.Io(file)); };

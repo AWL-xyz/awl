@@ -12,8 +12,8 @@ static void verify(Unit &u,bool good=false) {
     serialize(u);expect(u.json==before,"verifier mutated arena");expect(good!=rejected,"incorrect verifier result");
 }
 int main() {try {
-    const std::string source="func main: i64 { @p s: tcp_listen_loopback(0,1); @p b: buffer_new(8); tcp_valid(s); tcp_port(s); tcp_accept(s,0); tcp_read(s,b,0,8,0); tcp_write(s,b,0,8,0); defer tcp_close(s); buffer_free(b); return 0; };";
-    auto seed=parse_source(source.data(),source.size(),true,true);expect(seed->diagnostics.empty(),"seed parse");Checker(*seed).run();verify(*seed,true);unsigned cases=1;
+    const std::string source="func main[i64] { @p s: tcp_listen_loopback(0,1); @p b: buffer_new(8); tcp_valid(s); tcp_port(s); tcp_accept(s,0); tcp_read(s,b,0,8,0); tcp_write(s,b,0,8,0); defer tcp_close(s); buffer_free(b); return 0; };";
+    auto seed=parse_source(source.data(),source.size());expect(seed->diagnostics.empty(),"seed parse");Checker(*seed).run();verify(*seed,true);unsigned cases=1;
     for(const std::string name:{"tcp_listen_loopback","tcp_valid","tcp_port","tcp_accept","tcp_read","tcp_write","tcp_close"}) {
         const auto id=find(*seed,"call",name);
         auto run=[&](const std::function<void(Unit &)> &edit) {Unit u=*seed;edit(u);verify(u);++cases;};

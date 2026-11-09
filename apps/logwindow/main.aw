@@ -1,6 +1,6 @@
 use File.aw as file;
 use Display.aw as display;
-func show :: source:text, first:i64, count:i64: i64 {
+func show[i64] :: source:text, first:i64, count:i64 {
     @s lines vector<text>: vector.new<text>(0);
     @s line spool: spool.new(64);
     if not vector.valid(lines) or not spool.valid(line) { return 9; };
@@ -40,7 +40,7 @@ func show :: source:text, first:i64, count:i64: i64 {
     display.render(window, first);
     return 0;
 };
-func main: i64 {
+func main[i64] {
     if arg_count() != 3 { print("usage: logwindow FILE FIRST_LINE COUNT"); return 2; };
     if not arg_text_valid(0) or not arg_i64_valid(1) or not arg_i64_valid(2) { return 2; };
     match file.read(arg_text(0)) then

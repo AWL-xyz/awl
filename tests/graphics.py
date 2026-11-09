@@ -56,7 +56,7 @@ def main():
  expected+=['33023','-1','16777215','-1','false','221','false']
  reports=[]
  with tempfile.TemporaryDirectory(prefix='Awl-draw-tests-',dir='/var/tmp') as td:
-  work=Path(td);shutil.copyfile(ROOT/'examples-next/apps/colorlab/Graphics.aw',work/'Graphics.aw');src=work/'main.aw';src.write_text('use Graphics.aw as gfx; func main()->i64 @p scoped pixels vector<i64>: vector_new<i64>(0); @p i: 0; '+' '.join(body)+' return 0; end;')
+  work=Path(td);shutil.copyfile(ROOT/'examples/apps/colorlab/Graphics.aw',work/'Graphics.aw');src=work/'main.aw';src.write_text('use Graphics.aw as gfx; func main()->i64 @p scoped pixels vector<i64>: vector_new<i64>(0); @p i: 0; '+' '.join(body)+' return 0; end;')
   for mode in ['bundled','sanitized']:
    exe=work/mode;cmd='build' if mode=='bundled' else 'emit-c';r=subprocess.run([str(a.kcc.resolve()),cmd,str(src),'--syntax','next']+(['-o',str(exe)] if mode=='bundled' else []),capture_output=True,text=True,env={**os.environ,'PATH':'/no-host-tools','XDG_CACHE_HOME':'/var/tmp/Awl-draw-cache'},timeout=180);assert r.returncode==0,r.stderr
    if mode=='sanitized':
@@ -64,6 +64,6 @@ def main():
    begin=time.perf_counter_ns();r=subprocess.run([str(exe)],capture_output=True,text=True,timeout=20);elapsed=(time.perf_counter_ns()-begin)/1e6;assert r.returncode==0 and not r.stderr,(r.returncode,r.stderr);actual=r.stdout.splitlines();assert len(actual)==len(expected),(len(actual),len(expected))
    for i,(got,want) in enumerate(zip(actual,expected)):assert got==want,(i,i//222,cases[min(i//222,len(cases)-1)],got,want)
    reports.append({'mode':mode,'cases':len(cases)+7,'pixel_and_status_assertions':len(expected),'whole_process_ms':elapsed,'executable_sha256':hashlib.sha256(exe.read_bytes()).hexdigest()})
- report={'status':'PASS','compiler_sha256':hashlib.sha256(a.kcc.read_bytes()).hexdigest(),'source_sha256':hashlib.sha256((ROOT/'examples-next/apps/colorlab/Graphics.aw').read_bytes()).hexdigest(),'harness_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),'font_rows_sha256':hashlib.sha256((ROOT/'tests/font5x7.json').read_bytes()).hexdigest(),'runs':reports,'qualification':'source-level CPU rasterizer, independent closed-form line and per-pixel shape oracles, font fixture and implementation share authored glyph designs, no native font engine, timing includes stdout verification data'}
+ report={'status':'PASS','compiler_sha256':hashlib.sha256(a.kcc.read_bytes()).hexdigest(),'source_sha256':hashlib.sha256((ROOT/'examples/apps/colorlab/Graphics.aw').read_bytes()).hexdigest(),'harness_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),'font_rows_sha256':hashlib.sha256((ROOT/'tests/font5x7.json').read_bytes()).hexdigest(),'runs':reports,'qualification':'source-level CPU rasterizer, independent closed-form line and per-pixel shape oracles, font fixture and implementation share authored glyph designs, no native font engine, timing includes stdout verification data'}
  a.report.write_text(json.dumps(report,separators=(',',':'))+'\n');print(report)
 if __name__=='__main__':main()

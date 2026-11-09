@@ -12,8 +12,8 @@ static void verify(Unit &u,bool good=false) {
     serialize(u);expect(u.json==before,"verifier mutated arena");expect(good!=rejected,"incorrect verifier result");
 }
 int main() {try {
-    const std::string source="func main: i64 { return file_replace(\".\",\"temp\",\"target\"); };";
-    auto seed=parse_source(source.data(),source.size(),true,true);expect(seed->diagnostics.empty(),"seed parse");Checker(*seed).run();verify(*seed,true);unsigned cases=1;
+    const std::string source="func main[i64] { return file_replace(\".\",\"temp\",\"target\"); };";
+    auto seed=parse_source(source.data(),source.size());expect(seed->diagnostics.empty(),"seed parse");Checker(*seed).run();verify(*seed,true);unsigned cases=1;
     for(const std::string name:{"file_replace"}) {
         const auto id=find(*seed,"call",name);
         auto run=[&](const std::function<void(Unit &)> &edit) {Unit u=*seed;edit(u);verify(u);++cases;};

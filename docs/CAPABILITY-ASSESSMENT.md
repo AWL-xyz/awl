@@ -140,7 +140,7 @@ this closes a language/library-composition gap rather than a new workload domain
 
 ## next-default Linux SDK delivery, no new point
 
-Linux0.25 now ships the qualified exported-enum implementation and makes next syntax the default for all native compiler commands, public awl retains its init/build scope, legacy sources require an explicit compatibility selector or manifest declaration, the legacy C ABI/Python reference parser remain compatibility APIs
+Linux0.25 now ships the qualified exported-enum implementation and makes Aesop syntax the default for all native compiler commands, public awl retains its init/build scope, legacy sources require an explicit compatibility selector or manifest declaration, the legacy C ABI/Python reference parser remain compatibility APIs
 
 62 default/override/casing/error/output-preservation cases,187 native/sanitized exported-result/configuration checks and107 native/107 WASI result oracles bind the rebuilt compiler, the exact complete SDK passed112commands,348integer checks and5traps in an offline unprivileged environment without a host shell/Python/compiler,18105 upstream backend files were verified, see tests/default-checkpoint.json
 

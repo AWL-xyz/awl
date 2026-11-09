@@ -28,7 +28,7 @@ void exercise(const std::string &source) {
 }
 int main(int argc,char **argv) {
     try {
-        require(Awl_parse_abi_version()==1);
+        require(Awl_parse_abi_version()==2);
         void *unit=nullptr; size_t size=0;
         require(Awl_parse_source(nullptr,1,&unit)==1&&!unit);
         require(Awl_parse_source("",0,nullptr)==1);
@@ -38,10 +38,10 @@ int main(int argc,char **argv) {
         require(Awl_parse_tokens("",0,&eof,1,&unit)==0&&unit); Awl_parse_free(unit); unit=nullptr;
         eof.end=1; require(Awl_parse_tokens("",0,&eof,1,&unit)==1&&!unit);
         exercise("struct P ) end"); exercise("union U V( end");
-        exercise("function main()->i64 return "+std::string(100,'(')+"0"+std::string(100,')')+" end");
+        exercise("func main[i64] { return "+std::string(100,'(')+"0"+std::string(100,')')+"; };");
         exercise(std::string(1048577,'x'));
         std::string tokens; for(int i=0;i<100001;++i) tokens+="1 "; exercise(tokens);
-        std::vector<std::string> seeds={"function main()->i64 return 0 end"};
+        std::vector<std::string> seeds={"func main[i64] { return 0; };"};
         for(int i=1;i<argc;++i) {
             std::ifstream file(argv[i],std::ios::binary); require(static_cast<bool>(file));
             seeds.emplace_back(std::istreambuf_iterator<char>(file),std::istreambuf_iterator<char>()); exercise(seeds.back());

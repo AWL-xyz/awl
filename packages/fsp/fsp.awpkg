@@ -3,4 +3,4 @@ kind: package
 name: fsp
 version: 0.1.0
 entry: fsp.aw
-syntax: next
+syntax: aesop

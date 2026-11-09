@@ -1,10 +1,10 @@
 # Awl Software Development Kit [Beta]0.26.0-dev
 
-Linux x86-64 complete successor SDK, current next syntax ships in the published bundle, `func size :: @b values[i64], etc[i64]: i64 { ... };` replaces the parenthesized parameter and `end;` function forms, `func main: i64 { ... };` is the parameterless shape
+Linux x86-64 complete successor SDK, current Aesop syntax ships in the published bundle, `func size[i64] :: @b values[i64], etc[i64] { ... };` replaces the parenthesized parameter and `end;` function forms, `func main[i64] { ... };` is the parameterless shape
 
 the awk `: type` result annotation, `exports{...};` permissions, `@p/@s/@b/@o/@r/@w` modifiers, braced `if`/`elseif`/`else`/`while`, `name[T]` vector arguments and `${name}` interpolation are the published grammar, `--syntax legacy` still selects the explicit compatibility parser
 
-new single-file `editor/awl-editor.html`, the `awl.` editor, ships with the owl mark, the current next-syntax highlighter/structural aid and a source-level JavaScript interpreter for the supported subset, every bundled example is checked by `kcc check` in `tests/awl-editor.json`
+new single-file `editor/awl-editor.html`, the `awl.` editor, ships with the owl mark, the current Aesop-syntax highlighter/structural aid and a source-level JavaScript interpreter for the supported subset, every bundled example is checked by `kcc check` in `tests/awl-editor.json`
 
 `editor/Awl-studio.html` remains the older deliberately limited legacy-subset playground with its own bundled sources, it is not the native compiler and isn't newly requalified
 

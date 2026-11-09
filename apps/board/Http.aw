@@ -1,4 +1,4 @@
-func equal :: buffer:i64, start:i64, count:i64, expected:text, folded:bool: bool {
+func equal[bool] :: buffer:i64, start:i64, count:i64, expected:text, folded:bool {
     if count != string.bytes(expected) { return false; };
     @p i: 0;
     while i < count {
@@ -10,7 +10,7 @@ func equal :: buffer:i64, start:i64, count:i64, expected:text, folded:bool: bool
     return true;
 };
 exports{
-    @r func receive :: connection:i64, buffer:i64, @b output[text]: i64 {
+    @r func receive[i64] :: connection:i64, buffer:i64, @b output[text] {
         if buffer_size(buffer) < 9216 or vector.length(output) != 0 { return 500; };
         @p count: 0;
         @p scan: 0;
@@ -148,7 +148,7 @@ exports{
         vector.push(output, site);
         return 0;
     };
-    @r func respond :: connection:i64, buffer:i64, status:i64, body:text, content:text, headers:text: bool {
+    @r func respond[bool] :: connection:i64, buffer:i64, status:i64, body:text, content:text, headers:text {
         @p reason: "OK";
         if status == 202 { reason: "Accepted"; };
         if status == 403 { reason: "Forbidden"; };

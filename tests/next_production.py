@@ -21,7 +21,7 @@ def main():
     assert (r.returncode,r.stdout,r.stderr)==(0,stdout,''),(label,r.returncode,r.stdout,r.stderr)
    records.append({'label':label,'command':command,'exit':r.returncode,'expected_error':error})
   def program(body):return 'func main() -> i64 '+body+' return 0; end;'
-  library=(ROOT/'examples-next/native/Library.aw').read_text();entry=(ROOT/'examples-next/native/main.aw').read_text()
+  library=(ROOT/'examples/native/Library.aw').read_text();entry=(ROOT/'examples/native/main.aw').read_text()
   test('actual private nested helper, own locals, original module not importer',{'main.aw':entry,'Library.aw':library},'42\n1.0.0\n')
   test('inferred scalar text bool widths arrays',{'main.aw':program('@p text_value: "é🙂; colon: text"; @p b: true; @p n: 7u16; @p data: [1,2,3]; print(text_value); print(b); print(n); print(data[2]);')},'é🙂; colon: text\ntrue\n7\n3\n')
   test('explicit type and compound terminators',{'main.aw':program('@p n i64: 4; while n>0 do n: n-1; end; if n==0 then print(42); else print(0); end;')},'42\n')

@@ -15,7 +15,7 @@ def main():
   values,metadata=mod.oracle(s);want=(5,'selection\n'+str(index)+'\n') if index<0 else (0,'ok\n'+str(metadata[2+index*2])+'\n'+str(len(values))+'\n'+values[index]+'\n');cases.append((s,pointer,want))
  env={**os.environ,'PATH':'/no-host-tools','XDG_CACHE_HOME':'/var/tmp/Awl-wasm-cache','ASAN_OPTIONS':'detect_leaks=1:abort_on_error=1'};records={};timing=[]
  with tempfile.TemporaryDirectory(prefix='Awl-wasm-tests-',dir='/var/tmp') as td:
-  work=Path(td);native=work/'native';kcc=a.sdk.resolve()/'bin/kcc';subprocess.run([str(kcc),'build',str(ROOT/'examples-next/parsing/web.aw'),'--syntax','next','-o',str(native)],check=True,env=env,capture_output=True);expected=[]
+  work=Path(td);native=work/'native';kcc=a.sdk.resolve()/'bin/kcc';subprocess.run([str(kcc),'build',str(ROOT/'examples/parsing/web.aw'),'--syntax','next','-o',str(native)],check=True,env=env,capture_output=True);expected=[]
   for s,pointer,want in cases:
    r=subprocess.run([str(native),s,pointer],capture_output=True,env=env,timeout=5);r.stdout=r.stdout.decode();r.stderr=r.stderr.decode();assert not r.stderr
    if want:assert (r.returncode,r.stdout)==want,(s[:80],pointer,want,r.returncode,r.stdout)
@@ -31,7 +31,7 @@ def main():
    else:
     value=x+y if op=='+' else x-y if op=='-' else x*y if op=='*' else (abs(x)//abs(y))*(-1 if (x<0)!=(y<0) else 1);code=0 if minimum<=value<=maximum else 4;out=str(value) if code==0 else 'arithmetic overflow'
    wanted.append({'code':code,'stdout':out+'\n','stderr':''})
-  calc=work/'calc.wasm';build=work/'calc.json';subprocess.run([sys.executable,str(ROOT/'web/build.py'),'--sdk',str(a.sdk),'--entry',str(ROOT/'examples-next/enums/main.aw'),'--output',str(work/'calc.html'),'--wasm',str(calc),'--report',str(build)],check=True,env={**os.environ,'PYTHONDONTWRITEBYTECODE':'1'},capture_output=True);data.write_text(json.dumps([[op,str(x),str(y)] for op,x,y in inputs]));r=subprocess.run(['node',str(js),str(calc),str(data)],capture_output=True,text=True,check=True,timeout=120)
+  calc=work/'calc.wasm';build=work/'calc.json';subprocess.run([sys.executable,str(ROOT/'web/build.py'),'--sdk',str(a.sdk),'--entry',str(ROOT/'examples/enums/main.aw'),'--output',str(work/'calc.html'),'--wasm',str(calc),'--report',str(build)],check=True,env={**os.environ,'PYTHONDONTWRITEBYTECODE':'1'},capture_output=True);data.write_text(json.dumps([[op,str(x),str(y)] for op,x,y in inputs]));r=subprocess.run(['node',str(js),str(calc),str(data)],capture_output=True,text=True,check=True,timeout=120)
   for got,want in zip(json.loads(r.stdout),wanted,strict=True):assert {k:got[k] for k in want}==want
   records['wasm_i64_enum_oracle_cases']=len(inputs)
   host=work/'host.cjs';host.write_text("const fs=require('fs'),{runAwl}=require("+json.dumps(str(ROOT/'web/wasi.js'))+");(async()=>{const b=fs.readFileSync(process.argv[2]);let n=0;for(const a of [[null],['a\\0b'],['\\uD800'],Array(257).fill('x'),['x'.repeat(65536)]]){try{await runAwl(b,a);throw Error('accepted bad args')}catch(e){if(e.message==='accepted bad args')throw e;n++}}for(const raw of [new Uint8Array([0]),new Uint8Array([0,97,115,109,1,0,0,0]),new Uint8Array([0,97,115,109,1,0,0,0,1,4,1,96,0,0,2,11,1,3,101,110,118,3,102,111,111,0,0])]){try{await runAwl(raw,[]);throw Error('accepted bad module')}catch(e){if(e.message==='accepted bad module')throw e;n++}}console.log(n)})().catch(e=>{console.error(e);process.exit(1)})");r=subprocess.run(['node',str(host),str(a.wasm)],capture_output=True,text=True,check=True);assert r.stdout.strip()=='8';records['host_rejection_cases']=8

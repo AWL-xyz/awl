@@ -1,13 +1,13 @@
 # native source graphics and color lab
 
-`examples-next/apps/colorlab/Graphics.aw` supplies reusable CPU drawing on typed pixel vectors, the native Color Lab app uses it for a working RGB/grayscale picker, text and controls are rendered by Awl source, not a Python UI or host widget framework
+`examples/apps/colorlab/Graphics.aw` supplies reusable CPU drawing on typed pixel vectors, the native Color Lab app uses it for a working RGB/grayscale picker, text and controls are rendered by Awl source, not a Python UI or host widget framework
 
 ## build and use
 
 with the current complete development toolchain
 
 ```sh
-cd examples-next/apps/colorlab
+cd examples/apps/colorlab
 awl build
 ./build/colorlab
 ```

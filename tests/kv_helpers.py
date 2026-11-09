@@ -17,7 +17,7 @@ expected.extend(['-1','-2','false','false','true',json.dumps(''.join(chr(i) for 
 records=[]
 with tempfile.TemporaryDirectory(prefix='Awl-kv-helpers-',dir='/var/tmp') as td:
  folder=Path(td)
- for name in ['TextMap.aw','Json.aw','Journal.aw']:shutil.copyfile(ROOT/'examples-next/apps/kvserve'/name,folder/name)
+ for name in ['TextMap.aw','Json.aw','Journal.aw']:shutil.copyfile(ROOT/'examples/apps/kvserve'/name,folder/name)
  src=folder/'main.aw';src.write_text('use TextMap.aw as map; use Json.aw as json; use Journal.aw as journal; func main()->i64 @p scoped pairs vector<text>: vector.new<text>(0); '+' '.join(body)+' return 0; end;')
  for mode in ['bundled','sanitized']:
   exe=folder/mode;command='build' if mode=='bundled' else 'emit-c';r=subprocess.run([str(kcc),command,str(src),'--syntax','next']+(['-o',str(exe)] if mode=='bundled' else []),capture_output=True,text=True,env={**os.environ,'PATH':'/no-host-tools','XDG_CACHE_HOME':'/var/tmp/Awl-kv-cache'},timeout=120);assert r.returncode==0,r.stderr

@@ -54,10 +54,10 @@ on non-linux targets, nonzero stream io, stream flush and valid environment look
 
 ## useful native pipeline
 
-[`examples-next/apps/kpipe`](../examples-next/apps/kpipe/main.aw) is a complete next-syntax project, it's a binary-safe streaming copy/filter with bounded memory, checked short-write loops and separate error/report output
+[`examples/apps/kpipe`](../examples/apps/kpipe/main.aw) is a complete Aesop-syntax project, it's a binary-safe streaming copy/filter with bounded memory, checked short-write loops and separate error/report output
 
 ```sh
-cd examples-next/apps/kpipe
+cd examples/apps/kpipe
 awl build
 printf 'hello, Awl!\n' | KPIPE_MODE=upper KPIPE_REPORT=1 ./build/kpipe
 ```

@@ -47,7 +47,7 @@ compiler versions, CPU, affinity, flags and every sample are recorded, different
 
 `vector_truncate(v,length)->bool` shrinks without reallocating, negative lengths and attempts to grow return false without changing contents/length/capacity, equal length succeeds, removed scalar/text slots require no destructor, retained capacity can be reused
 
-both operations support the existing11scalar/text element types, see `examples-next/collections`, no resource-element or arbitrary generic support is implied
+both operations support the existing11scalar/text element types, see `examples/collections`, no resource-element or arbitrary generic support is implied
 
 35focused operation/layout/identity cases and440078runtime oracle assertions pass under native ASan/UBSan,12WASI cases cover every element type and the same runtime oracle, the oracle explicitly refuses NDEBUG so release compilation can't silently discard its assertions
 

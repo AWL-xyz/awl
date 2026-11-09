@@ -51,7 +51,7 @@ def main():
   proc,port=start(probe)
   with socket.create_connection(('127.0.0.1',port),timeout=3):finish(proc,b'0\n0\n-5\n-5\n-5\n-10\n')
   records.append(['zero operations, connected kinds, read timeout','passed'])
-  source=(ROOT/'examples-next/apps/kserve/main.aw').read_text();files={'Http.aw':(ROOT/'examples-next/apps/kserve/Http.aw').read_text()};service=build('kserve',source=source,files=files)
+  source=(ROOT/'examples/apps/kserve/main.aw').read_text();files={'Http.aw':(ROOT/'examples/apps/kserve/Http.aw').read_text()};service=build('kserve',source=source,files=files)
   tests=[]
   def request(method,path='/health',headers=b'Host: localhost\r\n'):return method+b' '+path.encode()+b' HTTP/1.1\r\n'+headers+b'\r\n'
   tests += [('health',request(b'GET'),200,{'status':'ok'}),('counter start',request(b'GET','/counter'),200,{'counter':0}),('increment',request(b'POST','/counter'),200,{'counter':1}),('counter retained',request(b'GET','/counter'),200,{'counter':1}),('missing',request(b'GET','/missing'),404,{'error':404}),('method',request(b'DELETE','/counter'),405,{'error':405}),('health post',request(b'POST'),405,{'error':405}),('case folded headers',request(b'GET',headers=b'hOsT: localhost\r\ncontent-length: 0\r\n'),200,{'status':'ok'})]

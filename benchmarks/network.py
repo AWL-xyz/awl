@@ -4,7 +4,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];p=argparse.ArgumentParser();p.add_argument('--awl',type=Path,required=True);a=p.parse_args();binary=a.awl.absolute();env={**os.environ,'PATH':'/no-host-tools','XDG_CACHE_HOME':'/var/tmp/Awl-net-cache'}
 with tempfile.TemporaryDirectory(prefix='Awl-net-bench-',dir='/var/tmp') as td:
  work=Path(td)
- for file in (ROOT/'examples-next/apps/kserve').iterdir():
+ for file in (ROOT/'examples/apps/kserve').iterdir():
   if file.is_file():(work/file.name).write_bytes(file.read_bytes())
  builds=[]
  for i in range(8):

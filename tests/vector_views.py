@@ -6,7 +6,7 @@ def main():
  p=argparse.ArgumentParser();p.add_argument('--sdk',type=Path,required=True);p.add_argument('--report',type=Path,required=True);a=p.parse_args();sdk=a.sdk.resolve();env={**os.environ,'XDG_CACHE_HOME':'/var/tmp/Awl-view-cache','ASAN_OPTIONS':'detect_leaks=1:abort_on_error=1'};cases=[];want=[];functions=[];names=[]
  types=[(t,'11'+t,'22'+t,'11','22') for t in ['i8','i16','i32','i64','u8','u16','u32','u64']]+[('f64','1.25','2.5','1.25','2.5'),('bool','true','false','true','false'),('text','"café 🦉"','"日本語"','café 🦉','日本語')]
  for t,x,y,sx,sy in types:
-  name='test_'+t;names.append(name);functions.append(f'''func read_{t}(value:view<{t}>)->{t} return view.get(value,0); end;
+  name='test_'+t;names.append(name);functions.append(f'''func read_ {t}(value:view<{t}>)->{t} return view.get(value,0); end;
 func {name}()->i64
  @p scoped v vector<{t}>: vector.new<{t}>(2);
  if not vector.valid(v) then return 9; end;

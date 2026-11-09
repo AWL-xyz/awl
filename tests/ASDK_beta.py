@@ -50,7 +50,7 @@ def main():
    legacy=work('legacy');(legacy/'main.aw').write_text('function main()->i64 print(17) return 0 end\n');manifest(legacy,'Old',syntax='legacy');case('legacy project manifest',['build'],legacy);execute(legacy,Path('build/Old'),'17\n');case('single legacy explicit option',['build','main.aw','--syntax','legacy'],legacy);execute(legacy,Path('main'),'17\n')
    (legacy/'Old.awproj').write_text('format: 1\nentry: main.aw\nsyntax: next\n');case('syntax flag overrides manifest',['build','--syntax','legacy'],legacy)
    (single/'broken.aw').write_text('func main()->i64 return unknown; end;');case('compiler diagnostic propagates',['build','broken.aw'],single,status=1,contains='unknown')
-   libs=work('imports');shutil.copytree(ROOT/'examples-next/modules',libs,dirs_exist_ok=True);case('single file with real imports/state/math',['build','main.aw'],libs);execute(libs,Path('main'),'128.59\n42\n2\n1\n9\n1\n0.78539816339744828\n')
+   libs=work('imports');shutil.copytree(ROOT/'examples/modules',libs,dirs_exist_ok=True);case('single file with real imports/state/math',['build','main.aw'],libs);execute(libs,Path('main'),'128.59\n42\n2\n1\n9\n1\n0.78539816339744828\n')
    case('refuse overwrite imported source',['build','main.aw','-o','Library.aw'],libs,status=2,contains='overwrite source')
    case('refuse overwrite entry source',['build','main.aw','-o','main.aw'],libs,status=2,contains='overwrite source')
    prior=(d/'build/Demo').read_bytes();(d/'main.aw').write_text('bad source');case('failed compile preserves prior executable',['build'],d,status=1);assert (d/'build/Demo').read_bytes()==prior

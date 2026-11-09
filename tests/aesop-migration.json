@@ -1,0 +1,171 @@
+{
+  "status": "PASS",
+  "scope": "before/after source-syntax and return-inference migration, unchanged emitted C for 27 existing programs after isolating the new wall-clock helper, Linux host-C compilation, not execution of every application or standalone SDK acceptance",
+  "entry_points": 27,
+  "byte_identical_emitted_c": true,
+  "compiler_sha256": "4f1fdd6a0cda6ccd7e80db38fc089ad355ac685f6eed126a1304c7e6742be43c",
+  "records": [
+    {
+      "source": "examples/apps/colorlab/main.aw",
+      "source_sha256": "56039a91e487f1ca8586a3f0987c67f0140e9dd9c4cb5a1b944f626f91d60dde",
+      "before_and_after_c_sha256": "ca173273c8f9a6171c65aceeaf8199d528ff48b3820a6f90d52672af2ce35210",
+      "native_compiled": true
+    },
+    {
+      "source": "examples/apps/kpipe/main.aw",
+      "source_sha256": "b22205847d8f250c50e6cdce9da46e3661d08a85cfee1cc9127e951612f9a094",
+      "before_and_after_c_sha256": "340c324a0c0bd967a379e68c59f31d059b40a2670e8f686367a4ca861ce2c79e",
+      "native_compiled": true
+    },
+    {
+      "source": "examples/apps/ksave/main.aw",
+      "source_sha256": "f0760bae0c091ce6f78c8b03dfcf30cbf4711eee0b491bec986c3f3a35e65e53",
+      "before_and_after_c_sha256": "60bcef6c8d6dc8022a10849206cd47affcf04fe2ddd0b26a92d5c6b6b6de09cb",
+      "native_compiled": true
+    },
+    {
+      "source": "examples/apps/kserve/main.aw",
+      "source_sha256": "496d5584c9b06a4f66358aeb289f44a4c520b8f155f10907a968581bc4abbbce",
+      "before_and_after_c_sha256": "a5aa3c8bdece0c2ef3766b20c4ecd653ae944cba957b6d04a67072bae701da73",
+      "native_compiled": true
+    },
+    {
+      "source": "examples/apps/ksort/main.aw",
+      "source_sha256": "6449e91d30468de31576ab430046b5f5fdfb4387c1beacc8b25e72e6e8b39035",
+      "before_and_after_c_sha256": "758ac12f3f202975523c9cc13603502e7510e1427fba5f6b90723e41dffb2995",
+      "native_compiled": true
+    },
+    {
+      "source": "examples/apps/kvserve/main.aw",
+      "source_sha256": "f31007124f75b21ee33be5916d8625c3ca592744197d17dc2c0938cf73f839c4",
+      "before_and_after_c_sha256": "f969a4ae6815667548cffce6d077747b1b911f9b681737a26789dd617abf02b9",
+      "native_compiled": true
+    },
+    {
+      "source": "examples/collections/main.aw",
+      "source_sha256": "6ce2675ef69dcc8be6de2f38f2df60f1b8c48fb77ea3a96ce32e56d9a92a33d7",
+      "before_and_after_c_sha256": "16cd361ab380a29b8dd7a6dd17823f269a5820d70184dd6a304aa9240e73eb02",
+      "native_compiled": true
+    },
+    {
+      "source": "examples/containers/main.aw",
+      "source_sha256": "073945c12e636a688443fe3d92adebf4b9ecd95011289f6a9825498e30e35544",
+      "before_and_after_c_sha256": "3f59758bfdcce9e1a6ce762f2db2c3ead39e1768224c597a2680229d8aabf3c2",
+      "native_compiled": true
+    },
+    {
+      "source": "examples/enums/main.aw",
+      "source_sha256": "1c5d54d0a9171229252e068ff93095a53fc4fef39d39664aef926ea51288a3dd",
+      "before_and_after_c_sha256": "a3bfb4692e07bcfe317b592cd3a635585c64d6ab10527441ee8ec02004ae1a3b",
+      "native_compiled": true
+    },
+    {
+      "source": "examples/exported-enums/main.aw",
+      "source_sha256": "1ca6b8220ddfce26444b02fac178a972d3e57262efbe1971580eeced18bf447d",
+      "before_and_after_c_sha256": "d4e1343789ca22ed7331900f5795ca3bec3346ac3938485552f500e2bb682df4",
+      "native_compiled": true
+    },
+    {
+      "source": "examples/exported-enums/web.aw",
+      "source_sha256": "35429e3ed31e2829d30e923a64d3138202785ae7f3e3c6544d8a54f97245bc12",
+      "before_and_after_c_sha256": "d7355eee77862569ee2a36608d28a9d4be3aad7fb5e7dcb386e76713d8d49db6",
+      "native_compiled": true
+    },
+    {
+      "source": "examples/exports/main.aw",
+      "source_sha256": "b20cace3255c16bdd083665d720f75f6f2d9db674a22f4661eaafb737010dab3",
+      "before_and_after_c_sha256": "b629cb7b39759de9f556ca41dfc6c825998b57e19bf47bb14c99184bb800852c",
+      "native_compiled": true
+    },
+    {
+      "source": "examples/loops/main.aw",
+      "source_sha256": "09aedeff9301261f5c35957f6362b53e03858cf715286f0cb6a2d31881f185a4",
+      "before_and_after_c_sha256": "efd6ad2d1325dc3b116c6c4651dd86467b5d1f68ad4e6d629ed02c34e898a8a6",
+      "native_compiled": true
+    },
+    {
+      "source": "examples/modules/main.aw",
+      "source_sha256": "5de8438f00d6230978496be69c2e8bdd16da8d366f381322166261bf7f1325c9",
+      "before_and_after_c_sha256": "1ee61934ff611633c6fb733e9608c127f440a1b7beaa016128eb644974b154d6",
+      "native_compiled": true
+    },
+    {
+      "source": "examples/native/main.aw",
+      "source_sha256": "dce16178581e2f3a9bc4c69977a51ea9d7217cf104e44d82b46196ab8467b91f",
+      "before_and_after_c_sha256": "99d62131c755fe98ee7235214d6f09db05826cc1860790e91b64d2034fdf5419",
+      "native_compiled": true
+    },
+    {
+      "source": "examples/numeric/donut.aw",
+      "source_sha256": "7556bb0785efc31d111f3a90f059df0f85db214411bc64aa7c9b0b58cf2e3b43",
+      "before_and_after_c_sha256": "01de9824df1dc0c3cb5fe7541c660aeb25f0120606453db13fd7b0ca7ab68e9f",
+      "native_compiled": true
+    },
+    {
+      "source": "examples/numeric/main.aw",
+      "source_sha256": "0bac4a0ea3b1c93a51ec2b2196bf3076c35c8db8fc2cf7df13a900840c996223",
+      "before_and_after_c_sha256": "ed99f95da1e01ec6f3a6b5c426f997b3033dca995d82dddf3b81caf049043347",
+      "native_compiled": true
+    },
+    {
+      "source": "examples/packages-demo/main.aw",
+      "source_sha256": "ae60208978b3191f118e1f317c188bc17b063215d6fa6c69c3b5b06f4fc72fac",
+      "before_and_after_c_sha256": "c0faa21323876ba4b37c9801e269e872c177f6f6e4b65bdbf70285b02794bc2c",
+      "native_compiled": true
+    },
+    {
+      "source": "examples/parsing/jget.aw",
+      "source_sha256": "d77ba97ee6396c5a8156304c4dffcaa3daa2d8f0716524ffd3eeb8f5523044d5",
+      "before_and_after_c_sha256": "777db363cd1ae1961eebefac4f070cb24adf1a96b2b02d2f0436290996273d05",
+      "native_compiled": true
+    },
+    {
+      "source": "examples/parsing/web.aw",
+      "source_sha256": "d1115ef1773c69d31f294e79823011d02a8153f5296eab28687f567eed41b85a",
+      "before_and_after_c_sha256": "d6e653c6868a357da6c3c80c7754069c1274d7fbb389c04015f3e022378da18b",
+      "native_compiled": true
+    },
+    {
+      "source": "examples/resource-structs/main.aw",
+      "source_sha256": "3341be6eb29f256efc1dd04b8c0a1c1439d28ef3ec1b2123ec4779089bb46f43",
+      "before_and_after_c_sha256": "29530b2a607c1f5ef17cca9694a5ba9976bdc7d81ed2145913bb669d68b60dbe",
+      "native_compiled": true
+    },
+    {
+      "source": "examples/structs/main.aw",
+      "source_sha256": "d74adad1dc78798a811568603359caad759f947deab750bfc9a9db4115955af2",
+      "before_and_after_c_sha256": "44a69ac33a37892ffee6f2fd4e2a3bbd6b7f0d911bd3556c7103a9aaf1ef4df9",
+      "native_compiled": true
+    },
+    {
+      "source": "examples/tour/main.aw",
+      "source_sha256": "a9ea167c899b00c4242e91f2d32bf11e52f70a93609460fb12f9bb489cb85839",
+      "before_and_after_c_sha256": "fcb4fc783ffdb244f989fded9702d0568d7d17fffc8fa57988ccea31b91ebbbe",
+      "native_compiled": true
+    },
+    {
+      "source": "apps/board/filter.aw",
+      "source_sha256": "6af4b2ba425e619147befeaf85ae1d423d0543b80e4d41f3235b40f1fa7f9506",
+      "before_and_after_c_sha256": "291fe2c69e3415b13dd157ea79a07764be026fc8736a737053234bc02d843da8",
+      "native_compiled": true
+    },
+    {
+      "source": "apps/board/main.aw",
+      "source_sha256": "81e0eb25933a75f2dfbf6afe6b563932ca286a75e18023431504f27d2c532ef3",
+      "before_and_after_c_sha256": "6bf038a1536374f4e0e2b8ee4ff94d03764b5a57e5fbc153ba9e1a365ec96fa7",
+      "native_compiled": true
+    },
+    {
+      "source": "apps/logwindow/main.aw",
+      "source_sha256": "c99bd518b094a6fb8b9e7d47f47b8f4e4b0614330ab2424d93b93ac3dadcac6f",
+      "before_and_after_c_sha256": "b86f582b7b983abc852bf48424ffd1c076d777a5ed80a292326efff868bd694e",
+      "native_compiled": true
+    },
+    {
+      "source": "apps/taskrun/main.aw",
+      "source_sha256": "3b4670973101cfe15a79a58e15e6ddc891c722feef14abf84a7774df9a8ba5cd",
+      "before_and_after_c_sha256": "f99b0e4cf1601eed67f1abe0e9af53b927a5527a2a7563f9d9dfd8bb6ae1eb45",
+      "native_compiled": true
+    }
+  ]
+}

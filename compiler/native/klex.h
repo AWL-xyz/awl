@@ -25,11 +25,6 @@ KLEX_API size_t Awl_lex_result_size(void);
 /* out must not own a previous result; free before reuse. Do not shallow-copy
    owned results. Source pointer must address at least size readable bytes. */
 KLEX_API int Awl_lex(const char *source, size_t size, AwlLexResult *out);
-/* Filesystem-project scanner: flag4 UTF-8 string tokens; status6 unterminated
-   string. Legacy scanner above retains its token/error compatibility policy. */
-KLEX_API int Awl_lex_project(const char *,size_t,AwlLexResult *);
-/* Opt-in next-dialect scanner; legacy project scanning is unchanged. */
-KLEX_API int Awl_lex_next(const char *,size_t,AwlLexResult *);
 KLEX_API void Awl_lex_free(AwlLexResult *out);
 /* Isolated C++ scan+allocation+free time; excludes FFI/text marshalling. */
 KLEX_API int Awl_lex_benchmark(const char *, size_t, uint32_t, double *, uint64_t *);

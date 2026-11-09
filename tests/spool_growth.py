@@ -19,7 +19,7 @@ def main():
   else:emit('spool.snapshot(b)',text)
   emit('spool.bytes(b)',len(text.encode()));emit('spool.length(b)',len(text));emit('spool.capacity(b)',capacity)
   if step%50==49:chunks.append('func part'+str(len(chunks))+' :: @b b:spool { '+' '.join(body)+' };');body=[]
- source=' '.join(chunks)+' func main: i64 { @s b spool:spool.new(0); '+''.join('part'+str(i)+'(b);' for i in range(len(chunks)))+' return 0; };';want=('\n'.join(expected)+'\n').encode();records=[]
+ source=' '.join(chunks)+' func main[i64] { @s b spool:spool.new(0); '+''.join('part'+str(i)+'(b);' for i in range(len(chunks)))+' return 0; };';want=('\n'.join(expected)+'\n').encode();records=[]
  with tempfile.TemporaryDirectory(prefix='Awl-grow-',dir='/var/tmp') as td:
   td=Path(td);src=td/'main.aw';src.write_text(source);c=td/'main.c';r=subprocess.run([str(sdk/'bin/kcc'),'emit-c',str(src)],capture_output=True);assert r.returncode==0,r.stderr;c.write_bytes(r.stdout)
   for mode in ['native','sanitized']:

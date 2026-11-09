@@ -7,7 +7,7 @@ the header mark is the project owl, static, taken from `assets/branding/awl.svg`
 ## what it does
 
 - multi-file `.aw` editing with rename/delete, drag and drop, `.aw` download, and `localStorage` persistence under `awl-editor:v2`
-- highlighting and a structural aid for the current `next` grammar, brackets, `end` blocks, statements missing `;` and the old `func name(...)`/function `end;` shapes are flagged, it is not the native checker
+- highlighting and a structural aid for the current `aesop` grammar, brackets, `end` blocks, statements missing `;` and the old `func name(...)`/function `end;` shapes are flagged, it is not the native checker
 - `Run`/`Live` executes the supported subset in the page, `Ctrl+Enter` reruns, output, traps and a source line for each diagnostic are shown
 - the framebuffer calls record frames and the Visual tab replays them, recording is capped at600frames and48MB
 
@@ -16,7 +16,7 @@ the header mark is the project owl, static, taken from `assets/branding/awl.svg`
 - top-level `use ... as ...;`, `exports{ @r|@w ... };`, `@p`/`@s` bindings, `func name :: params: type { ... };`, enums and `match ... end;`
 - checked integer widths with traps on overflow, division by zero and out-of-range conversion, f64 math, `pi`/`tau`, text and `..` concatenation
 - module state, `@r` read-only and `@w` writable access from the importing file, private defining-file context
-- `print`, clock/sleep, math helpers, string helpers, `window_open`/`window_set_pixel`/`window_present`/`window_title`/`window_close`
+- `print`, monotonic clock, wall clock and sleep, math helpers, string helpers, `window_open`/`window_set_pixel`/`window_present`/`window_title`/`window_close`
 
 ## not supported
 

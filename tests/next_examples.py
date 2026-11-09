@@ -1,10 +1,10 @@
-"""Development regression only: structural checker coverage over every examples-next source, imports auto-loaded."""
+"""Development regression only: structural checker coverage over every examples source, imports auto-loaded."""
 import argparse,hashlib,json,subprocess
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 def main():
  p=argparse.ArgumentParser();p.add_argument('--binary',type=Path,required=True);p.add_argument('--report',type=Path,required=True);a=p.parse_args();binary=a.binary.resolve()
- sources=sorted((ROOT/'examples-next').rglob('*.aw'));records=[]
+ sources=sorted((ROOT/'examples').rglob('*.aw'));records=[]
  for source in sources:
   r=subprocess.run([str(binary),str(source)],capture_output=True,text=True,timeout=20,cwd=ROOT)
   assert r.returncode==0,(source.relative_to(ROOT),r.stderr)

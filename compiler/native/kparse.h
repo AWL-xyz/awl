@@ -21,8 +21,6 @@ KLEX_API int Awl_parse_source(const char *,size_t,void **);
    graph loading, namespace resolution and file provenance. No code execution.
    Paths returned below live until unit free. Source-byte APIs do not do I/O. */
 KLEX_API int Awl_parse_file(const char *,void **);
-/* Explicit experimental next dialect. Existing parse_file stays legacy. */
-KLEX_API int Awl_parse_file_next(const char *,void **);
 KLEX_API uint32_t Awl_source_file_count(void *);
 KLEX_API const char *Awl_source_file_path(void *,uint32_t);
 KLEX_API uint32_t Awl_diagnostic_count(void *);

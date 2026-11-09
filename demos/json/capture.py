@@ -6,7 +6,7 @@ from Xlib import X,display
 ROOT=Path(__file__).resolve().parents[2];out=Path(__file__).resolve().parent;binary=Path(os.environ.get('Awl_JSON_BINARY','/var/tmp/Awl-json-sdk/Awl/bin/Awl'))
 with tempfile.TemporaryDirectory(prefix='Awl-net-photo-',dir='/var/tmp') as td:
  work=Path(td)
- for src in (ROOT/'examples-next/parsing').iterdir():
+ for src in (ROOT/'examples/parsing').iterdir():
   if src.is_file():(work/src.name).write_bytes(src.read_bytes())
  (work/'config.json').write_text('{"database":{"host":"localhost","port":5432},"names":["café","Awl"]}')
  (work/'broken.json').write_text('{"database":]}')

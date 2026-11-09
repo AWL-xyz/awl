@@ -82,7 +82,7 @@ def main():
  pointer_cases += [('{"a":1,"\\u0061":2}','/a',-3),('null','',0),('null','/',-1),('{}','/'+'a'*4096,-2),('[]','/'*17,-2)]
  counts={};timings={};env={**os.environ,'PATH':'/no-host-tools','XDG_CACHE_HOME':'/var/tmp/Awl-json-cache','ASAN_OPTIONS':'detect_leaks=1:abort_on_error=1'}
  with tempfile.TemporaryDirectory(prefix='Awl-json-tests-',dir='/var/tmp') as td:
-  folder=Path(td);shutil.copyfile(ROOT/'examples-next/parsing/Json.aw',folder/'Json.aw');src=folder/'main.aw';src.write_text(PROBE)
+  folder=Path(td);shutil.copyfile(ROOT/'examples/parsing/Json.aw',folder/'Json.aw');src=folder/'main.aw';src.write_text(PROBE)
   for mode in ['bundled','sanitized']:
    exe=folder/mode;cmd='build' if mode=='bundled' else 'emit-c';r=subprocess.run([str(kcc),cmd,str(src),'--syntax','next']+(['-o',str(exe)] if mode=='bundled' else []),capture_output=True,text=True,env=env,timeout=180);assert r.returncode==0,r.stderr
    if mode=='sanitized':
@@ -106,5 +106,5 @@ def main():
    ok,values,metadata,_=run('{"é":]');assert not ok and metadata==[1,6] and values==['keep'];passed+=1
    r=subprocess.run([str(exe),'--reuse'],capture_output=True,env=env,timeout=5);assert (r.returncode,r.stdout,r.stderr)==(0,b'reuse passed\n',b'');passed+=1
    counts[mode]=passed;timings[mode]={'process_median_ms':sorted(elapsed)[len(elapsed)//2],'qualification':'includes file input, process startup and token output, mixed valid/invalid bounded corpus, not parser-only throughput'}
- report={'status':'PASS','cases_per_mode':counts,'corpus_sha256':hashlib.sha256(json.dumps([corpus,pointer_cases],ensure_ascii=True).encode()).hexdigest(),'compiler_sha256':hashlib.sha256(kcc.read_bytes()).hexdigest(),'parser_sha256':hashlib.sha256((ROOT/'examples-next/parsing/Json.aw').read_bytes()).hexdigest(),'harness_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),'timing':timings};a.report.write_text(json.dumps(report,separators=(',',':'))+'\n');print(report)
+ report={'status':'PASS','cases_per_mode':counts,'corpus_sha256':hashlib.sha256(json.dumps([corpus,pointer_cases],ensure_ascii=True).encode()).hexdigest(),'compiler_sha256':hashlib.sha256(kcc.read_bytes()).hexdigest(),'parser_sha256':hashlib.sha256((ROOT/'examples/parsing/Json.aw').read_bytes()).hexdigest(),'harness_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),'timing':timings};a.report.write_text(json.dumps(report,separators=(',',':'))+'\n');print(report)
 if __name__=='__main__':main()

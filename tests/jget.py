@@ -4,7 +4,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 p=argparse.ArgumentParser();p.add_argument('--kcc',type=Path,required=True);p.add_argument('--report',type=Path,required=True);a=p.parse_args();kcc=a.kcc.resolve();reports=[]
 with tempfile.TemporaryDirectory(prefix='Awl-jget-tests-',dir='/var/tmp') as td:
- folder=Path(td);src=ROOT/'examples-next/parsing/jget.aw';env={**os.environ,'PATH':'/no-host-tools','XDG_CACHE_HOME':'/var/tmp/Awl-json-cache','ASAN_OPTIONS':'detect_leaks=1:abort_on_error=1'}
+ folder=Path(td);src=ROOT/'examples/parsing/jget.aw';env={**os.environ,'PATH':'/no-host-tools','XDG_CACHE_HOME':'/var/tmp/Awl-json-cache','ASAN_OPTIONS':'detect_leaks=1:abort_on_error=1'}
  for mode in ['bundled','sanitized']:
   exe=folder/mode;cmd='build' if mode=='bundled' else 'emit-c';start=time.perf_counter_ns();r=subprocess.run([str(kcc),cmd,str(src),'--syntax','next']+(['-o',str(exe)] if mode=='bundled' else []),capture_output=True,text=True,env=env,timeout=180);assert r.returncode==0,r.stderr;build=(time.perf_counter_ns()-start)/1e6
   if mode=='sanitized':
@@ -24,4 +24,4 @@ with tempfile.TemporaryDirectory(prefix='Awl-jget-tests-',dir='/var/tmp') as td:
   with open('/dev/full','wb') as full:
    r=subprocess.run([str(exe),str(file)],stdout=full,stderr=subprocess.PIPE,env=env,timeout=5);assert r.returncode==3 and not r.stderr;passed+=1
   reports.append({'mode':mode,'cases':passed,'build_or_emit_ms':build,'executable_sha256':hashlib.sha256(exe.read_bytes()).hexdigest()})
-report={'status':'PASS','compiler_sha256':hashlib.sha256(kcc.read_bytes()).hexdigest(),'sources_sha256':{name:hashlib.sha256((ROOT/'examples-next/parsing'/name).read_bytes()).hexdigest() for name in ['Json.aw','jget.aw','jget.awproj']},'harness_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),'runs':reports};a.report.write_text(json.dumps(report,separators=(',',':'))+'\n');print(report)
+report={'status':'PASS','compiler_sha256':hashlib.sha256(kcc.read_bytes()).hexdigest(),'sources_sha256':{name:hashlib.sha256((ROOT/'examples/parsing'/name).read_bytes()).hexdigest() for name in ['Json.aw','jget.aw','jget.awproj']},'harness_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),'runs':reports};a.report.write_text(json.dumps(report,separators=(',',':'))+'\n');print(report)

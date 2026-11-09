@@ -7,7 +7,7 @@ function AwlBrowserRuntime(files, entry, send) {
  const win=id=>{if(!windows.has(id))throw Error('Invalid window handle');return windows.get(id);};
  const builtins={pi:Math.PI,tau:2*Math.PI,sin:Math.sin,cos:Math.cos,sqrt:Math.sqrt,atan2:Math.atan2,
  f64:x=>Number(x),print:x=>{send({type:'stdout',text:String(x)+'\n'});},
- sleep_millis:sleep,clock_millis:()=>Math.floor(performance.now()),
+ sleep_millis:sleep,clock_millis:()=>Math.floor(performance.now()),wall_clock_millis:()=>Math.floor(Date.now()),
  window_open:(w,h)=>{if(!Number.isInteger(w)||!Number.isInteger(h)||w<1||h<1||w*h>1048576)throw Error('Browser framebuffer limit: 1,048,576 pixels');const id=nextWindow++;windows.set(id,{w,h,title:'Awl window',pixels:new Uint8ClampedArray(w*h*4)});send({type:'open',id,w,h});return id;},
  window_width:id=>win(id).w,window_height:id=>win(id).h,
  window_set_title:(id,title)=>{win(id).title=String(title);send({type:'title',id,title:String(title)});return true;},
