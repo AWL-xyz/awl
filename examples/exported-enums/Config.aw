@@ -8,7 +8,7 @@ func port[i64] :: value:text {
     @p i: 0;
     @p result: 0;
     while i < string.bytes(value) {
-        @p byte: i64(string.byte_at(value, i));
+        @p byte: i64(string.byteat(value, i));
         if byte < 48 or byte > 57 { return -1; };
         result: result * 10 + byte - 48;
         i: i + 1;

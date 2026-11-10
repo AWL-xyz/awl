@@ -1,4 +1,4 @@
-// Native public ASDK Beta front door. Included by kcc.cpp; compiler stays in-process.
+// Native public ASDK Beta front door. Included by acc.cpp; compiler stays in-process.
 #include <filesystem>
 #include <algorithm>
 #include <set>

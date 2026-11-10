@@ -6,7 +6,7 @@ exports{
     Failed(code:i64);
  end;
  @r func run[Outcome] :: program:text,args:view<text>,@b out:spool,@b err:spool,timeout:i64 {
-    @p code:process_capture(program,args,out,err,timeout);
+    @p code:process.capture(program,args,out,err,timeout);
     if code==0 { return Outcome.Passed(); };
     if code>0 { return Outcome.Exited(code); };
     if code==-4 { return Outcome.TimedOut(); };

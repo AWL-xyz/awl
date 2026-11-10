@@ -11,22 +11,22 @@ import subprocess
 import tempfile
 ROOT = Path(__file__).resolve().parent
 PHASES = {
-    'lexer': ['klex.cpp', 'klex_test.cpp'],
-    'frontend': ['klex.cpp', 'kparse.cpp', 'kparse_test.cpp'],
-    'verifier': ['klex.cpp', 'kverify_test.cpp'],
-    'project': ['klex.cpp', 'kproject_test.cpp'],
-    'aesop': ['klex.cpp', 'kaesop_test.cpp'],
-    'inference': ['klex.cpp', 'kinfer_test.cpp'],
-    'module-numeric': ['klex.cpp', 'kmodule_numeric_test.cpp'],
-    'streams': ['klex.cpp', 'kstreams_test.cpp'],
-    'typed-vectors': ['klex.cpp', 'kgeneric_test.cpp'],
-    'tcp': ['klex.cpp', 'ktcp_test.cpp'],
-    'replace': ['klex.cpp', 'kreplace_test.cpp'],
-    'enums': ['klex.cpp', 'kenum_test.cpp'],
-    'views': ['klex.cpp', 'kview_test.cpp'],
-    'process': ['klex.cpp', 'kprocess_test.cpp'],
-    'clean-syntax': ['klex.cpp', 'kclean_test.cpp'],
-    'exported-enums': ['klex.cpp', 'kexport_test.cpp'],
+    'lexer': ['lex.cpp', 'lex_test.cpp'],
+    'frontend': ['lex.cpp', 'parse.cpp', 'parse_test.cpp'],
+    'verifier': ['lex.cpp', 'verify_test.cpp'],
+    'project': ['lex.cpp', 'project_test.cpp'],
+    'aesop': ['lex.cpp', 'aesop_test.cpp'],
+    'inference': ['lex.cpp', 'infer_test.cpp'],
+    'module-numeric': ['lex.cpp', 'module_numeric_test.cpp'],
+    'streams': ['lex.cpp', 'streams_test.cpp'],
+    'typed-vectors': ['lex.cpp', 'generic_test.cpp'],
+    'tcp': ['lex.cpp', 'tcp_test.cpp'],
+    'replace': ['lex.cpp', 'replace_test.cpp'],
+    'enums': ['lex.cpp', 'enum_test.cpp'],
+    'views': ['lex.cpp', 'view_test.cpp'],
+    'process': ['lex.cpp', 'process_test.cpp'],
+    'clean-syntax': ['lex.cpp', 'clean_test.cpp'],
+    'exported-enums': ['lex.cpp', 'export_test.cpp'],
 }
 def snapshot():
     return {p.name: hashlib.sha256(p.read_bytes()).hexdigest()

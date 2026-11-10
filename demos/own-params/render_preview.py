@@ -8,7 +8,7 @@ env={**os.environ,'PATH':'/no-host-tools','XDG_CACHE_HOME':str(Path.home()/'.cac
 r=subprocess.run([str(kcc),'run',str(ROOT/'examples/own-params/main.aw')],env=env,capture_output=True,text=True,check=True,timeout=120)
 assert r.stdout=='frame=99999\n100000 owning calls: callee releases builders\n1088890\nUnavailable handles transfer safely\nfalse\n',r.stdout
 with tempfile.TemporaryDirectory() as td:
- p=Path(td)/'alias.aw';p.write_text('function mixed(borrow view:spool,own b:spool)->unit end function main()->i64 scoped building:spool=spool_new(32) mixed(building,move building) return 0 end')
+ p=Path(td)/'alias.aw';p.write_text('function mixed(borrow view:spool,own b:spool)->unit end function main()->i64 scoped building:spool=spool.new(32) mixed(building,move building) return 0 end')
  q=subprocess.run([str(kcc),'check',str(p),'--diagnostic-format','json'],env=env,capture_output=True,text=True,timeout=20);assert q.returncode==1
  diagnostic=json.loads(q.stderr)['diagnostics'][0];assert diagnostic['code']=='E222'
 im=Image.new('RGB',(1280,940),'#101621');d=ImageDraw.Draw(im)
@@ -18,7 +18,7 @@ d.text((48,124),'Explicit move arguments  /  Consumed caller binding  /  Callee 
 d.rounded_rectangle((48,176,1232,239),radius=12,fill='#203149');d.text((69,196),'ROADMAP ~17.7%  |  +0.40 accepted planning points — subjective, not measured completeness',font=f(18),fill='#e4edff')
 d.rounded_rectangle((48,260,632,662),radius=14,fill='#19243a');d.rounded_rectangle((652,260,1232,662),radius=14,fill='#0a101a')
 d.text((69,282),'SOURCE EXCERPTS · examples/own-params/',font=f(14),fill='#78e2bd');d.text((675,282),'ACTUAL EXTRACTED-BUNDLE OUTPUT',font=f(14),fill='#78e2bd')
-code=['function finish(own b:spool,n:i64)->i64','    ...','    return spool_bytes(b)','end','','scoped b:spool=spool_new(32)','','local count:i64=sink.finish(move b,n)','return count']
+code=['function finish(own b:spool,n:i64)->i64','    ...','    return spool.bytes(b)','end','','scoped b:spool=spool.new(32)','','local count:i64=sink.finish(move b,n)','return count']
 for i,line in enumerate(code):d.text((69,324+i*34),line,font=f(17,True),fill='#dbe8fc')
 for i,line in enumerate(r.stdout.splitlines()):d.text((675,335+i*58),line,font=f(18,True),fill='#88edc0' if line in ['1088890','false'] else '#dbe8fc')
 d.rounded_rectangle((48,684,1232,854),radius=14,fill='#30202b');d.text((69,704),'BORROW + CONSUME ALIAS · actual compiler rejection',font=f(15),fill='#f3b6ba');d.text((69,742),'mixed(building,move building)',font=f(22,True),fill='#f5d5db')

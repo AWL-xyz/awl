@@ -4,8 +4,8 @@ func contains_folded[bool] :: value:text, query:text {
         @p i: 0;
         @p same: true;
         while i < string.bytes(query) and same {
-            @p a: i64(string.byte_at(value, at + i));
-            @p b: i64(string.byte_at(query, i));
+            @p a: i64(string.byteat(value, at + i));
+            @p b: i64(string.byteat(query, i));
             if a >= 65 and a <= 90 { a: a + 32; };
             if b >= 65 and b <= 90 { b: b + 32; };
             if a != b { same: false; };
@@ -19,11 +19,11 @@ func contains_folded[bool] :: value:text, query:text {
 exports{
     @r func integer[i64] :: value:text {
         if string.bytes(value) == 0 or string.bytes(value) > 7 { return -1; };
-        if string.bytes(value) > 1 and string.byte_at(value, 0) == 48u8 { return -1; };
+        if string.bytes(value) > 1 and string.byteat(value, 0) == 48u8 { return -1; };
         @p number: 0;
         @p i: 0;
         while i < string.bytes(value) {
-            @p digit: i64(string.byte_at(value, i)) - 48;
+            @p digit: i64(string.byteat(value, i)) - 48;
             if digit < 0 or digit > 9 { return -1; };
             number: number * 10 + digit;
             if number > 1000000 { return -1; };

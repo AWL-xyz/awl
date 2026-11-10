@@ -15,7 +15,7 @@ func main[i64] {
     if not vector.truncate(rows,2) { return 1; };
     print(vector.get(rows,0));
     print(vector.get(rows,1));
-    print("capacity: "+string.from_i64(vector.capacity(rows)));
-    print("length: "+string.from_i64(vector.length(rows)));
+    print("capacity: "+string.fromi64(vector.capacity(rows)));
+    print("length: "+string.fromi64(vector.length(rows)));
     return 0;
 };

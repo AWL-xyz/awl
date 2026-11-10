@@ -43,16 +43,16 @@ dependency resolution between packages, `awl add/install`, lockfiles, a user-wid
 
 these are development-source features, the received complete0.26 SDK predates this Package/ACC/spool work, its successful offline acceptance is not acceptance of the merged source as a shipped SDK
 
-compiler collection name is Awl Compiler Collection (ACC), the source driver recognizes `acc`, `kcc` remains a compatibility executable/file name, `awl` is still the public toolkit command, future complete bundle builders include the `acc` alias, no server `add/install` command was added
+compiler collection name is Awl Compiler Collection (ACC), the source driver recognizes `acc`, `acc` remains a compatibility executable/file name, `awl` is still the public toolkit command, future complete bundle builders include the `acc` alias, no server `add/install` command was added
 
 `env.parse` accepts up to16384 UTF8 bytes and256total pairs, checks aligned keys/values and a result vector with at least2elements, accepts LF/CRLF and quoted newlines, comments retain the preceding pair, long keys/values aren't silently truncated, EOF empty values are empty, result code0means success, valid preceding pairs remain appended on a later error, this isn't an atomic parser, it doesn't mutate OS environment variables, `find/get` use the first matching duplicate key, bare-CR line endings and variable expansion aren't promised
 
 14 integration groups check both Package initializer flag positions and overwrite protection, created modules/aliases, missing/wrong-case/private/cyclic imports, malformed names/format/entry and duplicate aliases, native/sanitized env/json/fsp and real WASI env/json, fsp covers actual UTF8 file reads, missing files, invalid UTF8 and over16384-byte files, `tests/aesop_time.py` separately checks native and sanitized time Package execution, wall-clock agreement with the host, checked deadlines, bounded sleeps, bad-arity rejection, Windows helper source syntax and the shipped demo, the manifest reader isn't a registry security boundary or dependency resolver
 
-latest source evidence is `tests/package-import-checkpoint.json` for the original three Packages and `tests/aesop-time.json` for the time Package, inherited release/editor/old-source reports remain historical rather than acceptance of different source bytes
+latest source evidence is `tests/aesop-checks.json`, `tests/aesop-time.json` and `tests/aesop-native.json.gz`, the original Package checkpoint and older release/editor reports are preserved under `tests/archive/` as historical evidence
 
 map repairs during import are checked separately by `tests/map_model.py`,10000 independently modeled operations, non-power-of-two initial capacity, set zero-width storage, stale/quota traps and native/sanitized/WASI extraction surviving clear, maps charge owned text together with table storage against64MiB, immutable returned snapshots use the existing separate bounded process-lifetime string region, this isn't reclaimable text or mutation-safe/concurrent iteration
 
 primary C interface validity reference, [POSIX2.1.1](https://pubs.opengroup.org/onlinepubs/9799919799/functions/V2_chap02.html#tag_16_01_01), zero-width set storage must not pass a null pointer to a standard memory operation, tests caught this under UBSan and the runtime now skips zero-byte/null value operations
 
-all16 compiler ASan/UBSan phases pass on the current source, including867 targeted verifier corruptions, full historical564x3 legacy qualification was not rerun, workload score remains26.7%=12/45
+all16 compiler ASan/UBSan phases pass on the current source, including869 targeted verifier corruptions, full historical564x3 legacy qualification was not rerun, workload score remains26.7%=12/45

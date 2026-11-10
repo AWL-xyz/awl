@@ -1,14 +1,14 @@
 use Graphics.aw as gfx;
 func render[bool] :: window:i64, @b pixels[i64], red:i64, green:i64, blue:i64 {
-    @p width: window_width(window);
-    @p height: window_height(window);
+    @p width: window.width(window);
+    @p height: window.height(window);
     if not gfx.surface(pixels, width, height, 1119522) { return false; };
     gfx.rect(pixels, width, height, 24, 68, 432, 224, 1646897);
     gfx.rect(pixels, width, height, 472, 68, 224, 224, 1646897);
     gfx.draw_text(pixels, width, height, 28, 24, "Awl COLOR LAB", 3, 14215151);
-    gfx.draw_text(pixels, width, height, 48, 88, "RED   " + string.from_i64(red), 2, 16741488);
-    gfx.draw_text(pixels, width, height, 48, 152, "GREEN " + string.from_i64(green), 2, 8124596);
-    gfx.draw_text(pixels, width, height, 48, 216, "BLUE  " + string.from_i64(blue), 2, 8100863);
+    gfx.draw_text(pixels, width, height, 48, 88, "RED   " + string.fromi64(red), 2, 16741488);
+    gfx.draw_text(pixels, width, height, 48, 152, "GREEN " + string.fromi64(green), 2, 8124596);
+    gfx.draw_text(pixels, width, height, 48, 216, "BLUE  " + string.fromi64(blue), 2, 8100863);
     @p x: 0;
     while x < 384 {
         @p value: x * 256 / 384;
@@ -32,11 +32,11 @@ func render[bool] :: window:i64, @b pixels[i64], red:i64, green:i64, blue:i64 {
     return gfx.present(window, pixels, width, height);
 };
 func main[i64] {
-    if arg_count() != 0 { return 2; };
-    @p window: window_open(720, 440);
+    if arg.count() != 0 { return 2; };
+    @p window: window.open(720, 440);
     if window == 0 { return 3; };
-    defer window_close(window);
-    if not window_set_title(window, "Awl Color Lab | native source graphics") { return 3; };
+    defer window.close(window);
+    if not window.title(window, "Awl Color Lab | native source graphics") { return 3; };
     @s pixels vector<i64>: vector.new<i64>(0);
     if not vector.valid(pixels) { return 9; };
     @p red: 78;
@@ -48,15 +48,15 @@ func main[i64] {
     @p frames: 0;
     while active and frames < 2048 {
         @p events: 0;
-        @p event: window_poll(window);
+        @p event: window.poll(window);
         while event != 0 and active and events < 64 {
             if event == 1 { active: false; };
             if event == 2 or event == 3 { dirty: true; };
-            if event == 7 and window_key(window) == 1 { dragging: true; };
-            if event == 8 and window_key(window) == 1 { dragging: false; };
+            if event == 7 and window.key(window) == 1 { dragging: true; };
+            if event == 8 and window.key(window) == 1 { dragging: false; };
             if dragging and (event == 6 or event == 7) {
-                @p x: window_mouse_x(window);
-                @p y: window_mouse_y(window);
+                @p x: window.mousex(window);
+                @p y: window.mousey(window);
                 if x >= 48 and x < 432 {
                     @p value: (x - 48) * 256 / 384;
                     if y >= 112 and y < 134 { red: value; dirty: true; };
@@ -68,17 +68,17 @@ func main[i64] {
                 };
             };
             events: events + 1;
-            if events < 64 { event: window_poll(window); };
+            if events < 64 { event: window.poll(window); };
         };
         if active and dirty {
             if not render(window, pixels, red, green, blue) { return 3; };
             frames: frames + 1;
             dirty: false;
         };
-        if active { sleep_millis(10); };
+        if active { clock.sleep(10); };
     };
     if active { return 6; };
-    print(string.from_i64(red) + " " + string.from_i64(green) + " " + string.from_i64(blue));
-    if stdout_flush() != 0 { return 3; };
+    print(string.fromi64(red) + " " + string.fromi64(green) + " " + string.fromi64(blue));
+    if stdout.flush() != 0 { return 3; };
     return 0;
 };

@@ -12,8 +12,8 @@ def main():
    result='own spool' if label=='owned' else 'spool'
    setup='scoped' if label=='owned' else 'local'
    ret='move b' if label=='owned' else 'b'
-   cleanup='' if label=='owned' else 'spool_free(b)'
-   source='function make(i:i64)->'+result+' '+setup+' b:spool=spool_new(64) spool_append(b,"frame=") spool_i64(b,i) return '+ret+' end function frame(i:i64)->i64 '+setup+' b:spool=make(i) local n:i64=spool_bytes(b) '+cleanup+' return n end function main()->i64 local i:i64=0 local sum:i64=0 while i<100000 do sum=sum+frame(i) i=i+1 end print(sum) return 0 end'
+   cleanup='' if label=='owned' else 'spool.free(b)'
+   source='function make(i:i64)->'+result+' '+setup+' b:spool=spool.new(64) spool.append(b,"frame=") spool.i64(b,i) return '+ret+' end function frame(i:i64)->i64 '+setup+' b:spool=make(i) local n:i64=spool.bytes(b) '+cleanup+' return n end function main()->i64 local i:i64=0 local sum:i64=0 while i<100000 do sum=sum+frame(i) i=i+1 end print(sum) return 0 end'
    (root/(label+'.aw')).write_text(source)
   def sample(label):
    exe=root/label;t=time.perf_counter();r=subprocess.run([str(KCC),'build',str(root/(label+'.aw')),'-O','2','-o',str(exe)],env=env,capture_output=True,text=True,timeout=120);build=(time.perf_counter()-t)*1000;assert r.returncode==0,r.stderr

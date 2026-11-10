@@ -6,10 +6,10 @@ from Xlib import X,display
 ROOT=Path(__file__).resolve().parents[2];out=Path(__file__).resolve().parent;binary=Path(os.environ.get('Awl_NET_BINARY','/var/tmp/Awl-net-sdk/Awl/bin/Awl'))
 with tempfile.TemporaryDirectory(prefix='Awl-net-photo-',dir='/var/tmp') as td:
  work=Path(td)
- for src in (ROOT/'examples/apps/kserve').iterdir():
+ for src in (ROOT/'examples/apps/serve').iterdir():
   if src.is_file():(work/src.name).write_bytes(src.read_bytes())
  oracle=work/'client.py';oracle.write_text('''import http.client,subprocess
-p=subprocess.Popen(['./build/kserve','0','5'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
+p=subprocess.Popen(['./build/serve','0','5'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
 try:
  port=int(p.stdout.readline());print('native server bound to 127.0.0.1:'+str(port))
  for method,path,status in [('GET','/health',200),('GET','/counter',200),('POST','/counter',200),('GET','/counter',200),('GET','/missing',404)]:

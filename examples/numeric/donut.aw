@@ -1,21 +1,21 @@
 func main[i64] {
-    @p window: window_open(64, 48);
+    @p window: window.open(64, 48);
     if window == 0 {
         return 1;
     };
-    @p titled: window_set_title(window, "Awl spinning donut");
+    @p titled: window.title(window, "Awl spinning donut");
     @p running: true;
     @p frame: 0;
     while running {
-        @p event: window_poll(window);
+        @p event: window.poll(window);
         while event != 0 {
             if event == 1 {
                 running: false;
             };
-            event: window_poll(window);
+            event: window.poll(window);
         };
         if running == false {
-            window_close(window);
+            window.close(window);
             return 0;
         };
         @p angle: f64(frame) * tau / 90;
@@ -55,15 +55,15 @@ func main[i64] {
                         };
                     };
                 };
-                window_set_pixel(window, col, row, color);
+                window.pixel(window, col, row, color);
                 col: col + 1;
             };
             row: row + 1;
         };
-        running: window_present(window);
-        sleep_millis(16);
+        running: window.present(window);
+        clock.sleep(16);
         frame: (frame + 1) % 90;
     };
-    window_close(window);
+    window.close(window);
     return 0;
 };

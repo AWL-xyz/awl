@@ -4,11 +4,15 @@ Aesop is the only supported surface syntax, the native frontend lives in `compil
 
 this is the source syntax reference, older SDK archives do not implement this revision
 
+see [built-in API and conversions](API.md) for grouped `namespace.method(...)` calls, numeric `convert`, `isnum` and exact `match` predicates
+
+mixed integer and `f64` arithmetic is strict, use `f64.convert(...)` or an integer `convert(...)` explicitly, there is no implicit widening or narrowing
+
 ## function declarations
 
 ```text
 func size :: @b values[i64], etc[i64] {
-    return vector_length(values) + vector_length(etc);
+    return vector.length(values) + vector.length(etc);
 };
 
 func main[i64] {
@@ -36,7 +40,7 @@ func NAME { BODY };
 
 ```text
 func size :: @b values[i64], etc[i64] {
-    return vector_length(values) + vector_length(etc);
+    return vector.length(values) + vector.length(etc);
 };
 ```
 
@@ -166,6 +170,6 @@ functions are private unless explicitly exported, defining-module private contex
 
 `..` is left-associative with the same precedence as `+`, `1..2` is concatenation, `1.2` is an f64 literal, resource/vector/aggregate values are not implicitly formatted
 
-category calls such as `vector.length(values)`, `spool.new(16)` and `map.get(table,key)` are the normal builtin spelling, `vector_length(values)` is also accepted as the explicit vector-length alias used in the requested declaration example, this does not restore the old grammar or all underscore builtin aliases
+category calls such as `vector.length(values)`, `spool.new(16)` and `map.get(table,key)` are the normal builtin spelling, `vector.length(values)` is also accepted as the explicit vector-length alias used in the requested declaration example, this does not restore the old grammar or all underscore builtin aliases
 
 runtime ownership, bounds, overflow, resource and view-staleness checks are unchanged by the declaration migration

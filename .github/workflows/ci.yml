@@ -25,7 +25,7 @@ jobs:
       - name: Local time Package with generated-program sanitizers
         run: python3 tests/aesop_time.py --acc compiler/native/bin/acc --sanitize --report tests/aesop-time.json
       - name: Offline editor interpreter and bundled examples
-        run: python3 tests/awl_editor.py --kcc compiler/native/bin/acc --report tests/aesop-editor.json
+        run: python3 tests/awl_editor.py --acc compiler/native/bin/acc --report tests/aesop-editor.json
       - name: Native ownership and independent-verifier gates with sanitizers
         run: python3 compiler/test_native.py --sanitize --report tests/aesop-native.json.gz
       - uses: actions/upload-artifact@v4

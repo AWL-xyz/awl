@@ -10,7 +10,7 @@ def main():
   root=Path(td)
   for label in samples:
    capacity='0' if label=='growth' else '100000'
-   source='function main()->i64 scoped v:int_vector=int_vector_new('+capacity+') if not int_vector_valid(v) then return 1 end local i:i64=0 while i<100000 do if not int_vector_push(v,i) then return 2 end i=i+1 end local sum:i64=0 i=0 while i<int_vector_length(v) do sum=sum+int_vector_get(v,i) i=i+1 end print(sum) return 0 end'
+   source='function main()->i64 scoped v:int_vector=intvector.new('+capacity+') if not intvector.valid(v) then return 1 end local i:i64=0 while i<100000 do if not intvector.push(v,i) then return 2 end i=i+1 end local sum:i64=0 i=0 while i<intvector.length(v) do sum=sum+intvector.get(v,i) i=i+1 end print(sum) return 0 end'
    (root/(label+'.aw')).write_text(source)
   def sample(label):
    exe=root/label;t=time.perf_counter();r=subprocess.run([str(KCC),'build',str(root/(label+'.aw')),'-O','2','-o',str(exe)],env=env,capture_output=True,text=True,timeout=120);build=(time.perf_counter()-t)*1000;assert r.returncode==0,r.stderr

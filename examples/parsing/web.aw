@@ -1,9 +1,9 @@
 use Json.aw as json;
 func main[i64] {
-    if arg_count() != 2 { print("arguments"); return 2; };
-    if not arg_text_valid(0) or not arg_text_valid(1) { print("utf8"); return 2; };
-    @p source: arg_text(0);
-    @p pointer: arg_text(1);
+    if arg.count() != 2 { print("arguments"); return 2; };
+    if not arg.textvalid(0) or not arg.textvalid(1) { print("utf8"); return 2; };
+    @p source: arg.text(0);
+    @p pointer: arg.text(1);
     @s tokens vector<text>: vector.new<text>(0);
     @s result vector<i64>: vector.new<i64>(0);
     if not vector.valid(tokens) or not vector.valid(result) { print("allocation"); return 9; };

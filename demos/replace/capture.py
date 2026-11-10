@@ -6,7 +6,7 @@ from Xlib import X,display
 ROOT=Path(__file__).resolve().parents[2];out=Path(__file__).resolve().parent;binary=Path(os.environ.get('Awl_REPLACE_BINARY','/var/tmp/Awl-replace-sdk/Awl/bin/Awl'))
 with tempfile.TemporaryDirectory(prefix='Awl-net-photo-',dir='/var/tmp') as td:
  work=Path(td)
- for src in (ROOT/'examples/apps/ksave').iterdir():
+ for src in (ROOT/'examples/apps/save').iterdir():
   if src.is_file():(work/src.name).write_bytes(src.read_bytes())
  transcript=work/'transcript.txt';script=work/'demo.sh';script.write_text('''#!/bin/sh
 export PATH="'''+str(binary.parent)+'''":/usr/bin:/bin
@@ -18,12 +18,12 @@ awl build
 mkdir store
 printf 'old copy\\n' > store/config
 printf '\\n$ publish new stdin data without truncating the old file\\n'
-printf '{"port":5432}\\n' | ./build/ksave store scratch config
+printf '{"port":5432}\\n' | ./build/save store scratch config
 printf 'publication status above, target now contains: '
 cat store/config
 printf '\\n$ existing temporary file refuses overwrite\\n'
 printf 'reserved\\n' > store/scratch
-printf 'bad replacement\\n' | ./build/ksave store scratch config
+printf 'bad replacement\\n' | ./build/save store scratch config
 printf 'exit: %s\\n' "$?"
 printf 'target retained: '
 cat store/config

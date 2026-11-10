@@ -9,8 +9,8 @@ def main():
  with tempfile.TemporaryDirectory(prefix='Awl-own-params-bench-') as td:
   root=Path(td)
   for label in samples:
-   owned=label=='reinit';setup='scoped' if owned else 'local';result='own spool' if owned else 'spool';returned='move b' if owned else 'b';mode='own' if owned else 'borrow';arg='move b' if owned else 'b';cleanup='' if owned else 'spool_free(b)'
-   source='function make(i:i64)->'+result+' '+setup+' b:spool=spool_new(64) spool_append(b,"frame=") spool_i64(b,i) return '+returned+' end function take('+mode+' b:spool)->i64 return spool_bytes(b) end function frame(i:i64)->i64 '+setup+' b:spool=make(i) local n:i64=take('+arg+') '+cleanup+' b=make(i) '+cleanup+' return n end function main()->i64 local i:i64=0 local sum:i64=0 while i<100000 do sum=sum+frame(i) i=i+1 end print(sum) return 0 end'
+   owned=label=='reinit';setup='scoped' if owned else 'local';result='own spool' if owned else 'spool';returned='move b' if owned else 'b';mode='own' if owned else 'borrow';arg='move b' if owned else 'b';cleanup='' if owned else 'spool.free(b)'
+   source='function make(i:i64)->'+result+' '+setup+' b:spool=spool.new(64) spool.append(b,"frame=") spool.i64(b,i) return '+returned+' end function take('+mode+' b:spool)->i64 return spool.bytes(b) end function frame(i:i64)->i64 '+setup+' b:spool=make(i) local n:i64=take('+arg+') '+cleanup+' b=make(i) '+cleanup+' return n end function main()->i64 local i:i64=0 local sum:i64=0 while i<100000 do sum=sum+frame(i) i=i+1 end print(sum) return 0 end'
    (root/(label+'.aw')).write_text(source)
   def sample(label):
    exe=root/label;t=time.perf_counter();r=subprocess.run([str(KCC),'build',str(root/(label+'.aw')),'-O','2','-o',str(exe)],env=env,capture_output=True,text=True,timeout=120);build=(time.perf_counter()-t)*1000;assert r.returncode==0,r.stderr

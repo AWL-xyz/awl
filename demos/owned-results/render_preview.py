@@ -7,7 +7,7 @@ env={**os.environ,'PATH':'/no-host-tools','XDG_CACHE_HOME':str(Path.home()/'.cac
 r=subprocess.run([str(kcc),'run',str(ROOT/'examples/owned-results/main.aw')],env=env,capture_output=True,text=True,check=True,timeout=120)
 assert r.stdout=='frame=99999 / returned\n100000 factory -> transform -> caller pipelines\n2188890\n',r.stdout
 with tempfile.TemporaryDirectory() as td:
- p=Path(td)/'discard.aw';p.write_text('function make()->own spool scoped b:spool=spool_new(8) return move b end function main()->i64 make() return 0 end')
+ p=Path(td)/'discard.aw';p.write_text('function make()->own spool scoped b:spool=spool.new(8) return move b end function main()->i64 make() return 0 end')
  q=subprocess.run([str(kcc),'check',str(p),'--diagnostic-format','json'],env=env,capture_output=True,text=True);assert q.returncode==1
  diagnostic=json.loads(q.stderr)['diagnostics'][0];assert diagnostic['code']=='E223'
 im=Image.new('RGB',(1400,940),'#101621');d=ImageDraw.Draw(im)
@@ -16,7 +16,7 @@ d.text((48,28),'Awl / 0.14.0-dev',font=f(18),fill='#78e2bd');d.text((48,70),'Bui
 d.text((48,132),'Factory → transform → scoped caller  /  Native execution  /  Explicit return move',font=f(22),fill='#a4b8d1')
 d.rounded_rectangle((48,190,1352,252),radius=12,fill='#203149');d.text((69,210),'ACCEPTED  ·  449 tests × 3 configurations  ·  197 extracted-bundle tests  ·  54 offline commands',font=f(20),fill='#e4edff')
 d.rounded_rectangle((48,274,1352,515),radius=14,fill='#19243a');d.text((69,294),'SOURCE EXCERPTS · examples/owned-results/',font=f(15),fill='#78e2bd')
-code=['function transform(own b:spool)->own spool','    spool_append(b," / returned")','    return move b','end','scoped draft:spool=factory.forward(n)','scoped ready:spool=factory.transform(move draft)']
+code=['function transform(own b:spool)->own spool','    spool.append(b," / returned")','    return move b','end','scoped draft:spool=factory.forward(n)','scoped ready:spool=factory.transform(move draft)']
 for i,line in enumerate(code):d.text((69,332+i*28),line,font=f(21,True),fill='#dbe8fc')
 d.rounded_rectangle((48,537,1352,730),radius=14,fill='#0a101a');d.text((69,557),'ACTUAL FINAL EXTRACTED-BUNDLE OUTPUT',font=f(15),fill='#78e2bd')
 for i,line in enumerate(r.stdout.splitlines()):d.text((69,597+i*36),line,font=f(23,True),fill='#88edc0')

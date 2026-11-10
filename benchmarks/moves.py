@@ -11,7 +11,7 @@ def main():
   for label in samples:
    transfer='scoped ready:spool=move building' if label=='move' else ''
    target='ready' if label=='move' else 'building'
-   source='function step(n:i64)->i64 scoped building:spool=spool_new(64) if not spool_valid(building) then return -1 end spool_append(building,"frame=") spool_i64(building,n) '+transfer+' return spool_bytes('+target+') end function main()->i64 local i:i64=0 local sum:i64=0 while i<100000 do local n:i64=step(i) if n<0 then return 1 end sum=sum+n i=i+1 end print(sum) return 0 end'
+   source='function step(n:i64)->i64 scoped building:spool=spool.new(64) if not spool.valid(building) then return -1 end spool.append(building,"frame=") spool.i64(building,n) '+transfer+' return spool.bytes('+target+') end function main()->i64 local i:i64=0 local sum:i64=0 while i<100000 do local n:i64=step(i) if n<0 then return 1 end sum=sum+n i=i+1 end print(sum) return 0 end'
    (root/(label+'.aw')).write_text(source)
   def sample(label):
    exe=root/label;t=time.perf_counter();r=subprocess.run([str(KCC),'build',str(root/(label+'.aw')),'-O','2','-o',str(exe)],env=env,capture_output=True,text=True,timeout=120);build=(time.perf_counter()-t)*1000;assert r.returncode==0,r.stderr

@@ -1,5 +1,7 @@
 # practical capability assessment
 
+current source note, conversions, type tests, namespace-only built-ins, file renames, documentation cleanup and source gates do not add a workload point, the score below remains 26.7% · 12/45
+
 ## current estimate, 26.7% — 12 / 45 stage points
 
 it's a coarse engineering judgment against the requested software scope, not an objective fraction of all possible programs, the arithmetic's explicit but the underlying judgments aren't precise
@@ -33,13 +35,13 @@ stages need review, they're not automatic checklist completions, wine isn't nati
 
 | area | stage / 5 | evidence and limiting factor |
 |---|---:|---|
-| cli / persistent-data tools | 2 | native intstats, kcopy, textinfo environment-configured kpipe with binary stdin/stdout and typed-vector ksort, broad parsing/configuration and structured recoverable errors remain open |
+| cli / persistent-data tools | 2 | native intstats, kcopy, textinfo environment-configured pipe with binary stdin/stdout and typed-vector sort, broad parsing/configuration and structured recoverable errors remain open |
 | native desktop applications | 2 | pixelboard saves and reloads validated drawings, with malformed-load rollback and overwrite refusal, limited source-rendered ASCII text/color controls now exist, general fonts/widgets/accessibility/media remain blockers |
-| backend apis / services | 2 | useful native kvserve text store, strict request bodies, JSON output, restart replay and checked storage errors, bounded trusted local use only, no full HTTP/general JSON parsing/TLS/auth/concurrency or crash-durable database |
+| backend apis / services | 2 | useful native valueserve text store, strict request bodies, JSON output, restart replay and checked storage errors, bounded trusted local use only, no full HTTP/general JSON parsing/TLS/auth/concurrency or crash-durable database |
 | browser frontend / full-stack | 2 | useful persistent Awl Board, native Awl HTTP/schema/storage and shared Awl WASM filtering, real-browser edits/conflicts/restart/export/failure checks, JS DOM glue and contributor WASM builds remain, no native Windows qualification or general DOM bindings |
 | full 3d games / renderers | 0 | no gpu 3d renderer with loaded models, lighting and shadows, software framebuffer demos don't qualify |
 | systems / long-running software | 2 | useful bounded native task supervisor, explicit argv and concurrent pipe draining, deadlines, retained-identity group/leader cleanup and reaping, validated build→execution batches, source candidate only, no async/sandbox/durable scheduler/native Windows acceptance |
-| native developer tooling / required toolkit | 2 | native ASDK beta initializes projects and compiles real single/multi-file workloads, including kpipe, manifest/error/sanitizer tests pass on linux, complete Linux SDK exact-archive acceptance exists, native windows qualification remains open |
+| native developer tooling / required toolkit | 2 | native ASDK beta initializes projects and compiles real single/multi-file workloads, including pipe, manifest/error/sanitizer tests pass on linux, complete Linux SDK exact-archive acceptance exists, native windows qualification remains open |
 | website / accounts / registry | 0 | planned, not implemented |
 | default manager-published Packages | 0 | Awldb and envman/ENVMAN remain planned, not implemented |
 | **total** | **12 / 45** | **26.7% coarse practical-capability index, rounded** |
@@ -51,7 +53,7 @@ the additional point's for an executed useful native developer workflow, not a r
 - `awl init` creates a usable project without overwriting source
 - `awl build` resolves current, named-child, custom-entry and direct-file builds
 - multi-file private-state/math workloads execute through the real bundled backend
-- the same toolkit builds the useful kpipe project, which actually processes binary stdin/stdout with environment configuration and separate diagnostics
+- the same toolkit builds the useful pipe project, which actually processes binary stdin/stdout with environment configuration and separate diagnostics
 - missing/ambiguous projects, bad manifests, compiler failures, source/manifest protection and preservation of previous build output have executed checks
 
 that's the existing stage-2 definition, a useful bounded native workload on one target with correctness/error tests, it doesn't meet stage 3, no accepted complete ASDK distribution or native windows-host execution is claimed
@@ -70,11 +72,11 @@ next priorities are language/runtime completeness, broader collections and parsi
 
 ## historical typed-vector review
 
-scalar/text vectors and stable multi-file ksort close a real collection gap, but cli was already at stage2, this bounded workload does not meet stage3 or demonstrate a new domain, that checkpoint left the estimate at15.6% (7/45), arbitrary generics, maps, reusable parsing/results, networking and concurrency remain open
+scalar/text vectors and stable multi-file sort close a real collection gap, but cli was already at stage2, this bounded workload does not meet stage3 or demonstrate a new domain, that checkpoint left the estimate at15.6% (7/45), arbitrary generics, maps, reusable parsing/results, networking and concurrency remain open
 
 ## historical review, backend moved from0 to1
 
-this point is for a newly executed domain-specific foundation, not function/test counts or another cli tool, kserve is a native Awl program accepting actual TCP connections, parsing a bounded bodyless request subset, routing health/stateful counter requests and emitting framed JSON responses
+this point is for a newly executed domain-specific foundation, not function/test counts or another cli tool, serve is a native Awl program accepting actual TCP connections, parsing a bounded bodyless request subset, routing health/stateful counter requests and emitting framed JSON responses
 
 normal bundled-backend and sanitizer clients verify state changes, malformed/fragmented/oversized/slow requests and peer resets, runtime fault tests verify deadlines/cleanup/signal policy, no Python server or delegated host HTTP framework stands in for Awl
 
@@ -84,7 +86,7 @@ at that checkpoint stage1 only, loopback/single-threaded/manual sockets/limited 
 
 the added point's for a useful bounded local key/value backend, actual native PUT/GET/DELETE requests store text, survive process restart, return valid escaped JSON and delete persisted state, not just a health endpoint or an in-memory counter
 
-strict request framing, independent record/checksum oracles, malformed recovery rejection, key/mutation limits and deterministic short-transfer/write/fsync/close failures have executed normal/sanitizer checks, see docs/KVSERVE.md and tests/kv-{linux,sanitized,helpers,faults}.json
+strict request framing, independent record/checksum oracles, malformed recovery rejection, key/mutation limits and deterministic short-transfer/write/fsync/close failures have executed normal/sanitizer checks, see docs/VALUE-SERVE.md and tests/kv-{linux,sanitized,helpers,faults}.json
 
 this matches the existing stage2 requirement on one native target, it doesn't imply broad backend readiness,128 keys/256 mutations/finite connections, trusted single writer, no full HTTP/JSON framework, TLS/auth/concurrency/compaction or power-loss durability, no new end-user bundle or native windows acceptance
 
@@ -104,23 +106,23 @@ desktop already held stage2, no native Windows or substantial delivered cross-pl
 
 ## atomic persistence review, no new point
 
-Linux file_replace and native ksave now demonstrate checked atomic same-directory publication, precommit error preservation and explicit postcommit uncertainty, source+directory synchronization and fault tests close a real runtime gap
+Linux file.replace and native save now demonstrate checked atomic same-directory publication, precommit error preservation and explicit postcommit uncertainty, source+directory synchronization and fault tests close a real runtime gap
 
 this strengthens existing stage2 persistent-data tools, it doesn't establish a substantial new systems workload or stage3 cross-platform evidence, index remains20.0%=9/45, see docs/ATOMIC-SAVE.md
 
 ## private enum language checkpoint
 
-private associated-value enums, nested typed results and exhaustive matching are implemented and regression-tested, this improves reusable foundations without delivering another cumulative workload stage, practical score remains20.0%=9/45, exported/resource/generic enum types remain unimplemented, see [ENUMS.md](ENUMS.md)
+private associated-value enums, nested typed results and exhaustive matching are implemented and regression-tested, this improves reusable foundations without delivering another cumulative workload stage, practical score remains20.0%=9/45, exported/resource/generic enum types remain unimplemented, see [ENUMS.md](archive/ENUMS.md)
 
 ## current browser foundation review
 
-browser0→1 earns one point for an executed production-compiler-to-webassembly path and interactive offline JSON inspection, not a javascript reimplementation,437native/browser parity cases and444webassembly integer/enum oracle cases pass, cancellation, timeout and opaque sandbox execution are checked, see [BROWSER-WASM.md](BROWSER-WASM.md)
+browser0→1 earns one point for an executed production-compiler-to-webassembly path and interactive offline JSON inspection, not a javascript reimplementation,437native/browser parity cases and444webassembly integer/enum oracle cases pass, cancellation, timeout and opaque sandbox execution are checked, see [BROWSER-WASM.md](archive/BROWSER-WASM.md)
 
 all other stages stay unchanged, important browser blockers prevent a general representative frontend/full-stack platform, no stage2browser or native windows/distribution acceptance is claimed
 
 ## vector performance review
 
-checked vector lookup/access improvements and swap/truncate strengthen existing workloads, local ksort and optimized comparison evidence is in [PERFORMANCE.md](PERFORMANCE.md), no new domain stage, index stays22.2%=10/45, rust-competitive performance is a target rather than a universal superiority claim
+checked vector lookup/access improvements and swap/truncate strengthen existing workloads, local sort and optimized comparison evidence is in [PERFORMANCE.md](PERFORMANCE.md), no new domain stage, index stays22.2%=10/45, rust-competitive performance is a target rather than a universal superiority claim
 
 ## useful full-stack review, browser1→2
 
@@ -134,7 +136,7 @@ all other eight area stages remain unchanged, source-level helper reuse improves
 
 ## exported result-type review, no new point
 
-compiler-source exported enums now allow native multi-file settings/file-read APIs to return and exhaustively handle typed nested results, private variant access and nominal type identity remain checked, see [EXPORTED-ENUMS.md](EXPORTED-ENUMS.md)
+compiler-source exported enums now allow native multi-file settings/file-read APIs to return and exhaustively handle typed nested results, private variant access and nominal type identity remain checked, see [EXPORTED-ENUMS.md](archive/EXPORTED-ENUMS.md)
 
 this closes a language/library-composition gap rather than a new workload domain or cumulative stage, current24.4%=11/45 stays unchanged, existing published SDK/compiler binaries aren't relabelled as containing this source-development feature
 
@@ -164,7 +166,7 @@ current total12/45=26.7%, all other area stages remain unchanged, original24.4% 
 
 ## 0.26 publication note
 
-the published0.26 Linux SDK now ships the revised next function declaration syntax and `editor/awl-editor.html`, a single-file editor with highlighting, a structural aid, recorded visual frames and a source-level subset interpreter, its bundled examples are re-checked by `kcc check` in tests/awl-editor.json
+the published0.26 Linux SDK now ships the revised next function declaration syntax and `editor/awl-editor.html`, a single-file editor with highlighting, a structural aid, recorded visual frames and a source-level subset interpreter, its bundled examples are re-checked by `acc check` in tests/awl-editor.json
 
 an editor and a syntax revision are tooling and language surface work, they don't demonstrate a new application workload, so every stage and the total stay at26.7%=12/45
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Contributor-only successor bundle builder. Not run by installed kcc.
+"""Contributor-only successor bundle builder. Not run by installed acc.
 
 Rebuilds a complete Linux bundle from a previously published, resource-verified
 archive plus the current source tree and a freshly built host compiler. The
@@ -11,7 +11,7 @@ import argparse,hashlib,json,os,shutil,tarfile
 from pathlib import Path
 from distribution_privacy import scrub_private
 ROOT=Path(__file__).resolve().parents[1]
-ALIASES=['acc','awl','awL','aWl','aWL','Awl','AwL','AWl','AWL']
+ALIASES=['kcc','awl','awL','aWl','aWL','Awl','AwL','AWl','AWL']
 COPY=['docs','examples','third-party','assets','apps','web','editor','packages']
 def sha(path):
     h=hashlib.sha256()
@@ -68,7 +68,7 @@ no end-user Python, host compiler, SDK or additional backend download is needed
 
 Aesop is the only syntax, function results may be inferred, `func size :: @b values[i64] { ... };` and `func main[i64] { ... };` are both supported
 
-public beta commands remain init/build only, acc is the compiler driver and kcc is a compatibility filename, run/install/Packages/registry are not public beta commands
+public beta commands remain init/build only, acc is the compiler driver, run/install/Packages/registry are not public beta commands
 
 editor/awl-editor.html is the single-file Aesop subset editor, not the native compiler, web/Awl-json-workbench.html runs freshly compiled WebAssembly with a bounded browser host
 
@@ -78,21 +78,23 @@ see docs for syntax, runtime limits and workload assessment, native Windows acce
 ''')
     (prefix/'README.md').write_text(readme)
     if (ROOT/'RELEASE-0.26.md').is_file():shutil.copy2(ROOT/'RELEASE-0.26.md',prefix/'RELEASE-0.26.md')
-    binary=prefix/'bin/kcc'
+    binary=prefix/'bin/acc'
+    if binary.exists() or binary.is_symlink():binary.unlink()
     shutil.copy2(a.compiler,binary);binary.chmod(0o755)
     for name in ALIASES:
         link=prefix/'bin'/name
         if link.exists() or link.is_symlink():link.unlink()
-        link.symlink_to('kcc')
+        link.symlink_to('acc')
     version=json.loads((ROOT/'BUNDLE-README.md').read_text().splitlines()[2].split(' ')[0]) if False else None
-    (prefix/'validation'/'README.md').write_text('historical rename-* and default-* reports in this directory bind the previous0.25 compiler, not the current binary, the0.26 editor evidence is validation/awl-editor.json, exact successor acceptance is recorded in the workspace tests/ directory\n')
-    if (ROOT/'tests/awl-editor.json').is_file():shutil.copy2(ROOT/'tests/awl-editor.json',prefix/'validation/awl-editor.json')
+    (prefix/'validation'/'README.md').write_text('historical rename-* and default-* reports in this directory bind the previous0.25 compiler, not the current binary, the source-current editor evidence is validation/aesop-editor.json, exact successor acceptance is recorded in the workspace tests/ directory\n')
+    if (ROOT/'tests/aesop-editor.json').is_file():shutil.copy2(ROOT/'tests/aesop-editor.json',prefix/'validation/aesop-editor.json')
     manifest=json.loads((prefix/'manifest.json').read_text())
     scrub_private(prefix)
     manifest.pop('legacy_requires_explicit_syntax',None)
     old_examples=prefix/'examples-next'
     if old_examples.is_dir():shutil.rmtree(old_examples)
-    manifest.update(version='0.26.0-dev',kcc_sha256=sha(binary),default_syntax='aesop',supported_syntaxes=['aesop'],
+    manifest.pop('kcc_sha256',None)
+    manifest.update(version='0.26.0-dev',acc_sha256=sha(binary),default_syntax='aesop',supported_syntaxes=['aesop'],
         windows_native_host_accepted=False,editor={'aesop':'editor/awl-editor.html'},
         resources_inherited_from={'archive':a.base.name,'sha256':sha(a.base),'libexec_tree_sha256':resources,'files_verified':manifest.get('upstream_files_verified',0)},
         compiler_sources_sha256={f.name:sha(f) for f in sorted(src.iterdir()) if f.is_file()},

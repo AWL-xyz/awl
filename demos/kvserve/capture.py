@@ -6,11 +6,11 @@ from Xlib import X,display
 ROOT=Path(__file__).resolve().parents[2];out=Path(__file__).resolve().parent;binary=Path(os.environ.get('Awl_KV_BINARY','/var/tmp/Awl-kv-sdk/Awl/bin/Awl'))
 with tempfile.TemporaryDirectory(prefix='Awl-net-photo-',dir='/var/tmp') as td:
  work=Path(td)
- for src in (ROOT/'examples/apps/kvserve').iterdir():
+ for src in (ROOT/'examples/apps/valueserve').iterdir():
   if src.is_file():(work/src.name).write_bytes(src.read_bytes())
  oracle=work/'client.py';oracle.write_text('''import http.client,json,subprocess
 for methods in [[('PUT','/kv/note','hello Awl'),('GET','/kv/note',None)],[('GET','/kv/note',None),('DELETE','/kv/note',None),('GET','/kv/note',None)]]:
- p=subprocess.Popen(['./build/kvserve','./store','0',str(len(methods))],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
+ p=subprocess.Popen(['./build/valueserve','./store','0',str(len(methods))],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
  try:
   port=int(p.stdout.readline());print('native service ready, '+('restart from storage' if methods[0][0]=='GET' else 'new storage'))
   for method,path,value in methods:

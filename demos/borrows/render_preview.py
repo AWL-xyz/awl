@@ -18,7 +18,7 @@ d.text((48,126),'Checked helper parameters  /  Module forwarding  /  No copy, es
 d.rounded_rectangle((48,176,1232,239),radius=12,fill='#203149');d.text((69,196),'ROADMAP ~17.0%  |  +0.60 accepted planning points — subjective, not measured completeness',font=f(18),fill='#e4edff')
 d.rounded_rectangle((48,260,632,662),radius=14,fill='#19243a');d.rounded_rectangle((652,260,1232,662),radius=14,fill='#0a101a')
 d.text((69,282),'SOURCE EXCERPTS · examples/borrows/main.aw',font=f(14),fill='#78e2bd');d.text((675,282),'ACTUAL EXTRACTED-BUNDLE OUTPUT',font=f(14),fill='#78e2bd')
-code=['function render(borrow b:spool,n:i64)->i64','    return text.append_frame(b,n)','end','','scoped b:spool=spool_new(32)','','local count:i64=render(b,i)','','spool_print(b)']
+code=['function render(borrow b:spool,n:i64)->i64','    return text.append_frame(b,n)','end','','scoped b:spool=spool.new(32)','','local count:i64=render(b,i)','','spool.print(b)']
 for i,line in enumerate(code):d.text((69,324+i*34),line,font=f(17,True),fill='#dbe8fc')
 for i,line in enumerate(r.stdout.splitlines()):d.text((675,345+i*66),line,font=f(20,True),fill='#88edc0' if line in ['1088890','true'] else '#dbe8fc')
 d.rounded_rectangle((48,684,1232,854),radius=14,fill='#30202b');d.text((69,704),'ESCAPE ATTEMPT · actual compiler rejection',font=f(15),fill='#f3b6ba');d.text((69,738),'return b',font=f(21,True),fill='#f5d5db')

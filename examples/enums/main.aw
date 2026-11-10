@@ -15,14 +15,14 @@ func integer[IntegerResult] :: payload:text {
     @p offset: 0;
     @p negative: false;
     if size == 0 { return IntegerResult.Invalid(0); };
-    @p first: string.byte_at(payload, 0);
+    @p first: string.byteat(payload, 0);
     if first == 45u8 or first == 43u8 { negative: first == 45u8; offset: 1; };
     if offset == size { return IntegerResult.Invalid(offset); };
     @p limit: -9223372036854775807;
     if negative { limit: -9223372036854775808; };
     @p value: 0;
     while offset < size {
-        @p byte: string.byte_at(payload, offset);
+        @p byte: string.byteat(payload, offset);
         if byte < 48u8 or byte > 57u8 { return IntegerResult.Invalid(offset); };
         @p digit: i64(byte) - 48;
         if value < limit / 10 { return IntegerResult.Overflow(); };
@@ -81,10 +81,10 @@ func calculate[Calculation] :: operator:text, left:text, right:text {
     end;
 };
 func main[i64] {
-    if arg_count() != 3 { return 2; };
+    if arg.count() != 3 { return 2; };
     @p i: 0;
-    while i < 3 { if not arg_text_valid(i) { return 2; }; i: i + 1; };
-    match calculate(arg_text(0), arg_text(1), arg_text(2)) then
+    while i < 3 { if not arg.textvalid(i) { return 2; }; i: i + 1; };
+    match calculate(arg.text(0), arg.text(1), arg.text(2)) then
         case Calculation.Value(value) then print(value); return 0;
         case Calculation.BadOperator(operator) then print("unknown operator: " + operator); return 2;
         case Calculation.DivisionByZero() then print("division by zero"); return 4;
@@ -92,7 +92,7 @@ func main[i64] {
         case Calculation.OperandError(operand, issue) then
             match issue then
                 case IntegerResult.Value(_) then return 6;
-                case IntegerResult.Invalid(offset) then print(operand + " invalid at byte " + string.from_i64(offset)); return 3;
+                case IntegerResult.Invalid(offset) then print(operand + " invalid at byte " + string.fromi64(offset)); return 3;
                 case IntegerResult.Overflow() then print(operand + " integer overflow"); return 3;
             end;
     end;

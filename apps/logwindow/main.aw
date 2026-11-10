@@ -41,10 +41,10 @@ func show[i64] :: source:text, first:i64, count:i64 {
     return 0;
 };
 func main[i64] {
-    if arg_count() != 3 { print("usage: logwindow FILE FIRST_LINE COUNT"); return 2; };
-    if not arg_text_valid(0) or not arg_i64_valid(1) or not arg_i64_valid(2) { return 2; };
-    match file.read(arg_text(0)) then
-        case file.Read.Text(source) then return show(source, arg_i64(1), arg_i64(2));
+    if arg.count() != 3 { print("usage: logwindow FILE FIRST_LINE COUNT"); return 2; };
+    if not arg.textvalid(0) or not arg.i64valid(1) or not arg.i64valid(2) { return 2; };
+    match file.read(arg.text(0)) then
+        case file.Read.Text(source) then return show(source, arg.i64(1), arg.i64(2));
         case file.Read.Failed(issue) then
             match issue then
                 case file.Issue.Missing() then print("missing file"); return 3;

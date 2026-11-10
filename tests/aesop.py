@@ -21,14 +21,16 @@ def main():
     with tempfile.TemporaryDirectory(prefix='aesop-') as td:
         work = Path(td)
         positives = {
-            'inferred requested vector signature': ('func size :: @b values[i64], etc[i64] { return vector_length(values) + vector_length(etc); }; func main { @s a vector<i64>: vector.new<i64>(0); @p b vector<i64>: vector.new<i64>(0); vector.push(a,7); print(size(a,b)); vector.free(b); return 0; };', '1\n'),
+            'inferred requested vector signature': ('func size :: @b values[i64], etc[i64] { return vector.length(values) + vector.length(etc); }; func main { @s a vector<i64>: vector.new<i64>(0); @p b vector<i64>: vector.new<i64>(0); vector.push(a,7); print(size(a,b)); vector.free(b); return 0; };', '1\n'),
             'inferred branch results': ('func choose :: flag:bool { if flag { return 7; } else { return 9; }; }; func main { print(choose(false)); return 0; };', '9\n'),
             'inferred argument-independent text and bool': ('func describe :: x:i64 { return "Awl"; }; func compare :: x:i64, y:i64 { return x<y; }; func main { print(describe(1)); print(compare(1,2)); return 0; };', 'Awl\ntrue\n'),
             'forward inferred call chain': ('func main { print(first()); return 0; }; func first { return second(); }; func second { return 42; };', '42\n'),
             'inferred local and nested result': ('func main { @p func helper :: n:i64 { @p result: n+2; return result; }; print(helper(40)); return 0; };', '42\n'),
             'inferred aggregate and f64': ('struct Pair { x:i64; }; func pair { return Pair(42); }; func fraction { return 1.5; }; func main { @p p: pair(); print(p.x); print(fraction()); return 0; };', '42\n1.5\n'),
             'annotated recursion breaks inference cycle': ('func even[bool] :: n:i64 { if n==0 { return true; }; return odd(n-1); }; func odd :: n:i64 { if n==0 { return false; }; return even(n-1); }; func main { print(even(4)); return 0; };', 'true\n'),
-            'requested vector signature': ('func size[i64] :: @b values[i64], etc[i64] { return vector_length(values) + vector_length(etc); }; func main[i64] { @s a vector<i64>: vector.new<i64>(0); @p b vector<i64>: vector.new<i64>(0); vector.push(a, 7); print(size(a,b)); vector.free(b); return 0; };', '1\n'),
+            'numeric conversions and static type tests': ('func main { print(i64.convert(1.5)); print(i8.convert(1000.0)); print(u64.convert(-1.5)); print(f64.convert(1.5)); print(isnum(1.5)); print(isnum("text")); print(i64.match(1)); print(f64.match(1.0)); print(text.match("text")); return 0; };', '1\n127\n0\n1.5\ntrue\nfalse\ntrue\ntrue\ntrue\n'),
+            'namespace-only built-in API': ('func main { @p b: buffer.new(8); buffer.set(b,0,65u8); print(buffer.get(b,0)); buffer.free(b); @p start: clock.millis(); clock.sleep(0); print(clock.millis() >= start); return 0; };', '65\ntrue\n'),
+            'requested vector signature': ('func size[i64] :: @b values[i64], etc[i64] { return vector.length(values) + vector.length(etc); }; func main[i64] { @s a vector<i64>: vector.new<i64>(0); @p b vector<i64>: vector.new<i64>(0); vector.push(a, 7); print(size(a,b)); vector.free(b); return 0; };', '1\n'),
             'scalar and f64 result': ('func add[f64] :: x:f64, y:f64 { return x+y; }; func main[i64] { print(add(1.5,2)); return 0; };', '3.5\n'),
             'owned vector result': ('func make[@o vector<i64>] { @s v vector<i64>: vector.new<i64>(0); vector.push(v,42); return move v; }; func main[i64] { @s v vector<i64>: make(); print(vector.get(v,0)); return 0; };', '42\n'),
             'implicit and explicit unit': ('func one { print(1); return; }; func two[unit] { print(2); return; }; func main[i64] { one(); two(); return 0; };', '1\n2\n'),
@@ -73,6 +75,8 @@ def main():
             'func f :: b:bool { if b { return 1; } else { return 1u64; }; }; func main { return 0; };',
             'func main { return false; };',
             'func main[i64] { return "wrong"; };',
+            'func main[i64] { @p x: clock_millis(); return 0; };',
+            'func main[i64] { @p a: 2; @p b: 1.5; return a * b; };',
 
         ]
         for source in rejected:

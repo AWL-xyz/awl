@@ -3,7 +3,7 @@ func label[text] :: n:i64 {
     if n % 15 == 0 { return "fizzbuzz"; };
     if n % 3 == 0 { return "fizz"; };
     if n % 5 == 0 { return "buzz"; };
-    return string.from_i64(n);
+    return string.fromi64(n);
 };
 
 func main[i64] {

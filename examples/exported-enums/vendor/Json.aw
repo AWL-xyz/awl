@@ -5,7 +5,7 @@ func fail[i64] :: @b result[i64], code:i64, offset:i64 {
 };
 func space[i64] :: source:text, offset:i64 {
     while offset < string.bytes(source) {
-        @p b: string.byte_at(source, offset);
+        @p b: string.byteat(source, offset);
         if b != 32u8 and b != 9u8 and b != 10u8 and b != 13u8 { return offset; };
         offset: offset + 1;
     };
@@ -24,7 +24,7 @@ func hex[i64] :: source:text, offset:i64 {
     @p value: 0;
     @p i: 0;
     while i < 4 {
-        @p b: i64(string.byte_at(source, offset + i));
+        @p b: i64(string.byteat(source, offset + i));
         @p digit: -1;
         if b >= 48 and b <= 57 { digit: b - 48; };
         if b >= 65 and b <= 70 { digit: b - 55; };
@@ -39,13 +39,13 @@ func quoted[i64] :: source:text, offset:i64, kind:i64, @b values[text], @b metad
     @p start: offset;
     @p size: string.bytes(source);
     if offset >= size { return fail(result, 1, offset); };
-    if string.byte_at(source, offset) != 34u8 { return fail(result, 1, offset); };
+    if string.byteat(source, offset) != 34u8 { return fail(result, 1, offset); };
     @s builder spool: spool.new(4096);
     if not spool.valid(builder) { return fail(result, 3, offset); };
     offset: offset + 1;
     while offset < size {
         @p at: offset;
-        @p cp: i64(string.byte_at(source, offset));
+        @p cp: i64(string.byteat(source, offset));
         offset: offset + 1;
         if cp == 34 {
             if not emit(kind, spool.snapshot(builder), start, values, metadata, result) { return -1; };
@@ -54,7 +54,7 @@ func quoted[i64] :: source:text, offset:i64, kind:i64, @b values[text], @b metad
         if cp < 32 { return fail(result, 1, at); };
         if cp == 92 {
             if offset == size { return fail(result, 1, offset); };
-            cp: i64(string.byte_at(source, offset));
+            cp: i64(string.byteat(source, offset));
             offset: offset + 1;
             if cp == 117 {
                 cp: hex(source, offset);
@@ -62,7 +62,7 @@ func quoted[i64] :: source:text, offset:i64, kind:i64, @b values[text], @b metad
                 offset: offset + 4;
                 if cp >= 55296 and cp <= 56319 {
                     if offset + 6 > size { return fail(result, 1, offset); };
-                    if string.byte_at(source, offset) != 92u8 or string.byte_at(source, offset + 1) != 117u8 { return fail(result, 1, offset); };
+                    if string.byteat(source, offset) != 92u8 or string.byteat(source, offset + 1) != 117u8 { return fail(result, 1, offset); };
                     @p low: hex(source, offset + 2);
                     if low < 56320 or low > 57343 { return fail(result, 1, offset + 2); };
                     cp: 65536 + (cp - 55296) * 1024 + low - 56320;
@@ -87,7 +87,7 @@ func quoted[i64] :: source:text, offset:i64, kind:i64, @b values[text], @b metad
                 cp: cp % mask;
                 @p i: 1;
                 while i < width {
-                    cp: cp * 64 + i64(string.byte_at(source, offset)) % 64;
+                    cp: cp * 64 + i64(string.byteat(source, offset)) % 64;
                     offset: offset + 1;
                     i: i + 1;
                 };
@@ -104,29 +104,29 @@ func quoted[i64] :: source:text, offset:i64, kind:i64, @b values[text], @b metad
 };
 func digit[bool] :: source:text, offset:i64 {
     if offset >= string.bytes(source) { return false; };
-    @p b: string.byte_at(source, offset);
+    @p b: string.byteat(source, offset);
     return b >= 48u8 and b <= 57u8;
 };
 func number[i64] :: source:text, offset:i64, @b values[text], @b metadata[i64], @b result[i64] {
     @p start: offset;
     @p size: string.bytes(source);
-    if string.byte_at(source, offset) == 45u8 { offset: offset + 1; };
+    if string.byteat(source, offset) == 45u8 { offset: offset + 1; };
     if not digit(source, offset) { return fail(result, 1, offset); };
-    if string.byte_at(source, offset) == 48u8 { offset: offset + 1;
+    if string.byteat(source, offset) == 48u8 { offset: offset + 1;
     } else { while digit(source, offset) { offset: offset + 1; }; };
     if offset < size {
-        if string.byte_at(source, offset) == 46u8 {
+        if string.byteat(source, offset) == 46u8 {
             offset: offset + 1;
             if not digit(source, offset) { return fail(result, 1, offset); };
             while digit(source, offset) { offset: offset + 1; };
         };
     };
     if offset < size {
-        @p b: string.byte_at(source, offset);
+        @p b: string.byteat(source, offset);
         if b == 101u8 or b == 69u8 {
             offset: offset + 1;
             if offset < size {
-                b: string.byte_at(source, offset);
+                b: string.byteat(source, offset);
                 if b == 43u8 or b == 45u8 { offset: offset + 1; };
             };
             if not digit(source, offset) { return fail(result, 1, offset); };
@@ -136,7 +136,7 @@ func number[i64] :: source:text, offset:i64, @b values[text], @b metadata[i64], 
     @s builder spool: spool.new(16384);
     if not spool.valid(builder) { return fail(result, 3, start); };
     @p i: start;
-    while i < offset { spool.codepoint(builder, u32(string.byte_at(source, i))); i: i + 1; };
+    while i < offset { spool.codepoint(builder, u32(string.byteat(source, i))); i: i + 1; };
     if not emit(6, spool.snapshot(builder), start, values, metadata, result) { return -1; };
     return offset;
 };
@@ -144,7 +144,7 @@ func item[i64] :: source:text, offset:i64, depth:i64, @b values[text], @b metada
     offset: space(source, offset);
     @p size: string.bytes(source);
     if offset == size { return fail(result, 1, offset); };
-    @p b: string.byte_at(source, offset);
+    @p b: string.byteat(source, offset);
     if b == 34u8 { return quoted(source, offset, 5, values, metadata, result); };
     if b == 45u8 or digit(source, offset) { return number(source, offset, values, metadata, result); };
     if b == 123u8 or b == 91u8 {
@@ -155,7 +155,7 @@ func item[i64] :: source:text, offset:i64, depth:i64, @b values[text], @b metada
         if not emit(kind, "", offset, values, metadata, result) { return -1; };
         offset: space(source, offset + 1);
         if offset < size {
-            if string.byte_at(source, offset) == close {
+            if string.byteat(source, offset) == close {
                 if not emit(kind + 2, "", offset, values, metadata, result) { return -1; };
                 return offset + 1;
             };
@@ -166,14 +166,14 @@ func item[i64] :: source:text, offset:i64, depth:i64, @b values[text], @b metada
                 if offset < 0 { return -1; };
                 offset: space(source, offset);
                 if offset == size { return fail(result, 1, offset); };
-                if string.byte_at(source, offset) != 58u8 { return fail(result, 1, offset); };
+                if string.byteat(source, offset) != 58u8 { return fail(result, 1, offset); };
                 offset: offset + 1;
             };
             offset: item(source, offset, depth + 1, values, metadata, result);
             if offset < 0 { return -1; };
             offset: space(source, offset);
             if offset == size { return fail(result, 1, offset); };
-            b: string.byte_at(source, offset);
+            b: string.byteat(source, offset);
             if b == close {
                 if not emit(kind + 2, "", offset, values, metadata, result) { return -1; };
                 return offset + 1;
@@ -190,7 +190,7 @@ func item[i64] :: source:text, offset:i64, depth:i64, @b values[text], @b metada
     @p i: 0;
     while i < string.bytes(literal) {
         if offset + i >= size { return fail(result, 1, size); };
-        if string.byte_at(source, offset + i) != string.byte_at(literal, i) { return fail(result, 1, offset + i); };
+        if string.byteat(source, offset + i) != string.byteat(literal, i) { return fail(result, 1, offset + i); };
         i: i + 1;
     };
     if not emit(kind, literal, offset, values, metadata, result) { return -1; };
@@ -298,10 +298,10 @@ exports{
                 if part == "-" { return -1; };
                 if string.bytes(part) == 0 { return -2; };
                 if string.bytes(part) > 1 {
-                    if string.byte_at(part, 0) == 48u8 { return -2; };
+                    if string.byteat(part, 0) == 48u8 { return -2; };
                 };
                 while j < string.bytes(part) {
-                    @p b: string.byte_at(part, j);
+                    @p b: string.byteat(part, j);
                     if b < 48u8 or b > 57u8 { return -2; };
                     if index <= 512 { index: index * 10 + i64(b) - 48; };
                     j: j + 1;

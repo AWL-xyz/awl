@@ -258,7 +258,7 @@ footer b{font-weight:500;color:var(--text)}
   <span>Spaces: 4</span>
   <span>UTF-8</span>
   <span><b>Awl</b> .aw · current source syntax</span>
-  <span class="r" id="stat">in-browser runner · not kcc</span>
+  <span class="r" id="stat">in-browser runner · not acc</span>
 </footer>
 
 <div id="toast"></div>
@@ -271,8 +271,8 @@ footer b{font-weight:500;color:var(--text)}
 const KEYWORDS = new Set(['func','use','exports','enum','if','elseif','else','while','return','match','case','then','end','as','and','or','not','defer','move']);
 const CONSTS = new Set(['true','false','pi','tau']);
 const TYPES = new Set(['i8','i16','i32','i64','u8','u16','u32','u64','f64','bool','unit','string','text','spool','vector','view']);
-const BUILTIN_EXACT = new Set(['print','clock_millis','wall_clock_millis','sleep_millis','sin','cos','sqrt','atan2']);
-const BUILTIN_PREFIX = /^(spool_|text_vector_|i64_vector_|window_|buffer_|file_|arg_|string_)\w*$/;
+const BUILTIN_EXACT = new Set(['print','isnum','convert','match','sin','cos','sqrt','atan2']);
+const BUILTIN_PREFIX = /^(spool|vector|view|intvector|window|buffer|file|arg|string|clock|tcp|env|process|platform|stdin|stdout|stderr|array|map|set|i8|i16|i32|i64|u8|u16|u32|u64|f64|bool|text|unit)$/;
 
 /* ---------- example sources ---------- */
 const LIB_AW = `@p version: 128.59;
@@ -294,9 +294,9 @@ exports{
 `;
 const VISUAL_AW = `-- Visual demo: a scrolling colour gradient, opens the Visual tab
 func main[i64] {
-    @p w: window_open(48, 32);
+    @p w: window.open(48, 32);
     if w == 0 { return 3; };
-    window_set_title(w, "gradient");
+    window.title(w, "gradient");
     @p f: 0;
     @p running: true;
     while running and f < 60 {
@@ -305,16 +305,16 @@ func main[i64] {
             @p x: 0;
             while x < 48 {
                 @p r: (x * 5 + f * 4) % 256;
-                window_set_pixel(w, x, y, r * 65536 + y * 2048 + 128);
+                window.pixel(w, x, y, r * 65536 + y * 2048 + 128);
                 x: x + 1;
             };
             y: y + 1;
         };
-        running: window_present(w);
-        sleep_millis(16);
+        running: window.present(w);
+        clock.sleep(16);
         f: f + 1;
     };
-    window_close(w);
+    window.close(w);
     return 0;
 };
 `;
@@ -401,9 +401,9 @@ func main[i64] {
 'bounce.aw':
 `-- Visual output: a bouncing square, frames are recorded then played back
 func main[i64] {
-    @p w: window_open(80, 50);
+    @p w: window.open(80, 50);
     if w == 0 { return 3; };
-    window_set_title(w, "bouncing square");
+    window.title(w, "bouncing square");
     @p x: 10;
     @p y: 20;
     @p dx: 3;
@@ -416,7 +416,7 @@ func main[i64] {
             @p px: 0;
             while px < 80 {
                 @p on: px >= x and px < x + 14 and py >= y and py < y + 14;
-                if on { window_set_pixel(w, px, py, 16729156); } else { window_set_pixel(w, px, py, 1052688); };
+                if on { window.pixel(w, px, py, 16729156); } else { window.pixel(w, px, py, 1052688); };
                 px: px + 1;
             };
             py: py + 1;
@@ -425,11 +425,11 @@ func main[i64] {
         y: y + dy;
         if x < 0 or x > 66 { dx: -dx; };
         if y < 0 or y > 34 { dy: -dy; };
-        running: window_present(w);
-        sleep_millis(16);
+        running: window.present(w);
+        clock.sleep(16);
         frame: frame + 1;
     };
-    window_close(w);
+    window.close(w);
     return 0;
 };
 `
@@ -622,13 +622,13 @@ function renderProblems() {
   c.textContent = problems.length;
   c.className = problems.length ? '' : 'ok';
   const e = problems.filter(p => p.level === 'e').length;
-  $('stat').textContent = (e ? e + (e === 1 ? ' error' : ' errors') : 'no structural errors') + ' · in-browser runner, not kcc';
+  $('stat').textContent = (e ? e + (e === 1 ? ' error' : ' errors') : 'no structural errors') + ' · in-browser runner, not acc';
   if (tab !== 'problems') return;
   const pane = $('pane');
   pane.innerHTML = '';
   if (!problems.length) {
     pane.innerHTML = '<div class="good">Braces and end blocks balance, nothing unexpected was found.</div>' +
-      '<div class="note">This is a lightweight structural check in the browser, types, ownership and borrowing are checked by kcc itself, see the awl tab.</div>';
+      '<div class="note">This is a lightweight structural check in the browser, types, ownership and borrowing are checked by acc itself, see the awl tab.</div>';
     return;
   }
   problems.forEach(p => {
@@ -647,9 +647,9 @@ function renderRun() {
   const cmds = [
     ['build', 'awl build ' + f],
     ['init', 'awl init NAME'],
-    ['check', 'kcc check ' + f]
+    ['check', 'acc check ' + f]
   ];
-  pane.innerHTML = '<div class="note">Run these where the Awl Software Development Kit is installed. The public beta only ships <b>awl init</b> and <b>awl build</b>, the <b>kcc check</b> line is internal compiler tooling. This editor\u2019s runner is a JavaScript interpreter of the current syntax, not the native compiler.</div>';
+  pane.innerHTML = '<div class="note">Run these where the Awl Software Development Kit is installed. The public beta only ships <b>awl init</b> and <b>awl build</b>, the <b>acc check</b> line is internal compiler tooling. This editor\u2019s runner is a JavaScript interpreter of the current syntax, not the native compiler.</div>';
   cmds.forEach(([, c]) => {
     const d = document.createElement('div');
     d.className = 'cmd';
@@ -1124,6 +1124,7 @@ function parse(src) {
   const eat = v => is(v) ? T[p++] : fail("expected '" + v + "' but found " + (T[p].v === undefined ? 'end of file' : "'" + T[p].v + "'"));
   const acc = v => is(v) ? T[p++] : null;
   const id = () => { const t = T[p]; if (t.k !== 'id' || KEYWORDS.has(t.v) || ATS.has(t.v)) fail('expected a name'); p++; return t.v; };
+  const memberId = () => { const t = T[p]; if (t.k !== 'id' || ATS.has(t.v)) fail('expected a name'); p++; return t.v; };
   const type = () => {
     const t = T[p];
     if (!is('[') && t.k !== 'id') fail('expected a type');
@@ -1231,7 +1232,7 @@ function parse(src) {
     for (;;) {
       const t = T[p], at = { line: t.line, col: t.col };
       if (acc('(')) { const args = []; while (!is(')')) { args.push(expr()); if (!acc(',')) break; } eat(')'); e = { k: 'call', f: e, args, ...at }; }
-      else if (acc('.')) e = { k: 'mem', e, name: id(), ...at };
+      else if (acc('.')) e = { k: 'mem', e, name: memberId(), ...at };
       else return e;
     }
   }
@@ -1313,6 +1314,24 @@ function kernRun(src, out, vis, lib) {
     string_from_i64: a => a[0].v.toString(), string_from_u64: a => a[0].v.toString(),
     string_compare: a => i64(a[0] === a[1] ? 0 : a[0] < a[1] ? -1 : 1)
   };
+  const NAMESPACES = {
+    window: { open:B.window_open, width:B.window_width, height:B.window_height, pixel:B.window_set_pixel, present:B.window_present, poll:B.window_poll, key:B.window_key, mousex:B.window_mouse_x, mousey:B.window_mouse_y, title:B.window_set_title, close:B.window_close },
+    clock: { millis:B.clock_millis, wall:B.wall_clock_millis, sleep:B.sleep_millis },
+    string: { length:B.string_length, bytes:B.string_bytes, slice:B.string_slice, codepoint:B.string_codepoint, fromcodepoint:B.string_from_codepoint, fromi64:B.string_from_i64, fromu64:B.string_from_u64, compare:B.string_compare }
+  };
+  const convertValue = (ty, v, n) => {
+    if (ty === 'f64') { if (isInt(v)) return f64(Number(v.v)); if (isF(v)) return f64(v.v); throw err('f64.convert needs a number', n); }
+    if (!INT[ty]) throw err(ty + '.convert needs a numeric target', n);
+    if (isF(v)) {
+      if (Number.isNaN(v.v)) return fit(ty, 0n, n, 'conversion out of range');
+      if (v.v >= Number(INT[ty][1])) return fit(ty, INT[ty][1], n, 'conversion out of range');
+      if (v.v <= Number(INT[ty][0])) return fit(ty, INT[ty][0], n, 'conversion out of range');
+      return fit(ty, BigInt(Math.trunc(v.v)), n, 'conversion out of range');
+    }
+    if (isInt(v)) return fit(ty, v.v, n, 'conversion out of range');
+    throw err(ty + '.convert needs a number', n);
+  };
+  const typeNamespace = ty => INT[ty] || ['f64','bool','text','unit'].includes(ty);
   const arith = (op, a, b, n) => {
     if (isInt(a) && isInt(b)) {
       if (a.t !== b.t) throw err('type mismatch: ' + a.t + ' ' + op + ' ' + b.t + ', no implicit conversion, use ' + a.t + '(...)', n);
@@ -1380,7 +1399,7 @@ function kernRun(src, out, vis, lib) {
     if (inferring.has(fn)) throw err('circular return-type inference, add an explicit [type] annotation', fn);
     inferring.add(fn);
     const helpers = new Map(), returns = new Set();
-    const builtinTypes = { print:'unit', string_length:'i64', string_bytes:'i64', string_slice:'string', string_codepoint:'u32', string_from_i64:'string', window_open:'i64', window_width:'i64', window_height:'i64', window_present:'bool', window_close:'unit', window_set_pixel:'unit', window_set_title:'bool', window_poll:'i64', window_key:'i64', window_mouse_x:'i64', window_mouse_y:'i64', clock_millis:'i64', wall_clock_millis:'i64', sleep_millis:'unit' };
+    const builtinTypes = { print:'unit', isnum:'bool', 'string.length':'i64', 'string.bytes':'i64', 'string.slice':'string', 'string.codepoint':'u32', 'string.fromi64':'string', 'string.fromu64':'string', 'string.fromcodepoint':'string', 'string.compare':'i64', 'array.length':'i64', 'vector.length':'i64', 'window.open':'i64', 'window.width':'i64', 'window.height':'i64', 'window.present':'bool', 'window.close':'unit', 'window.pixel':'unit', 'window.title':'bool', 'window.poll':'i64', 'window.key':'i64', 'window.mousex':'i64', 'window.mousey':'i64', 'clock.millis':'i64', 'clock.wall':'i64', 'clock.sleep':'unit' };
     const unsupported = n => { throw err('this editor subset cannot infer this expression, add [type] or use ACC', n); };
     function expressionType(e, env) {
       if (e.k === 'num') return e.t;
@@ -1404,14 +1423,18 @@ function kernRun(src, out, vis, lib) {
           if (helpers.has(f.name)) return inferEditorResult(helpers.get(f.name), mod);
           if (mod.prog.fns[f.name]) return inferEditorResult(mod.prog.fns[f.name], mod);
           if (INT[f.name] || f.name === 'f64') return f.name;
+          if (f.name === 'isnum') return 'bool';
           if (MATH[f.name]) return 'f64';
           if (builtinTypes[f.name]) return builtinTypes[f.name];
         }
         if (f.k === 'mem' && f.e.k === 'var') {
+          const key = f.e.name + '.' + f.name;
+          if (f.name === 'convert' && (INT[f.e.name] || f.e.name === 'f64')) return f.e.name;
+          if (f.name === 'match' && typeNamespace(f.e.name)) return 'bool';
+          if (builtinTypes[key]) return builtinTypes[key];
           const other = mod.al[f.e.name];
           if (other && other.prog.fns[f.name] && other.prog.fns[f.name].exp) return inferEditorResult(other.prog.fns[f.name], other);
           if (mod.prog.enums[f.e.name]) return f.e.name;
-          if (builtinTypes[f.e.name + '_' + f.name]) return builtinTypes[f.e.name + '_' + f.name];
         }
       }
       return unsupported(e);
@@ -1453,6 +1476,13 @@ function kernRun(src, out, vis, lib) {
   }
   function call(n, sc) {
     const f = n.f, a = n.args.map(x => ev(x, sc));
+    if (f.k === 'mem' && f.e.k === 'var' && NAMESPACES[f.e.name] && NAMESPACES[f.e.name][f.name]) return NAMESPACES[f.e.name][f.name](a, n);
+    if (f.k === 'mem' && f.e.k === 'var' && (f.name === 'convert' || f.name === 'match') && typeNamespace(f.e.name)) {
+      if (a.length !== 1) throw err(f.e.name + '.' + f.name + ' takes one value', n);
+      if (f.name === 'match') return kind(a[0]) === (f.e.name === 'text' ? 'string' : f.e.name);
+      if (!(INT[f.e.name] || f.e.name === 'f64')) throw err('only numeric types provide convert', n);
+      return convertValue(f.e.name, a[0], n);
+    }
     if (f.k === 'mem' && f.e.k === 'var') {
       const construct = (union, fields) => {
         if (a.length !== fields.length) throw err(f.name + ' takes ' + fields.length + ' value(s)', n);
@@ -1483,8 +1513,9 @@ function kernRun(src, out, vis, lib) {
     const name = f.name, h = helper(sc, name);
     if (h) return invoke(h.fn, a, n.args, cur, h.at, n);
     if (cur.prog.fns[name]) return invoke(cur.prog.fns[name], a, n.args, cur, null, n);
-    if (INT[name]) { if (a.length !== 1) throw err(name + '(...) converts one number', n); const x = a[0]; if (isF(x)) { if (!isFinite(x.v)) throw trap('conversion of non-finite value', n); return fit(name, BigInt(Math.trunc(x.v)), n, 'conversion out of range for ' + name); } if (!isInt(x)) throw err(name + '(...) converts a number', n); return fit(name, x.v, n, 'integer conversion out of range for ' + name); }
-    if (name === 'f64') { const x = a[0]; if (!isInt(x) && !isF(x)) throw err('f64(...) converts a number', n); return f64(Number(x.v)); }
+    if (name === 'isnum') return isInt(a[0]) || isF(a[0]);
+    if (INT[name]) { if (a.length !== 1) throw err(name + '(...) converts one number', n); return convertValue(name, a[0], n); }
+    if (name === 'f64') { if (a.length !== 1) throw err('f64(...) converts one number', n); return convertValue('f64', a[0], n); }
     if (MATH[name]) { const x = a.map((v, i) => coerce('f64', n.args[i], v)); x.forEach(v => { if (!isF(v)) throw err(name + ' needs f64', n); }); return f64(MATH[name](...x.map(v => v.v))); }
     if (B[name]) return B[name](a, n);
     if (/^(spool_|text_vector_|i64_vector_|int_vector_|buffer_|file_|arg_)/.test(name)) throw err(name + ' is not supported by the in-browser runner, build it with awl', n);

@@ -56,8 +56,8 @@ def main():
         assert ok, (label, detail)
         records.append({'case': label, 'status': 'PASS'})
 
-    platform = (ROOT / 'compiler/native/kplatform.inc').read_text()
-    wall_helper = (ROOT / 'compiler/native/kwallclock.inc').read_text()
+    platform = (ROOT / 'compiler/native/platform.inc').read_text()
+    wall_helper = (ROOT / 'compiler/native/wallclock.inc').read_text()
     expect('k_wall_clock_millis' not in platform and 'k_wall_clock_millis' in wall_helper,
            'new wall-clock helper is isolated from legacy generated C')
     expect('CLOCK_REALTIME' in wall_helper and 'GetSystemTimePreciseAsFileTime' in wall_helper,
@@ -65,7 +65,7 @@ def main():
 
     with tempfile.TemporaryDirectory(prefix='aesop-time-', dir='/var/tmp') as td:
         stub = Path(td) / 'windows-syntax.c'
-        source = (ROOT / 'compiler/native/kwallclock.c').read_text()
+        source = (ROOT / 'compiler/native/wallclock.c').read_text()
         stub.write_text('''#include <stdint.h>
 #include <stdlib.h>
 typedef struct { unsigned int dwLowDateTime, dwHighDateTime; } FILETIME;
@@ -95,7 +95,7 @@ static _Noreturn void k_resource_trap(void) { abort(); }
         expect('k_wall_clock_millis' in generated_c, 'wall-clock helper appears only in generated programs that use it')
 
         bad = work / 'bad.aw'
-        bad.write_text('func main[i64] { @p x: wall_clock_millis(1); return x; };\n')
+        bad.write_text('func main[i64] { @p x: clock.wall(1); return x; };\n')
         rejected = run([acc, 'check', 'bad.aw', '--diagnostic-format', 'json'], cwd=work)
         expect(rejected.returncode == 1 and json.loads(rejected.stderr)['diagnostics'],
                'wall-clock intrinsic rejects wrong arity with a diagnostic', rejected.stderr)

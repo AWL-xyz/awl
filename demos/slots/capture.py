@@ -18,7 +18,7 @@ awl build
 printf '\n$ ./build/reuse\n'
 ./build/reuse
 printf '\n$ validated native benchmark medians, milliseconds\n'
-/usr/bin/python3 -c 'import json;d=json.load(open("/home/user/Awl/benchmarks/vector-competition.json"));r=d["results"];print("5 million checked vector updates, 7 shuffled warm samples");print("live  Awl old  Awl new  cpp.at  rust.release  rust.checked");[(print(str(n)+"    "+"  ".join(format(r[k+"/"+str(n)]["median_ms"],".3f") for k in ["Awl-before","Awl-after","cpp-at","rust-release","rust-checked"]))) for n in [1,16,64]];print("ksort 10000 lines, old/new ms",*[format(d["ksort"][k]["median_ms"],".3f") for k in ["before/sort","after/sort"]])'
+/usr/bin/python3 -c 'import json;d=json.load(open("/home/user/Awl/benchmarks/vector-competition.json"));r=d["results"];print("5 million checked vector updates, 7 shuffled warm samples");print("live  Awl old  Awl new  cpp.at  rust.release  rust.checked");[(print(str(n)+"    "+"  ".join(format(r[k+"/"+str(n)]["median_ms"],".3f") for k in ["Awl-before","Awl-after","cpp-at","rust-release","rust-checked"]))) for n in [1,16,64]];print("sort 10000 lines, old/new ms",*[format(d["sort"][k]["median_ms"],".3f") for k in ["before/sort","after/sort"]])'
 printf '\nchecksums verified, bounds/kind/stale/overflow checks retained\n'
 printf 'rust still wins important cases, no universal faster-than claim\n'
 } > "'''+str(transcript)+'''" 2>&1

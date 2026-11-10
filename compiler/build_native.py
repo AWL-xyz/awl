@@ -29,8 +29,8 @@ def main():
     if os.name!='nt': flags+=['-fPIC','-fvisibility=hidden']
     else: flags+=['-static-libgcc','-static-libstdc++']
     if a.sanitize: p.error('Use the standalone native sanitizer harness; loading an ASan library into Python requires special runtime setup.')
-    subprocess.run([cxx,*flags,str(ROOT/'native/klex.cpp'),str(ROOT/'native/kparse.cpp'),'-o',str(output)],check=True)
-    info={'abi_version':2,'toolchain_directory':str(Path(cxx).parent),'compiler':subprocess.check_output([cxx,'--version'],text=True).splitlines()[0],'flags':flags,'source_sha256':hashlib.sha256((ROOT/'native/klex.cpp').read_bytes()).hexdigest(),'header_sha256':hashlib.sha256((ROOT/'native/klex.h').read_bytes()).hexdigest(),'parser_source_sha256':hashlib.sha256((ROOT/'native/kparse.cpp').read_bytes()).hexdigest(),'parser_header_sha256':hashlib.sha256((ROOT/'native/kparse.h').read_bytes()).hexdigest(),'library':output.name}
+    subprocess.run([cxx,*flags,str(ROOT/'native/lex.cpp'),str(ROOT/'native/parse.cpp'),'-o',str(output)],check=True)
+    info={'abi_version':2,'toolchain_directory':str(Path(cxx).parent),'compiler':subprocess.check_output([cxx,'--version'],text=True).splitlines()[0],'flags':flags,'source_sha256':hashlib.sha256((ROOT/'native/lex.cpp').read_bytes()).hexdigest(),'header_sha256':hashlib.sha256((ROOT/'native/lex.h').read_bytes()).hexdigest(),'parser_source_sha256':hashlib.sha256((ROOT/'native/parse.cpp').read_bytes()).hexdigest(),'parser_header_sha256':hashlib.sha256((ROOT/'native/parse.h').read_bytes()).hexdigest(),'library':output.name}
     info['frontend_sources_sha256']={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted((ROOT/'native').iterdir()) if p.suffix in ('.cpp','.h','.inc')}
     info['host']=platform.platform()
     info['target']=subprocess.check_output([cxx,'-dumpmachine'],text=True).strip()
@@ -43,7 +43,7 @@ def main():
         if a.gc_sections: exe_flags+=['-ffunction-sections','-fdata-sections','-Wl,--gc-sections']
         if a.static or os.name=='nt': exe_flags+=['-static']
         if os.name=='nt': exe_flags+=['-municode']
-        subprocess.run([cxx,*exe_flags,str(ROOT/'native/klex.cpp'),str(ROOT/'native/kparse.cpp'),str(ROOT/'native/kcc.cpp'),str(ROOT/'native/kbuild.cpp'),*(['-lbcrypt','-ladvapi32'] if os.name=='nt' else []),'-o',str(exe)],check=True)
+        subprocess.run([cxx,*exe_flags,str(ROOT/'native/lex.cpp'),str(ROOT/'native/parse.cpp'),str(ROOT/'native/acc.cpp'),str(ROOT/'native/build.cpp'),*(['-lbcrypt','-ladvapi32'] if os.name=='nt' else []),'-o',str(exe)],check=True)
         if os.name!='nt': exe.chmod(exe.stat().st_mode|0o111)
         info['standalone']={'file':exe.name,'flags':exe_flags,'sha256':hashlib.sha256(exe.read_bytes()).hexdigest(),'bytes':exe.stat().st_size}
         public=folder/('awl.exe' if os.name=='nt' else 'awl')

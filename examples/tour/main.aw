@@ -154,10 +154,10 @@ func main[i64] {
     print(string.bytes("héllo"));                  -- utf8 bytes
     print(string.slice("héllo",1,3));              -- start, count
     print(string.codepoint("é",0));
-    print(string.from_codepoint(233u32));
-    print(string.byte_at("é",1));
-    print(string.from_i64(big));
-    print(string.from_u64(biggest));
+    print(string.fromcodepoint(233u32));
+    print(string.byteat("é",1));
+    print(string.fromi64(big));
+    print(string.fromu64(biggest));
     print(string.compare("a","b"));
     print(name == "owl");                          -- text equality
     print("a" + "b");                              -- `+` also joins text
@@ -226,80 +226,80 @@ func main[i64] {
     print(spool.length(report));
 
     -- legacy growable i64 container, kept for older sources
-    @s numbers int_vector: int_vector.new(2);
-    int_vector.push(numbers,11);
-    int_vector.push(numbers,12);
-    int_vector.set(numbers,0,10);
-    print(int_vector.length(numbers));
-    print(int_vector.get(numbers,0) + int_vector.get(numbers,1));
-    int_vector.insert(numbers,0,9);
-    print(int_vector.remove(numbers,1));
-    print(int_vector.pop(numbers));
-    int_vector.clear(numbers);
-    print(int_vector.length(numbers));
+    @s numbers int_vector: intvector.new(2);
+    intvector.push(numbers,11);
+    intvector.push(numbers,12);
+    intvector.set(numbers,0,10);
+    print(intvector.length(numbers));
+    print(intvector.get(numbers,0) + intvector.get(numbers,1));
+    intvector.insert(numbers,0,9);
+    print(intvector.remove(numbers,1));
+    print(intvector.pop(numbers));
+    intvector.clear(numbers);
+    print(intvector.length(numbers));
 
     -- byte buffers, the bridge between raw bytes and strict text
-    @p bytes: buffer_new(32);
-    buffer_write_text(bytes,0,"café");
-    print(buffer_size(bytes));
-    print(buffer_text(bytes,0,5));
-    print(buffer_text_valid(bytes,0,5));
-    buffer_set(bytes,0,u8(67));
-    print(buffer_text(bytes,0,5));
-    print(buffer_get(bytes,0));
-    buffer_free(bytes);
+    @p bytes: buffer.new(32);
+    buffer.writetext(bytes,0,"café");
+    print(buffer.size(bytes));
+    print(buffer.text(bytes,0,5));
+    print(buffer.textvalid(bytes,0,5));
+    buffer.set(bytes,0,u8(67));
+    print(buffer.text(bytes,0,5));
+    print(buffer.get(bytes,0));
+    buffer.free(bytes);
 
     -- regular files, mode 0 read, 1 create new, 2 create or truncate, then atomic replace
-    @p payload: buffer_new(32);
-    buffer_write_text(payload,0,"tour payload");
-    @p file: file_open("tour-scratch.txt",2);
-    if file_valid(file) {
-        print(file_write(file,payload,0,12));
-        print(file_flush(file));
-        print(file_size(file));
-        print(file_close(file));
+    @p payload: buffer.new(32);
+    buffer.writetext(payload,0,"tour payload");
+    @p file: file.open("tour-scratch.txt",2);
+    if file.valid(file) {
+        print(file.write(file,payload,0,12));
+        print(file.flush(file));
+        print(file.size(file));
+        print(file.close(file));
     } else {
         print(-1);
     };
-    print(file_replace(".","tour-scratch.txt","tour-final.txt"));  -- atomic publish
-    @p reopened: file_open("tour-final.txt",0);
-    @p readback: buffer_new(32);
-    if file_valid(reopened) {
-        print(file_read(reopened,readback,0,12));
-        print(buffer_text(readback,0,12));
-        print(file_seek(reopened,0));
-        print(file_size(reopened));
-        print(file_close(reopened));
+    print(file.replace(".","tour-scratch.txt","tour-final.txt"));  -- atomic publish
+    @p reopened: file.open("tour-final.txt",0);
+    @p readback: buffer.new(32);
+    if file.valid(reopened) {
+        print(file.read(reopened,readback,0,12));
+        print(buffer.text(readback,0,12));
+        print(file.seek(reopened,0));
+        print(file.size(reopened));
+        print(file.close(reopened));
     } else {
         print(-1);
     };
-    buffer_free(payload);
-    buffer_free(readback);
+    buffer.free(payload);
+    buffer.free(readback);
 
     -- standard streams and the environment
-    @p note: buffer_new(16);
-    buffer_write_text(note,0,"tour note");
-    print(stderr_write(note,0,9));                 -- writes to stderr, returns the count
-    print(stdout_write(note,0,0));                 -- zero byte probe, count 0
-    print(stdout_flush());
-    print(stderr_flush());
-    print(env_size("PATH") > 0);
-    @p envbuf: buffer_new(8);
-    @p envbytes: env_size("PATH");
+    @p note: buffer.new(16);
+    buffer.writetext(note,0,"tour note");
+    print(stderr.write(note,0,9));                 -- writes to stderr, returns the count
+    print(stdout.write(note,0,0));                 -- zero byte probe, count 0
+    print(stdout.flush());
+    print(stderr.flush());
+    print(env.size("PATH") > 0);
+    @p envbuf: buffer.new(8);
+    @p envbytes: env.size("PATH");
     if envbytes >= 8 {
-        print(env_read("PATH",envbuf,0,8));        -- -5 means the value did not fit the buffer
+        print(env.read("PATH",envbuf,0,8));        -- -5 means the value did not fit the buffer
     } else {
         print(-1);
     };
-    buffer_free(envbuf);
-    buffer_free(note);
-    -- stdin_read(note,0,16) would block without input, it reads stdin bytes into a buffer
-    print(arg_count());
-    print(arg_text_valid(0));
-    print(arg_i64_valid(0));
-    if arg_count() > 0 {
-        print(arg_text(0));                        -- strict UTF8 copy of argv[1]
-        print(arg_i64(0));                         -- strict integer argv[1]
+    buffer.free(envbuf);
+    buffer.free(note);
+    -- stdin.read(note,0,16) would block without input, it reads stdin bytes into a buffer
+    print(arg.count());
+    print(arg.textvalid(0));
+    print(arg.i64valid(0));
+    if arg.count() > 0 {
+        print(arg.text(0));                        -- strict UTF8 copy of argv[1]
+        print(arg.i64(0));                         -- strict integer argv[1]
     } else {
         print("no arguments");
     };
@@ -309,39 +309,39 @@ func main[i64] {
     @s err spool: spool.new(32);
     @s argv vector<text>: vector.new<text>(1);
     vector.push(argv,"tour");
-    print(process_capture("/bin/echo",vector.view(argv,0,1),out,err,5000));
+    print(process.capture("/bin/echo",vector.view(argv,0,1),out,err,5000));
     print(spool.snapshot(out));
     print(spool.bytes(err));
 
-    -- loopback TCP listener, close straight away, tcp_accept/tcp_read/tcp_write need a live peer
-    -- so they are exercised in examples/apps/kserve instead of a self-contained tour
-    @p listener: tcp_listen_loopback(0,2);
-    print(tcp_valid(listener));
-    print(tcp_port(listener) > 0);
-    print(tcp_close(listener));
+    -- loopback TCP listener, close straight away, tcp.accept/tcp.read/tcp.write need a live peer
+    -- so they are exercised in examples/apps/serve instead of a self-contained tour
+    @p listener: tcp.listenloopback(0,2);
+    print(tcp.valid(listener));
+    print(tcp.port(listener) > 0);
+    print(tcp.close(listener));
 
     -- framebuffer window, headless hosts return 0 instead of a handle
-    @p window: window_open(8,4);
+    @p window: window.open(8,4);
     if window != 0 {
-        window_set_title(window,"tour");
-        window_set_pixel(window,0,0,16711680);
-        print(window_width(window));
-        print(window_height(window));
-        print(window_present(window));
-        print(window_poll(window));
-        print(window_key(window));
-        print(window_mouse_x(window));
-        print(window_mouse_y(window));
-        window_close(window);
+        window.title(window,"tour");
+        window.pixel(window,0,0,16711680);
+        print(window.width(window));
+        print(window.height(window));
+        print(window.present(window));
+        print(window.poll(window));
+        print(window.key(window));
+        print(window.mousex(window));
+        print(window.mousey(window));
+        window.close(window);
     } else {
         print("no display");
     };
 
     -- clock and platform, monotonic milliseconds and a platform id
-    @p started: clock_millis();
-    sleep_millis(1);
-    print(clock_millis() >= started);
-    print(platform_kind());
+    @p started: clock.millis();
+    clock.sleep(1);
+    print(clock.millis() >= started);
+    print(platform.kind());
 
     -- control flow, if/elseif/else, while, match on enums with payload binding
     @p step: 0;
@@ -447,9 +447,9 @@ func main[i64] {
     print(vector.length(marks_copy));
 
     -- defer runs at scope exit, including every early return
-    @p tracked: file_open("tour-final.txt",0);
-    defer file_close(tracked);
-    print(file_valid(tracked));
+    @p tracked: file.open("tour-final.txt",0);
+    defer file.close(tracked);
+    print(file.valid(tracked));
 
     print("tour complete");
     return 0;

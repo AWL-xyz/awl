@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Contributor-only Linux x86-64 bundle builder. Not run by installed kcc.
+"""Contributor-only Linux x86-64 bundle builder. Not run by installed acc.
 Downloads are opt-in and checksum locked. Requires Python 3.12+ and native host.
 """
 import argparse
@@ -47,14 +47,14 @@ def main():
     flags=['-std=c++20','-target',lock['target'],'-mcpu=baseline','-static','-O2','-g0','-s','-Wall','-Wextra','-Werror']
     def affinity():
         allowed=sorted(os.sched_getaffinity(0));os.sched_setaffinity(0,set(allowed[:4]))
-    subprocess.run([str(tool/'zig'),'c++',*flags,*[str(native/name) for name in ['klex.cpp','kparse.cpp','kcc.cpp','kbuild.cpp']],'-o',str(package/'bin/kcc')],check=True,timeout=360,preexec_fn=affinity)
+    subprocess.run([str(tool/'zig'),'c++',*flags,*[str(native/name) for name in ['lex.cpp','parse.cpp','acc.cpp','build.cpp']],'-o',str(package/'bin/acc')],check=True,timeout=360,preexec_fn=affinity)
     public=package/'bin/awl'
     if public.exists() or public.is_symlink():public.unlink()
-    public.symlink_to('kcc')
+    public.symlink_to('acc')
     for alias in ['acc','awL','aWl','aWL','Awl','AwL','AWl','AWL']:
         link=package/'bin'/alias
         if link.exists() or link.is_symlink():link.unlink()
-        link.symlink_to('kcc')
+        link.symlink_to('acc')
     shutil.copy2(ROOT/'docs/ASDK.md',package/'ASDK.md')
     shutil.copy2(ROOT/'docs/STREAMS.md',package/'STREAMS.md')
     shutil.copy2(ROOT/'docs/NETWORK.md',package/'NETWORK.md')
@@ -98,7 +98,7 @@ def main():
     shutil.copy2(ROOT/'docs/CAPABILITY-ASSESSMENT.md',package/'CAPABILITY-ASSESSMENT.md')
     scrub_private(package)
     manifest={'toolkit':{'name':'Awl Software Development Kit [Beta]','command':'bin/awl','commands':['init','build']},'version':'0.24.0-dev','status':'experimental source candidate using Aesop syntax; Linux x86-64 only','toolchain':lock,'compiler_build_flags':flags,
-        'kcc_sha256':digest(package/'bin/kcc'),'zig_sha256':digest(tool/'zig'),
+        'acc_sha256':digest(package/'bin/acc'),'zig_sha256':digest(tool/'zig'),
         'compiler_sources_sha256':{f.name:digest(f) for f in sorted(src.iterdir()) if f.suffix in ['.cpp','.h','.inc','.c']},
         'resources':'Complete upstream Zig distribution, including libc sources/headers, compiler-rt, libc++/libc++abi/libunwind resources and notices. No host development tools required at runtime.',
         'build_target':'static x86_64-linux-musl; baseline CPU; release binaries without debug symbols','tested_host_baseline':'Linux x86-64 kernel6.1.189; see validation/files-development-validation.json; no older-kernel compatibility claim.'}

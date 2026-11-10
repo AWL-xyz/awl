@@ -1,9 +1,9 @@
 use Config.aw as config;
 use File.aw as file;
 func main[i64] {
-    if arg_count() != 1 { print("usage: configcheck-json JSON"); return 2; };
-    if not arg_text_valid(0) { return 2; };
-    match config.parse(arg_text(0)) then
+    if arg.count() != 1 { print("usage: configcheck-json JSON"); return 2; };
+    if not arg.textvalid(0) { return 2; };
+    match config.parse(arg.text(0)) then
         case config.Result.Loaded(settings) then
             match settings then
                 case config.Settings.Profile(host, port, debug) then

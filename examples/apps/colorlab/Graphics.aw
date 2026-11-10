@@ -201,7 +201,7 @@ exports{
     };
     @r func present[bool] :: window:i64, @b pixels[i64], width:i64, height:i64 {
         if not valid(pixels, width, height, 0) { return false; };
-        if window_width(window) != width or window_height(window) != height { return false; };
+        if window.width(window) != width or window.height(window) != height { return false; };
         @p i: 0;
         while i < vector.length(pixels) {
             @p color: vector.get(pixels, i);
@@ -209,7 +209,7 @@ exports{
             i: i + 1;
         };
         i: 0;
-        while i < vector.length(pixels) { window_set_pixel(window, i % width, i / width, vector.get(pixels, i)); i: i + 1; };
-        return window_present(window);
+        while i < vector.length(pixels) { window.pixel(window, i % width, i / width, vector.get(pixels, i)); i: i + 1; };
+        return window.present(window);
     };
 };

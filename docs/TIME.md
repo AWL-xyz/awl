@@ -36,7 +36,7 @@ func main[i64] {
 
 ## implementation
 
-`clock_millis` uses `CLOCK_MONOTONIC` on POSIX and `GetTickCount64` on Windows, `wall_clock_millis` uses `CLOCK_REALTIME` on POSIX/WASI and `GetSystemTimePreciseAsFileTime` on Windows, the helper is emitted only into generated programs that call it so existing generated C stays byte-identical
+`clock.millis` uses `CLOCK_MONOTONIC` on POSIX and `GetTickCount64` on Windows, `clock.wall` uses `CLOCK_REALTIME` on POSIX/WASI and `GetSystemTimePreciseAsFileTime` on Windows, the helper is emitted only into generated programs that call it so existing generated C stays byte-identical
 
 the Windows `FILETIME` value is converted from 100-nanosecond intervals since 1601 UTC by subtracting `116444736000000000` and dividing by `10000`, the POSIX conversion checks the `timespec` nanoseconds and the full `i64` millisecond limit before multiplying, malformed clocks and numeric overflow trap instead of wrapping
 

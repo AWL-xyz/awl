@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: security advisory
+    url: https://github.com/AWL-xyz/awl/security/advisories/new
+    about: report vulnerabilities privately, see SECURITY.md
+  - name: documentation index
+    url: https://github.com/AWL-xyz/awl/tree/main/docs
+    about: current syntax, API, toolkit, Package and editor documentation

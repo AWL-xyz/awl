@@ -36,7 +36,7 @@ func decode_into[bool] :: source:text, @b rows[text], @b meta[i64] {
     @p count: 0;
     @p previous: 0;
     while count < 33 {
-        @p prefix: "/tasks/" + string.from_i64(count);
+        @p prefix: "/tasks/" + string.fromi64(count);
         @p task: json.locate(prefix, tokens, result);
         if task == -1 {
             if vector.length(tokens) != 11 + count * 10 { return false; };
@@ -92,7 +92,7 @@ exports{
         if vector.length(meta) != 2 or vector.length(rows) > 128 or vector.length(rows) % 4 != 0 { return false; };
         @s builder spool: spool.new(65536);
         if not spool.valid(builder) { return false; };
-        if spool.append(builder, "{\"version\":1,\"revision\":" + string.from_i64(vector.get(meta, 0)) + ",\"next_id\":" + string.from_i64(vector.get(meta, 1)) + ",\"tasks\":[") < 0 { return false; };
+        if spool.append(builder, "{\"version\":1,\"revision\":" + string.fromi64(vector.get(meta, 0)) + ",\"next_id\":" + string.fromi64(vector.get(meta, 1)) + ",\"tasks\":[") < 0 { return false; };
         @p i: 0;
         while i < vector.length(rows) {
             if i > 0 {
@@ -111,33 +111,33 @@ exports{
         return vector.push(output, spool.snapshot(builder));
     };
     @r func load[bool] :: directory:text, buffer:i64, @b rows[text], @b meta[i64] {
-        @p file: file_open(directory + "/board.json", 0);
+        @p file: file.open(directory + "/board.json", 0);
         if file == -2 { return true; };
         if file < 0 { return false; };
-        @p size: file_size(file);
-        if size < 1 or size > 65536 { file_close(file); return false; };
+        @p size: file.size(file);
+        if size < 1 or size > 65536 { file.close(file); return false; };
         @p offset: 0;
         while offset < size {
-            @p n: file_read(file, buffer, offset, size - offset);
-            if n <= 0 { file_close(file); return false; };
+            @p n: file.read(file, buffer, offset, size - offset);
+            if n <= 0 { file.close(file); return false; };
             offset: offset + n;
         };
-        if file_close(file) != 0 { return false; };
-        if not buffer_text_valid(buffer, 0, size) { return false; };
-        return decode(buffer_text(buffer, 0, size), rows, meta);
+        if file.close(file) != 0 { return false; };
+        if not buffer.textvalid(buffer, 0, size) { return false; };
+        return decode(buffer.text(buffer, 0, size), rows, meta);
     };
     @r func save[i64] :: directory:text, source:text, buffer:i64 {
-        @p file: file_open(directory + "/.board.tmp", 2);
+        @p file: file.open(directory + "/.board.tmp", 2);
         if file < 0 { return -1; };
-        @p size: buffer_write_text(buffer, 0, source);
-        if size < 0 { file_close(file); return -1; };
+        @p size: buffer.writetext(buffer, 0, source);
+        if size < 0 { file.close(file); return -1; };
         @p offset: 0;
         while offset < size {
-            @p n: file_write(file, buffer, offset, size - offset);
-            if n <= 0 { file_close(file); return -1; };
+            @p n: file.write(file, buffer, offset, size - offset);
+            if n <= 0 { file.close(file); return -1; };
             offset: offset + n;
         };
-        if file_close(file) != 0 { return -1; };
-        return file_replace(directory, ".board.tmp", "board.json");
+        if file.close(file) != 0 { return -1; };
+        return file.replace(directory, ".board.tmp", "board.json");
     };
 };

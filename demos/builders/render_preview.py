@@ -17,7 +17,7 @@ d.text((68,184),'GENERAL-PURPOSE 1.0 ROADMAP',font=f(13),fill='#94a9c8')
 d.text((68,210),'~15%  ·  subjective scope estimate, not a completeness measurement',font=f(19),fill='#dce8fa')
 d.rounded_rectangle((48,267,1232,548),radius=14,fill='#192337')
 d.text((70,285),'ACTUAL EXAMPLE LOOP · examples/builders/main.aw',font=f(14),fill='#70e1bf')
-lines=['while i<100000 do','    spool_clear(b)','    if spool_append(b,"frame=")!=0 then return 5 end','    if spool_i64(b,i)!=0 then return 6 end','    i=i+1','end']
+lines=['while i<100000 do','    spool.clear(b)','    if spool.append(b,"frame=")!=0 then return 5 end','    if spool.i64(b,i)!=0 then return 6 end','    i=i+1','end']
 for i,line in enumerate(lines):d.text((70,323+i*32),line,font=f(22,True),fill='#dae8fc')
 d.rounded_rectangle((48,568,1232,839),radius=14,fill='#0a101a')
 d.text((70,586),'ACTUAL NATIVE PROGRAM OUTPUT · Awl-ONLY TOOLCHAIN',font=f(14),fill='#91a8c9')

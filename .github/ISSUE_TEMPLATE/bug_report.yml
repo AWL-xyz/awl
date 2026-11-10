@@ -1,0 +1,48 @@
+name: bug report
+description: compiler, generated C or toolkit failure with a reproducible command
+title: "[bug] "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        please use a minimal current-syntax source and exact commands, do not include credentials, private notes or historical capsules
+  - type: input
+    id: host
+    attributes:
+      label: host
+      description: OS, architecture, compiler versions and acc build command
+      placeholder: Linux x86-64, g++ 14, python3 compiler/build_native.py --standalone --strip
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: minimal source
+      description: smallest .aw source or project manifest that reproduces the issue
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: exact command and output
+      description: include diagnostic JSON when relevant
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: expected behavior
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: checklist
+      options:
+        - label: I used the current source syntax and a freshly built acc
+          required: true
+        - label: I checked docs/API.md and tests/README.md first
+          required: false

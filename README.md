@@ -37,7 +37,7 @@ function results are inferred from the body unless explicitly declared in bracke
 
 ```text
 func size :: @b values[i64], etc[i64] {
-    return vector_length(values) + vector_length(etc);
+    return vector.length(values) + vector.length(etc);
 };
 
 func main[i64] {
@@ -55,7 +55,7 @@ func main[i64] {
 - `func make[@o vector<i64>] { ... };` declares an owned resource result
 - `@p count: 3;` declares a binding, `count: count - 1;` assigns it
 - braced functions/control flow and mandatory semicolons are part of Aesop, enums and matches retain their documented `end;` forms
-- `vector_length(value)` and `vector.length(value)` both query vector length, the underscore spelling is an intentional alias for the example above
+- `vector.length(value)` queries vector length
 
 `@b` explicitly borrows a resource parameter, an unmarked parameter does not acquire borrow permission, scoped resources must still follow the ownership rules, resource results require an explicit result/ownership annotation
 

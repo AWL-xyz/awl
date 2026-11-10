@@ -1,49 +1,49 @@
 {
   "status": "PASS",
-  "scope": "before/after source-syntax and return-inference migration, unchanged emitted C for 27 existing programs after isolating the new wall-clock helper, Linux host-C compilation, not execution of every application or standalone SDK acceptance",
+  "scope": "before/after source-syntax, built-in namespace and return-inference migration, unchanged emitted C for 27 existing programs after isolating new runtime helpers, Linux host-C compilation, not execution of every application or standalone SDK acceptance",
   "entry_points": 27,
   "byte_identical_emitted_c": true,
-  "compiler_sha256": "4f1fdd6a0cda6ccd7e80db38fc089ad355ac685f6eed126a1304c7e6742be43c",
+  "compiler_sha256": "790a141d5036022bcd12b17973b8bc031f0f1e982715afd24ce8963c97b6bdbb",
   "records": [
     {
       "source": "examples/apps/colorlab/main.aw",
-      "source_sha256": "56039a91e487f1ca8586a3f0987c67f0140e9dd9c4cb5a1b944f626f91d60dde",
+      "source_sha256": "582b2375c2ad68de4b5db4b53aaac695baff93b9ec9214d615c21fee91380a7d",
       "before_and_after_c_sha256": "ca173273c8f9a6171c65aceeaf8199d528ff48b3820a6f90d52672af2ce35210",
       "native_compiled": true
     },
     {
-      "source": "examples/apps/kpipe/main.aw",
-      "source_sha256": "b22205847d8f250c50e6cdce9da46e3661d08a85cfee1cc9127e951612f9a094",
+      "source": "examples/apps/pipe/main.aw",
+      "source_sha256": "ab744c388fa1508bd7ca887a460421e539808c5a70025051126da934a9b8a237",
       "before_and_after_c_sha256": "340c324a0c0bd967a379e68c59f31d059b40a2670e8f686367a4ca861ce2c79e",
       "native_compiled": true
     },
     {
-      "source": "examples/apps/ksave/main.aw",
-      "source_sha256": "f0760bae0c091ce6f78c8b03dfcf30cbf4711eee0b491bec986c3f3a35e65e53",
+      "source": "examples/apps/save/main.aw",
+      "source_sha256": "e6a4a9d9db1d04e0abd677d1152fc1b73867abd466691487374f223b88445820",
       "before_and_after_c_sha256": "60bcef6c8d6dc8022a10849206cd47affcf04fe2ddd0b26a92d5c6b6b6de09cb",
       "native_compiled": true
     },
     {
-      "source": "examples/apps/kserve/main.aw",
-      "source_sha256": "496d5584c9b06a4f66358aeb289f44a4c520b8f155f10907a968581bc4abbbce",
+      "source": "examples/apps/serve/main.aw",
+      "source_sha256": "a53fefbd354a7b6b7488514e4fe11b4a23d3d2584a02c8e7cdc17f7a27006454",
       "before_and_after_c_sha256": "a5aa3c8bdece0c2ef3766b20c4ecd653ae944cba957b6d04a67072bae701da73",
       "native_compiled": true
     },
     {
-      "source": "examples/apps/ksort/main.aw",
-      "source_sha256": "6449e91d30468de31576ab430046b5f5fdfb4387c1beacc8b25e72e6e8b39035",
+      "source": "examples/apps/sort/main.aw",
+      "source_sha256": "87c49433fc9b87a99148fd5f33f904fba4626a7add6bf62296abf29467e9159b",
       "before_and_after_c_sha256": "758ac12f3f202975523c9cc13603502e7510e1427fba5f6b90723e41dffb2995",
       "native_compiled": true
     },
     {
-      "source": "examples/apps/kvserve/main.aw",
-      "source_sha256": "f31007124f75b21ee33be5916d8625c3ca592744197d17dc2c0938cf73f839c4",
+      "source": "examples/apps/valueserve/main.aw",
+      "source_sha256": "2af3495ee4a2a664b92348ea54a49a733822296193355dfe7b4b8a5d80aa7dda",
       "before_and_after_c_sha256": "f969a4ae6815667548cffce6d077747b1b911f9b681737a26789dd617abf02b9",
       "native_compiled": true
     },
     {
       "source": "examples/collections/main.aw",
-      "source_sha256": "6ce2675ef69dcc8be6de2f38f2df60f1b8c48fb77ea3a96ce32e56d9a92a33d7",
+      "source_sha256": "b25b2970ea92fd64bfbb67797bcc235a4ab43300c7dec5bfe8eb759b04ae9773",
       "before_and_after_c_sha256": "16cd361ab380a29b8dd7a6dd17823f269a5820d70184dd6a304aa9240e73eb02",
       "native_compiled": true
     },
@@ -55,19 +55,19 @@
     },
     {
       "source": "examples/enums/main.aw",
-      "source_sha256": "1c5d54d0a9171229252e068ff93095a53fc4fef39d39664aef926ea51288a3dd",
+      "source_sha256": "b9f509f1e322551070af6f2911576a48aa257ff39f52f76abff860cc15dd6ede",
       "before_and_after_c_sha256": "a3bfb4692e07bcfe317b592cd3a635585c64d6ab10527441ee8ec02004ae1a3b",
       "native_compiled": true
     },
     {
       "source": "examples/exported-enums/main.aw",
-      "source_sha256": "1ca6b8220ddfce26444b02fac178a972d3e57262efbe1971580eeced18bf447d",
+      "source_sha256": "553e4a3869395fab6705a85ebf30c987a4326e25cbe4781577af5c39db5e6bdc",
       "before_and_after_c_sha256": "d4e1343789ca22ed7331900f5795ca3bec3346ac3938485552f500e2bb682df4",
       "native_compiled": true
     },
     {
       "source": "examples/exported-enums/web.aw",
-      "source_sha256": "35429e3ed31e2829d30e923a64d3138202785ae7f3e3c6544d8a54f97245bc12",
+      "source_sha256": "d73a48779927b242405b93832021f96fe5f5d2f38ebb4477c9634cfdc3777085",
       "before_and_after_c_sha256": "d7355eee77862569ee2a36608d28a9d4be3aad7fb5e7dcb386e76713d8d49db6",
       "native_compiled": true
     },
@@ -79,7 +79,7 @@
     },
     {
       "source": "examples/loops/main.aw",
-      "source_sha256": "09aedeff9301261f5c35957f6362b53e03858cf715286f0cb6a2d31881f185a4",
+      "source_sha256": "0da3bce08de5428f90fa753506afb386c53ca9e1d23c7e6f909114cddd996ab8",
       "before_and_after_c_sha256": "efd6ad2d1325dc3b116c6c4651dd86467b5d1f68ad4e6d629ed02c34e898a8a6",
       "native_compiled": true
     },
@@ -97,7 +97,7 @@
     },
     {
       "source": "examples/numeric/donut.aw",
-      "source_sha256": "7556bb0785efc31d111f3a90f059df0f85db214411bc64aa7c9b0b58cf2e3b43",
+      "source_sha256": "4d7c2f65b07c86dc7f526ca57d7b319ceeee3f0ee8338230132045aeaefa6dc9",
       "before_and_after_c_sha256": "01de9824df1dc0c3cb5fe7541c660aeb25f0120606453db13fd7b0ca7ab68e9f",
       "native_compiled": true
     },
@@ -115,13 +115,13 @@
     },
     {
       "source": "examples/parsing/jget.aw",
-      "source_sha256": "d77ba97ee6396c5a8156304c4dffcaa3daa2d8f0716524ffd3eeb8f5523044d5",
+      "source_sha256": "0cda09f5a149e5bdaf235464cd9af184bc1527e100f8969c6750ae7c19c72574",
       "before_and_after_c_sha256": "777db363cd1ae1961eebefac4f070cb24adf1a96b2b02d2f0436290996273d05",
       "native_compiled": true
     },
     {
       "source": "examples/parsing/web.aw",
-      "source_sha256": "d1115ef1773c69d31f294e79823011d02a8153f5296eab28687f567eed41b85a",
+      "source_sha256": "b97a0afb734c2c2ba3715207a5816601142e0b400761ff0685d41d12a87660e2",
       "before_and_after_c_sha256": "d6e653c6868a357da6c3c80c7754069c1274d7fbb389c04015f3e022378da18b",
       "native_compiled": true
     },
@@ -139,31 +139,31 @@
     },
     {
       "source": "examples/tour/main.aw",
-      "source_sha256": "a9ea167c899b00c4242e91f2d32bf11e52f70a93609460fb12f9bb489cb85839",
+      "source_sha256": "c4ff83aedd106b95548d9f0ff048755f666b3d22e618c4603905d64f4f7a16cb",
       "before_and_after_c_sha256": "fcb4fc783ffdb244f989fded9702d0568d7d17fffc8fa57988ccea31b91ebbbe",
       "native_compiled": true
     },
     {
       "source": "apps/board/filter.aw",
-      "source_sha256": "6af4b2ba425e619147befeaf85ae1d423d0543b80e4d41f3235b40f1fa7f9506",
+      "source_sha256": "e9af903249d05e0db683070b8e51869921bb3c93b4d9c696121cd5d8f4694ed0",
       "before_and_after_c_sha256": "291fe2c69e3415b13dd157ea79a07764be026fc8736a737053234bc02d843da8",
       "native_compiled": true
     },
     {
       "source": "apps/board/main.aw",
-      "source_sha256": "81e0eb25933a75f2dfbf6afe6b563932ca286a75e18023431504f27d2c532ef3",
+      "source_sha256": "8d3180e5ae1fb299961148b9c48be92abfa9af8f5eed06af356b2d0ece265689",
       "before_and_after_c_sha256": "6bf038a1536374f4e0e2b8ee4ff94d03764b5a57e5fbc153ba9e1a365ec96fa7",
       "native_compiled": true
     },
     {
       "source": "apps/logwindow/main.aw",
-      "source_sha256": "c99bd518b094a6fb8b9e7d47f47b8f4e4b0614330ab2424d93b93ac3dadcac6f",
+      "source_sha256": "e39b7b72f9077abc505bdddfaab43b52739759742b19ee3a1a2e9c6b2ba0d2b2",
       "before_and_after_c_sha256": "b86f582b7b983abc852bf48424ffd1c076d777a5ed80a292326efff868bd694e",
       "native_compiled": true
     },
     {
       "source": "apps/taskrun/main.aw",
-      "source_sha256": "3b4670973101cfe15a79a58e15e6ddc891c722feef14abf84a7774df9a8ba5cd",
+      "source_sha256": "9e4ce95b3d5020a5720d3bd36bc2ab304357db4d94b729793d279426ab7c1097",
       "before_and_after_c_sha256": "f99b0e4cf1601eed67f1abe0e9af53b927a5527a2a7563f9d9dfd8bb6ae1eb45",
       "native_compiled": true
     }

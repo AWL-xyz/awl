@@ -15,7 +15,7 @@ def font(n,mono=False):return ImageFont.truetype('/usr/share/fonts/truetype/deja
 d.text((48,35),'Awl / 0.8.2-dev',font=font(17),fill='#72e0c0');d.text((48,70),'Native UTF-8 strings',font=font(36),fill='#f0f5ff')
 d.text((48,124),'Immutable text  /  Unicode scalar slicing  /  Exact byte counts',font=font(18),fill='#9cacc3')
 d.rounded_rectangle((40,177,1160,470),radius=16,fill='#182336');d.text((64,197),'EXAMPLE  ·  examples/strings/preview.aw',font=font(15),fill='#72e0c0')
-lines=['local text: string = "Awl café"','print("Hello, " + text + "!")','print("Scalars: " + string_from_i64(string_length(text)))','print("Bytes: " + string_from_i64(string_bytes(text)))','print("Slice: " + string_slice(text,5,4))','print(string_codepoint(text,8) == 233u32)']
+lines=['local text: string = "Awl café"','print("Hello, " + text + "!")','print("Scalars: " + string.fromi64(string.length(text)))','print("Bytes: " + string.fromi64(string.bytes(text)))','print("Slice: " + string.slice(text,5,4))','print(string.codepoint(text,8) == 233u32)']
 for i,line in enumerate(lines):d.text((64,238+i*32),line,font=font(21,True),fill='#d5e3f8')
 d.rounded_rectangle((40,490,1160,714),radius=16,fill='#0b111b');d.text((64,507),'ACTUAL PROGRAM OUTPUT',font=font(14),fill='#8498b5')
 for i,line in enumerate(r.stdout.splitlines()):d.text((64,540+i*30),line,font=font(22,True),fill='#81ebbc')

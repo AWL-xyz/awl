@@ -15,11 +15,11 @@ def main():
         for _ in range(7):
             builds.append(build(example));r=subprocess.run([str(out)],env=env,capture_output=True,text=True);assert(r.returncode,r.stdout)==(0,expected),r.stderr
         for name,n in [('reuse',1000000),('create_release',100000)]:
-            before='local b:spool=spool_new(64)' if name=='reuse' else ''
-            inside='spool_clear(b)' if name=='reuse' else 'local b:spool=spool_new(64) if not spool_valid(b) then return 3 end'
-            after='spool_free(b)' if name=='create_release' else ''
-            final='spool_free(b)' if name=='reuse' else ''
-            source=root/'bench.aw';source.write_text(f'function main()->i64 {before} local i:i64=0 local sum:i64=0 while i<{n} do {inside} if spool_append(b,"frame=")!=0 then return 1 end if spool_i64(b,i)!=0 then return 2 end sum=sum+spool_bytes(b) {after} i=i+1 end {final} print(sum) return 0 end')
+            before='local b:spool=spool.new(64)' if name=='reuse' else ''
+            inside='spool.clear(b)' if name=='reuse' else 'local b:spool=spool.new(64) if not spool.valid(b) then return 3 end'
+            after='spool.free(b)' if name=='create_release' else ''
+            final='spool.free(b)' if name=='reuse' else ''
+            source=root/'bench.aw';source.write_text(f'function main()->i64 {before} local i:i64=0 local sum:i64=0 while i<{n} do {inside} if spool.append(b,"frame=")!=0 then return 1 end if spool.i64(b,i)!=0 then return 2 end sum=sum+spool.bytes(b) {after} i=i+1 end {final} print(sum) return 0 end')
             build(source);checksum=6*n+sum(len(str(i)) for i in range(n));samples=[]
             for i in range(8):
                 start=time.perf_counter();r=subprocess.run([str(out)],env=env,capture_output=True,text=True);elapsed=(time.perf_counter()-start)*1000

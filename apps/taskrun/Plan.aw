@@ -4,7 +4,7 @@ func safe[bool] :: value:text {
     if string.bytes(value)>4096 { return false; };
     @p i:0;
     while i<string.bytes(value) {
-        if string.byte_at(value,i)==0u8 { return false; };
+        if string.byteat(value,i)==0u8 { return false; };
         i:i+1;
     };
     return true;

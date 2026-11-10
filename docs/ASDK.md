@@ -71,11 +71,12 @@ omitting a function result requests body-based inference, see [Aesop return infe
 ## language and evidence
 
 - [Aesop syntax reference](AESOP.md)
+- [built-in API and conversions](API.md)
 - [capability assessment](CAPABILITY-ASSESSMENT.md)
-- current source gates: `compiler/test_native.py`, `compiler/generate_runtime.py --check`, `compiler/generate_platform.py --check`, `tests/aesop.py`, `tests/aesop_time.py`
+- current source gates: `compiler/test_native.py`, `compiler/generate_runtime.py --check`, `compiler/generate_platform.py --check`, `tests/aesop.py`, `tests/aesop_time.py`, see [current test gates](../tests/README.md)
 - older checkpoints bind their recorded compiler/source hashes, not the current source by implication
 
-complete source-current SDK packaging, offline acceptance, relocation/backend-failure testing and native Windows qualification remain separate release work
+a source-current complete Linux SDK archive was built locally and its report is `tests/sdk-source-current.json`, offline acceptance, relocation/backend-failure testing and native Windows qualification remain separate release work
 
 ## frontend embedding
 

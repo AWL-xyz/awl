@@ -39,8 +39,14 @@ r=run([{name:'main.aw',text:'func choose :: b:bool { if b { return 7; } else { r
 expect(r.code===0&&r.out[0]==='9','inferred function and entry-point results');
 r=run([{name:'main.aw',text:'func main { print(answer()); return 0; }; func answer { return 42; };'}],'main.aw');
 expect(r.out[0]==='42','forward inferred result');
-r=run([{name:'main.aw',text:'func main { @p stamp: wall_clock_millis(); print(stamp >= 0); return 0; };'}],'main.aw');
+r=run([{name:'main.aw',text:'func main { @p stamp: clock.wall(); print(stamp >= 0); return 0; };'}],'main.aw');
 expect(r.code===0&&r.out[0]==='true','wall-clock intrinsic has a checked i64 result');
+r=run([{name:'main.aw',text:'func main { print(i64.convert(1.5)); print(i8.convert(1000.0)); print(u64.convert(-1.5)); print(f64.convert(1.5)); print(isnum(1.5)); print(isnum("x")); print(i64.match(1)); print(text.match("x")); return 0; };'}],'main.aw');
+expect(r.code===0&&JSON.stringify(r.out)===JSON.stringify(['1','127','0','1.5','true','false','true','true']),'numeric conversions, isnum and type match');
+r=run([{name:'main.aw',text:'func main { @p w: window.open(2,2); print(window.width(w)); window.title(w,"x"); print(window.present(w)); window.close(w); return 0; };'}],'main.aw');
+expect(r.code===0&&r.out[0]==='2'&&r.out[1]==='true','namespace window API');
+let mixed=false;try{run([{name:'main.aw',text:'func main { @p a: 2; @p b: 1.5; print(a * b); return 0; };'}],'main.aw');}catch(e){mixed=true;}expect(mixed,'strict mixed numeric arithmetic');
+
 for(const source of ['func bad :: b:bool { if b { return 1; } else { return false; }; }; func main { print(bad(true)); return 0; };','func bad { return bad(); }; func main { print(bad()); return 0; };','func bad :: b:bool { if b { return 1; }; }; func main { print(bad(true)); return 0; };']) {
   let rejected=false;try{run([{name:'main.aw',text:source}],'main.aw');}catch(e){rejected=true;}expect(rejected,'editor rejects mixed/circular/incomplete inferred results');
 }

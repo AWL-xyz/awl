@@ -10,7 +10,7 @@ def main():
   root=Path(td)
   for label in samples:
    mode='own' if label=='own' else 'borrow';argument='move b' if label=='own' else 'b'
-   source='function finish('+mode+' b:spool)->i64 return spool_bytes(b) end function frame(i:i64)->i64 scoped b:spool=spool_new(64) if not spool_valid(b) then return -1 end spool_append(b,"frame=") spool_i64(b,i) local n:i64=finish('+argument+') return n end function main()->i64 local i:i64=0 local sum:i64=0 while i<100000 do local n:i64=frame(i) if n<0 then return 1 end sum=sum+n i=i+1 end print(sum) return 0 end'
+   source='function finish('+mode+' b:spool)->i64 return spool.bytes(b) end function frame(i:i64)->i64 scoped b:spool=spool.new(64) if not spool.valid(b) then return -1 end spool.append(b,"frame=") spool.i64(b,i) local n:i64=finish('+argument+') return n end function main()->i64 local i:i64=0 local sum:i64=0 while i<100000 do local n:i64=frame(i) if n<0 then return 1 end sum=sum+n i=i+1 end print(sum) return 0 end'
    (root/(label+'.aw')).write_text(source)
   def sample(label):
    exe=root/label;t=time.perf_counter();r=subprocess.run([str(KCC),'build',str(root/(label+'.aw')),'-O','2','-o',str(exe)],env=env,capture_output=True,text=True,timeout=120);build=(time.perf_counter()-t)*1000;assert r.returncode==0,r.stderr

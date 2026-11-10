@@ -26,7 +26,7 @@ this is still a bounded single-threaded runtime, not a concurrent handle table, 
 | 16 | 78.292 | 9.464 | 11.376 | 11.032 | 7.124 |
 | 64 | 291.957 | 10.261 | 11.266 | 5.922 | 6.956 |
 
-| native ksort, 10000 lines | before, ms | after, ms |
+| native sort, 10000 lines | before, ms | after, ms |
 |---|---:|---:|
 | sort | 8.704 | 7.552 |
 | unique | 9.098 | 7.163 |
@@ -35,7 +35,7 @@ source and raw measurements are in `benchmarks/vector_competition.py` and `bench
 
 these are7shuffled warm whole-process samples after an excluded warmup, the stress case performs5million indexed updates over4096values, a Python oracle verifies the checksum, input is consumed from argv so the measured result isn't a discarded constant expression
 
-slot-pressure cases expose Awl's resource-table overhead, C++/rust ballast may be optimized away, this isn't a representative ranking of languages, the additional real ksort measurement checks10000seeded lines and unique output byte-for-byte
+slot-pressure cases expose Awl's resource-table overhead, C++/rust ballast may be optimized away, this isn't a representative ranking of languages, the additional real sort measurement checks10000seeded lines and unique output byte-for-byte
 
 Awl before/after use the same bundled backend with baseline x86-64, static musl and-O3, C++ uses GCC-O3/std::vector::at, rust uses opt-level3 with both default release arithmetic and explicit overflow checks, bounds checks may be optimized away when proven redundant, default C++/rust arithmetic semantics differ from Awl's checked arithmetic
 
@@ -43,9 +43,9 @@ compiler versions, CPU, affinity, flags and every sample are recorded, different
 
 ## new collection operations
 
-`vector_swap(v,first,second)` exchanges two elements without heap allocation, both indices are validated before mutation, equal valid indices are a no-op, invalid indices/handles trap
+`vector.swap(v,first,second)` exchanges two elements without heap allocation, both indices are validated before mutation, equal valid indices are a no-op, invalid indices/handles trap
 
-`vector_truncate(v,length)->bool` shrinks without reallocating, negative lengths and attempts to grow return false without changing contents/length/capacity, equal length succeeds, removed scalar/text slots require no destructor, retained capacity can be reused
+`vector.truncate(v,length)->bool` shrinks without reallocating, negative lengths and attempts to grow return false without changing contents/length/capacity, equal length succeeds, removed scalar/text slots require no destructor, retained capacity can be reused
 
 both operations support the existing11scalar/text element types, see `examples/collections`, no resource-element or arbitrary generic support is implied
 
@@ -63,6 +63,6 @@ benchmark methodology reference, [rust black_box documentation](https://doc.rust
 
 ## checked views, source candidate measurement
 
-current source implements32-byte runtime-checked nonallocating vector views, the range-scan microbenchmark and exact limits are in [VECTOR-VIEWS.md](VECTOR-VIEWS.md) and benchmarks/vector-views.json, small-window view paths improved in this run,1024-element candidate copying regressed about5.3% versus the published compiler, shared-host/process noise applies, no universal or Rust/C++ speed claim
+current source implements32-byte runtime-checked nonallocating vector views, the range-scan microbenchmark and exact limits are in [VECTOR-VIEWS.md](archive/VECTOR-VIEWS.md) and benchmarks/vector-views.json, small-window view paths improved in this run,1024-element candidate copying regressed about5.3% versus the published compiler, shared-host/process noise applies, no universal or Rust/C++ speed claim
 
 identity/epoch/range checks remain enabled, proving safe check hoisting and broader application-level performance remain future work, current workload score is24.4%=11/45, prior22.2% sections are historical

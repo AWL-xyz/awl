@@ -4,13 +4,13 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];p=argparse.ArgumentParser();p.add_argument('--awl',type=Path,required=True);a=p.parse_args();binary=a.awl.absolute();env={**os.environ,'PATH':'/no-host-tools','XDG_CACHE_HOME':'/var/tmp/Awl-net-cache'}
 with tempfile.TemporaryDirectory(prefix='Awl-net-bench-',dir='/var/tmp') as td:
  work=Path(td)
- for file in (ROOT/'examples/apps/kserve').iterdir():
+ for file in (ROOT/'examples/apps/serve').iterdir():
   if file.is_file():(work/file.name).write_bytes(file.read_bytes())
  builds=[]
  for i in range(8):
   start=time.perf_counter();r=subprocess.run([str(binary),'build'],cwd=work,env=env,capture_output=True,timeout=180);elapsed=(time.perf_counter()-start)*1000;assert r.returncode==0 and not r.stderr,(r.returncode,r.stderr)
   if i:builds.append(round(elapsed,3))
- start=time.perf_counter();proc=subprocess.Popen([str(work/'build/kserve'),'0','71'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,env=env);latencies=[]
+ start=time.perf_counter();proc=subprocess.Popen([str(work/'build/serve'),'0','71'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,env=env);latencies=[]
  try:
   port=int(proc.stdout.readline());ready=round((time.perf_counter()-start)*1000,3)
   for i in range(71):

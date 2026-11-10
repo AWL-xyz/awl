@@ -45,6 +45,15 @@ def integer_runtime(required=None):
             # Small integers promote to int for division/remainder, which is safe
             # after checking the type-specific minimum / -1 case above.
             add(f'k_{ty}_{op}',f'static {ct} k_{ty}_{op}({ct} a, {ct} b) {{ {guard} return ({ct})({expression}); }}')
+    for ty,(signed,bits) in INTEGERS.items():
+        ct=CT[ty]; hi=('INT' if signed else 'UINT')+str(bits)+'_MAX'; lo='INT'+str(bits)+'_MIN'
+        name='k_convert_f64_'+ty
+        if required is None or name in required:
+            if signed:
+                body=f'if (isnan(a)) return 0; if (a >= (double){hi}) return {hi}; if (a <= (double){lo}) return {lo}; return ({ct})trunc(a);'
+            else:
+                body=f'if (isnan(a) || a <= 0.0) return 0; if (a >= (double){hi}) return {hi}; return ({ct})trunc(a);'
+            add(name,f'static {ct} {name}(double a) {{ {body} }}')
     for dst,(ds,db) in INTEGERS.items():
         maximum=('INT' if ds else 'UINT')+str(db)+'_MAX'; minimum='INT'+str(db)+'_MIN'
         for src,(ss,sb) in INTEGERS.items():

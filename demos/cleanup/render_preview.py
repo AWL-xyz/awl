@@ -17,7 +17,7 @@ d.text((68,184),'GENERAL-PURPOSE 1.0 ROADMAP',font=f(13),fill='#94a9c8')
 d.text((68,210),'~15%  ·  subjective scope estimate, not a completeness measurement',font=f(19),fill='#dce8fa')
 d.rounded_rectangle((48,267,1232,548),radius=14,fill='#192337')
 d.text((70,285),'EXAMPLE CORE · printing branch omitted',font=f(14),fill='#70e1bf')
-lines=['local b:spool=spool_new(64)','if not spool_valid(b) then return 1 end','defer spool_free(b)','if spool_append(b,"frame=")!=0 then return 2 end','if spool_i64(b,index)!=0 then return 3 end','return 0']
+lines=['local b:spool=spool.new(64)','if not spool.valid(b) then return 1 end','defer spool.free(b)','if spool.append(b,"frame=")!=0 then return 2 end','if spool.i64(b,index)!=0 then return 3 end','return 0']
 for i,line in enumerate(lines):d.text((70,323+i*32),line,font=f(22,True),fill='#dae8fc')
 d.rounded_rectangle((48,568,1232,839),radius=14,fill='#0a101a')
 d.text((70,586),'ACTUAL NATIVE PROGRAM OUTPUT · Awl-ONLY TOOLCHAIN',font=f(14),fill='#91a8c9')

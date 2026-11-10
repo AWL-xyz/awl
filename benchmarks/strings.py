@@ -16,7 +16,7 @@ def main():
             build_samples.append(build(example));r=subprocess.run([str(out)],capture_output=True,text=True,env=env)
             assert (r.returncode,r.stdout)==(0,'Hello, Awl 🚀!\n6\n9\n🚀\ntrue\nAnswer: 42\n'),r.stderr
         for label,text in [('ascii','abcdef'),('utf8','Aé🚀éZ')]:
-            source=root/'work.aw';source.write_text('function main()->i64 local s:string="'+text+'" local sum:i64=0 local i:i64=0 while i<900000 do sum=sum+i64(string_codepoint(s,i%6)) i=i+1 end print(sum) return 0 end')
+            source=root/'work.aw';source.write_text('function main()->i64 local s:string="'+text+'" local sum:i64=0 local i:i64=0 while i<900000 do sum=sum+i64(string.codepoint(s,i%6)) i=i+1 end print(sum) return 0 end')
             build(source);expected=str(sum(map(ord,text))*150000)+'\n'
             samples=[]
             for i in range(8):

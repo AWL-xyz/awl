@@ -1,4 +1,4 @@
-name: Windows Aesop frontend preview, not SDK acceptance
+name: Windows source preview, not SDK acceptance
 on: [workflow_dispatch]
 jobs:
   frontend-preview:
@@ -14,5 +14,5 @@ jobs:
         run: '"C:\msys64\mingw64\bin" >> $env:GITHUB_PATH'
       - name: Build the source frontend only
         run: python compiler/build_native.py --standalone --strip
-      - name: Check Aesop source, not a complete installed SDK
+      - name: Check Awl source, not a complete installed SDK
         run: compiler/native/bin/acc.exe check examples/collections/main.aw

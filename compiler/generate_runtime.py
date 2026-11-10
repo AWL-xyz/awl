@@ -14,6 +14,7 @@ def render():
     for ty in kcc.INTEGERS:
         names+=['k_print_'+ty]+['k_'+ty+'_'+op for op in ['add','sub','mul','div','rem']]
     names+=['k_convert_'+src+'_'+dst for dst in kcc.INTEGERS for src in kcc.INTEGERS]
+    names+=['k_convert_f64_'+dst for dst in kcc.INTEGERS]
     for name in names:
         body=kcc.integer_runtime({name})
         assert body!='\n' and ')Awl"' not in body
@@ -22,7 +23,7 @@ def render():
 
 if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--check',action='store_true');a=p.parse_args()
-    target=Path(__file__).resolve().parent/'native/kruntime.inc';data=render()
+    target=Path(__file__).resolve().parent/'native/runtime.inc';data=render()
     if a.check:
         if not target.is_file() or target.read_text()!=data: raise SystemExit('native runtime has drifted; regenerate explicitly')
         print('native embedded runtime matches reference helper templates')

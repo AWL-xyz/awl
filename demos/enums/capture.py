@@ -15,13 +15,13 @@ cd "'''+td+'''"
 {
 printf '$ awl build\\n'
 awl build
-printf '\n$ ./build/kcalc + 40 2\n'
-./build/kcalc + 40 2
-printf '\n$ ./build/kcalc / -9223372036854775808 -1\n'
-./build/kcalc / -9223372036854775808 -1
+printf '\n$ ./build/calc + 40 2\n'
+./build/calc + 40 2
+printf '\n$ ./build/calc / -9223372036854775808 -1\n'
+./build/calc / -9223372036854775808 -1
 printf 'exit: %s\n' "$?"
-printf '\n$ ./build/kcalc + invalid 1\n'
-./build/kcalc + invalid 1
+printf '\n$ ./build/calc + invalid 1\n'
+./build/calc + invalid 1
 printf 'exit: %s\n' "$?"
 printf '\nvalidated: 54 feature cases, 450 calculator cases in each mode\n'
 printf 'all 11 compiler sanitizer phases, 564 legacy tests x 3 modes\n'

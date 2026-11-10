@@ -2,12 +2,17 @@
 
 ## Aesop source revision, not a published SDK release
 
+- grouped built-ins now use lowercase `namespace.method(...)` names with no underscores, old underscore spellings are rejected, examples, docs, editor and tests are migrated
+- numeric types provide `convert`, `isnum` and exact `match` predicates are available, float-to-integer conversions truncate toward zero and saturate, mixed integer/f64 arithmetic remains strict
+- leading-k compiler files and legacy example names were renamed, public `kcc` wording was replaced with ACC while the compatibility executable alias remains silent
+- current docs, examples and tests were indexed, historical docs/reports were moved to archives, community health files and metadata polish were added
+
 - function results are optional, `func size :: @b values[i64], etc[i64] { ... };` infers its result from the body
 - explicit results use `func size[i64] :: ... { ... };`, owned results retain explicit `[@o type]` annotations
 - mixed return types and missing return paths are diagnosed, unresolved recursive type dependencies require annotations
 - Aesop is the sole native compiler grammar, legacy/Python/prototype frontends are retired, current examples live in `examples/`
 - the language is Awl, the source syntax is Aesop, those names are not a compound product name
-- local `time` Package adds monotonic and UTC wall clocks, bounded sleeps and overflow-checked deadlines, `wall_clock_millis` is a new checked intrinsic emitted only into programs that use it
+- local `time` Package adds monotonic and UTC wall clocks, bounded sleeps and overflow-checked deadlines, `clock.wall` is a new checked intrinsic emitted only into programs that use it
 - the offline editor recognizes the wall-clock intrinsic, db/websocket/fetch Packages and native Windows acceptance remain unfinished
 - scanner/parser C ABI v2 removes dialect-selecting exports
 - source-current native, inference, editor and generated-program evidence lives in `tests/aesop-*`, older SDK archives are unchanged
@@ -54,7 +59,7 @@
 # unreleased local networking foundation
 
 - linux loopback tcp listeners/accept/read/write/close, bounded manual handles and monotonic deadlines
-- real native kserve, health/stateful counter routes and strict bounded bodyless HTTP subset
+- real native serve, health/stateful counter routes and strict bounded bodyless HTTP subset
 - socket SIGPIPE suppression is per-call, existing pipe policy unchanged
 - normal/strict sanitizer/fault/independent-verifier gates, no new archive or windows qualification
 - explicit --compact-shared opts into measured Os/LTO size/latency tradeoff, standalone stays O2/LTO
@@ -63,7 +68,7 @@
 
 - scalar/text vector<T>, checked growth and mutation, independent slice copies
 - scoped/borrow/own/move/refill/defer integration, runtime kind tags and allocation-failure preservation
-- real multi-file ksort, stable utf-8 bytewise line sorting and optional --unique
+- real multi-file sort, stable utf-8 bytewise line sorting and optional --unique
 - strict-warning sanitizer coverage, independent verifier and injected allocator failures
 - optional linux standalone --lto reduces this compiler by 40960 bytes, no speedup claim
 - practical capability remains15.6% (7/45), windows deferred, no new archive
@@ -72,7 +77,7 @@
 
 - linux stdin byte reads, raw stdout/stderr writes and explicit output flush
 - bounded environment size/read, missing vs empty, checked no-partial-copy errors
-- real native kpipe manifest project, copy/upper/lower pipelines and stderr reports
+- real native pipe manifest project, copy/upper/lower pipelines and stderr reports
 - runtime/os fault tests, generated-c sanitizers and independent verifier checks
 - personality.md and the four-file per-turn reading routine are now explicit
 - native tooling stage 1 → 2, coarse practical score 15.6% (7/45), no other stage raised
@@ -117,7 +122,7 @@
 
 ## 0.9.0-dev — typed fixed-size arrays
 
-- Native project `[T;N]` structural types/literals, checked i64 reads and local-rooted element stores, nested/nominal/module types, function/aggregate value copies and array_length with preserved effects.
+- Native project `[T;N]` structural types/literals, checked i64 reads and local-rooted element stores, nested/nominal/module types, function/aggregate value copies and array.length with preserved effects.
 - Independent checker/verifier layout/type/shape/count/1MiB budgets; generated C wrapper types avoid pointer decay and preserve copies. Bounds violations trap before access/RHS evaluation. Resource descriptor elements remain aliases, not owners.
 - Emission collects types only from verified reachable nodes; private regression ensures orphan arena type metadata cannot affect generated C.
 - All integer/bool/string/resource/aggregate/union element tests, order/bounds/budgets/seeded matrix checks, sanitizers and artifact acceptance recorded separately. Dynamic arrays/slices/generics/ownership remain absent.
@@ -125,7 +130,7 @@
 
 ## 0.8.4-dev — scoped deferred resource releases
 
-- Native project-only `defer` for spool_free/buffer_free/window_close. Capture argument once at registration, LIFO lexical exit and nested-return cleanup; evaluate return value before cleanup. Scope cleanup per loop iteration and match arm.
+- Native project-only `defer` for spool.free/buffer.free/window.close. Capture argument once at registration, LIFO lexical exit and nested-return cleanup; evaluate return value before cleanup. Scope cleanup per loop iteration and match arm.
 - Checker/independent verifier validate permitted calls, metadata, project mode,64registrations per scope/256per project. Lower to captured C locals/explicit exit calls, no runtime closure stack.
 -100,000-call example; tests for ordering/capture/returns/branches/loops/unit/match, reclaimed buffers and100actual X11 windows. This is NOT static ownership/borrowing, transfer/escape analysis, arbitrary defer or trap/exception unwinding.
 - Exact validation/artifact acceptance recorded separately. Broad language roadmap estimate remains~15%, subjective and incomplete. Prior archives preserved.
@@ -174,7 +179,7 @@
 - Added a relocatable native build/run driver using only its own shipped toolchain.
   Pinned Zig 0.15.2, LLVM/Clang/LLD 20.1.2, static musl/startup/compiler-runtime and
   headers; no Python, host compiler/linker/SDK or runtime downloads.
-- Packaged KCC is itself static musl/libc++, built by the bundled toolchain.
+- Packaged ACC is itself static musl/libc++, built by the bundled toolchain.
   Compiler subprocess environment is explicit; no PATH/CC fallback. Outputs are
   atomically staged; source overwrites rejected; run propagates exits/signals.
 - Offline unprivileged clean-root/private-network test passes 18 commands including
@@ -196,7 +201,7 @@
   and source-byte frontend with pinned Unicode lexical policy.
 - Ported value-language resolution, type/layout/control-flow/match checking to C++.
   Native source/typed arenas stay in native memory in the standalone executable.
-- Added a static Linux native `kcc` frontend: check, structured diagnostics,
+- Added a static Linux native `acc` frontend: check, structured diagnostics,
   emit-ast and emit-checked-ast. It explicitly rejects build/run: native machine-code generation,
   linking and complete distribution remain unfinished.
 - Added typed-tree/diagnostic parity tests, malformed-input mutations, standalone
@@ -217,7 +222,7 @@
 - Added an optional C++20 UTF-8/token scanner, bounded record buffer, explicit C ABI
   ownership and version/structure-size checks. Python still owns token policies,
   parsing, type checking, IR verification, C emission and the native compiler driver.
-- Added `--lexer python|native`, KCC_LEXER selection and explicit missing-library
+- Added `--lexer python|native`, ACC_LEXER selection and explicit missing-library
   errors. Python remains default. Native binaries are host-built and not in the zip.
 - Added bulk POD-record transfer after measuring that per-field ctypes transfer was
   slower than the reference. Both the slower baseline and latest raw timings remain.
@@ -294,7 +299,7 @@
   sanitizer smoke runs. Remote CI has not run here.
 - Versioned typed IR JSON as KIR0-structured-v0.2; not backward-stable interchange.
 - Preserved the initial benchmark at benchmarks/baseline-0.1.0.json and reran the
-  smoke benchmark, now recording KCC version. No language-wide performance claim.
+  smoke benchmark, now recording ACC version. No language-wide performance claim.
 
 ## 0.1.0 — bootstrap M0
 
@@ -303,9 +308,9 @@ Initial scalar language, Python compiler, typed structured IR, C11 native backen
 
 ## bounded persistent backend checkpoint
 
-`examples-next/apps/kvserve` adds native text PUT/GET/DELETE, strict body framing, JSON escaping, sorted text-map helpers and checksummed exclusive mutation segments with restart replay
+`examples-next/apps/valueserve` adds native text PUT/GET/DELETE, strict body framing, JSON escaping, sorted text-map helpers and checksummed exclusive mutation segments with restart replay
 
-192 native +192 strict sanitizer service cases,746 helper assertions per native/sanitized mode and15 storage fault checks passed, actual terminal capture in `demos/kvserve/native-kv.png`, contract and limits in [docs/KVSERVE.md](docs/KVSERVE.md)
+192 native +192 strict sanitizer service cases,746 helper assertions per native/sanitized mode and15 storage fault checks passed, actual terminal capture in `demos/valueserve/native-kv.png`, contract and limits in [docs/VALUE-SERVE.md](docs/archive/VALUE-SERVE.md)
 
 current practical capability20.0% =9/45, backend1→2 for a useful bounded native workload, no other area rises, not production readiness, no new archive, windows remains deferred
 
@@ -313,7 +318,7 @@ current practical capability20.0% =9/45, backend1→2 for a useful bounded nativ
 
 native `examples-next/parsing/Json.aw` now parses bounded nested JSON with decoded Unicode, exact number text, byte-offset diagnostics and transactional token publication, JSON Pointer lookup and the real `jget` configuration CLI are implemented
 
-440 parser/pointer cases and28 CLI cases passed EACH native/strict sanitizer mode, actual display capture in `demos/json/native-json.png`, API/limits in [docs/JSON-PARSING.md](docs/JSON-PARSING.md)
+440 parser/pointer cases and28 CLI cases passed EACH native/strict sanitizer mode, actual display capture in `demos/json/native-json.png`, API/limits in [docs/JSON-PARSING.md](docs/archive/JSON-PARSING.md)
 
 capability remains20.0% =9/45, existing CLI/backend stage2 strengthened, no manufactured point, compiler/protected archives unchanged, no new distribution or windows/browser acceptance
 
@@ -321,19 +326,19 @@ capability remains20.0% =9/45, existing CLI/backend stage2 strengthened, no manu
 
 `examples-next/apps/colorlab` adds a real native RGB/grayscale picker and reusable checked rectangles, lines, disks and scaled5x7 text on typed pixel surfaces, actual mouse/resize/close behavior is tested, screenshot in `demos/colorlab/native-colorlab.png`
 
-275 cases/59503 pixel-status assertions plus17 real-window checks EACH native/sanitized, contract in [docs/GRAPHICS.md](docs/GRAPHICS.md), index remains20.0% =9/45, no extra desktop stage or3D claim, compiler/distributions unchanged
+275 cases/59503 pixel-status assertions plus17 real-window checks EACH native/sanitized, contract in [docs/GRAPHICS.md](docs/archive/GRAPHICS.md), index remains20.0% =9/45, no extra desktop stage or3D claim, compiler/distributions unchanged
 
 ## native atomic-save checkpoint
 
-new `file_replace(directory,temporary,target)` publishes a completed staging file through atomic same-directory rename, source and directory syncs are checked, status1 explicitly means published but durability uncertain, real native `ksave` handles binary stdin without truncating the old target
+new `file.replace(directory,temporary,target)` publishes a completed staging file through atomic same-directory rename, source and directory syncs are checked, status1 explicitly means published but durability uncertain, real native `save` handles binary stdin without truncating the old target
 
-72API/CLI cases,14fault/reuse cases and all10native compiler sanitizer phases passed, rebuilt networking/JSON/jget/graphics regressions passed, contract in [docs/ATOMIC-SAVE.md](docs/ATOMIC-SAVE.md), actual capture in demos/replace/native-replace.png
+72API/CLI cases,14fault/reuse cases and all10native compiler sanitizer phases passed, rebuilt networking/JSON/jget/graphics regressions passed, contract in [docs/ATOMIC-SAVE.md](docs/archive/ATOMIC-SAVE.md), actual capture in demos/replace/native-replace.png
 
 compiler rebuilt to SHAa5bd2899…, older checkpoints remain historical, full3mode legacy wasn't rerun, index remains20.0%=9/45, no new archive or native Windows acceptance
 
 ## private associated-value enums
 
-next syntax now accepts private typed enums and exhaustive matches, nested payloads and arm-local bindings are independently verified, the real checked `kcalc` workload exercises typed parse/arithmetic errors, see [the enum contract](docs/ENUMS.md)
+next syntax now accepts private typed enums and exhaustive matches, nested payloads and arm-local bindings are independently verified, the real checked `calc` workload exercises typed parse/arithmetic errors, see [the enum contract](docs/archive/ENUMS.md)
 
 54 feature cases,450 calculator oracle cases per native/sanitized mode, all11compiler sanitizer phases and564legacy tests in each of3modes passed, current hashes are in tests/enum-checkpoint.json,67editor sources are browsable but its browser runtime still doesn't execute enums
 
@@ -341,15 +346,15 @@ capability stays20.0%=9/45, exported/resource/generic enums remain work, no new 
 
 ## compiled browser foundation
 
-[open the offline json workbench](web/Awl-json-workbench.html), production-verified Awl runs as real webassembly, with strict JSON validation, exact numeric text and JSON Pointer selection, no remote service or host compiler is needed to use the standalone HTML
+[open the offline json workbench](web/archive/Awl-json-workbench.html), production-verified Awl runs as real webassembly, with strict JSON validation, exact numeric text and JSON Pointer selection, no remote service or host compiler is needed to use the standalone HTML
 
 437 native/browser parity cases and444webassembly integer/enum oracle cases pass, fresh workers, cancellation, timeout and opaque sandbox execution are checked, all11native sanitizer phases and564legacy tests in each of3modes pass on the rebuilt compiler
 
-browser foundation0→1, current practical index22.2%=10/45, not a full browser compiler/framework or full-stack platform, see [the contract](docs/BROWSER-WASM.md), protected SDK downloads remain unchanged and native windows stays deferred
+browser foundation0→1, current practical index22.2%=10/45, not a full browser compiler/framework or full-stack platform, see [the contract](docs/archive/BROWSER-WASM.md), protected SDK downloads remain unchanged and native windows stays deferred
 
 ## checked vector performance and collection polish
 
-O(1) handle lookup and fixed-size typed get/set retain identity/kind/layout/bounds and checked arithmetic, new vector_swap/vector_truncate support in-place mutation and capacity reuse, see [the measured performance review](docs/PERFORMANCE.md)
+O(1) handle lookup and fixed-size typed get/set retain identity/kind/layout/bounds and checked arithmetic, new vector.swap/vector.truncate support in-place mutation and capacity reuse, see [the measured performance review](docs/PERFORMANCE.md)
 
 35focused cases,440078runtime assertions,12Node WASI cases,11native sanitizer phases and564legacy tests across3modes pass, the real10000line sorter improves from8.704to7.552ms in this local comparison, optimized C++ and rust wins/losses and raw samples are reported, no universal faster-than claim
 

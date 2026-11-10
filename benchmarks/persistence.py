@@ -4,8 +4,8 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 def main():
  kcc=ROOT/'build/Awl-linux-x86_64/bin/kcc';env={**os.environ,'PATH':'/no-host-tools'};results={'per-byte':[],'bounded-tail':[]};exe={}
- source=(ROOT/'examples/apps/pixelboard/storage.aw').read_text();baseline=source.replace('a=a+i64(buffer_get(bytes,i))','a=(a+i64(buffer_get(bytes,i)))%65521').replace('b=b+a','b=(b+a)%65521');assert baseline!=source
- body='import storage function main()->i64 local b:i64=buffer_new(1164) defer buffer_free(b) local i:i64=0 while i<1164 do buffer_set(b,i,u8(i%256)) i=i+1 end local total:i64=0 i=0 while i<20000 do buffer_set(b,i%1160,u8(i%256)) total=total+storage.checksum(b) i=i+1 end print(total) return 0 end'
+ source=(ROOT/'examples/apps/pixelboard/storage.aw').read_text();baseline=source.replace('a=a+i64(buffer.get(bytes,i))','a=(a+i64(buffer.get(bytes,i)))%65521').replace('b=b+a','b=(b+a)%65521');assert baseline!=source
+ body='import storage function main()->i64 local b:i64=buffer.new(1164) defer buffer.free(b) local i:i64=0 while i<1164 do buffer.set(b,i,u8(i%256)) i=i+1 end local total:i64=0 i=0 while i<20000 do buffer.set(b,i%1160,u8(i%256)) total=total+storage.checksum(b) i=i+1 end print(total) return 0 end'
  with tempfile.TemporaryDirectory(prefix='Awl-adler-bench-',dir=ROOT/'build') as td:
   work=Path(td)
   for name,text in [('per-byte',baseline),('bounded-tail',source)]:

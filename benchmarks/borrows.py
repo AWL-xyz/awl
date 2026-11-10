@@ -10,9 +10,9 @@ def main():
   root=Path(td)
   for label in samples:
    mode='borrow ' if label=='borrow' else ''
-   binding='scoped b:spool=spool_new(64)' if label=='borrow' else 'local b:spool=spool_new(64)'
-   cleanup='' if label=='borrow' else 'defer spool_free(b)'
-   source='function step('+mode+'b:spool,i:i64)->i64 spool_clear(b) if spool_append(b,"frame=")!=0 then return -1 end if spool_i64(b,i)!=0 then return -2 end return spool_bytes(b) end function main()->i64 '+binding+' if not spool_valid(b) then return 1 end '+cleanup+' local i:i64=0 local sum:i64=0 while i<100000 do local n:i64=step(b,i) if n<0 then return 2 end sum=sum+n i=i+1 end print(sum) return 0 end'
+   binding='scoped b:spool=spool.new(64)' if label=='borrow' else 'local b:spool=spool.new(64)'
+   cleanup='' if label=='borrow' else 'defer spool.free(b)'
+   source='function step('+mode+'b:spool,i:i64)->i64 spool.clear(b) if spool.append(b,"frame=")!=0 then return -1 end if spool.i64(b,i)!=0 then return -2 end return spool.bytes(b) end function main()->i64 '+binding+' if not spool.valid(b) then return 1 end '+cleanup+' local i:i64=0 local sum:i64=0 while i<100000 do local n:i64=step(b,i) if n<0 then return 2 end sum=sum+n i=i+1 end print(sum) return 0 end'
    (root/(label+'.aw')).write_text(source)
   def sample(label):
    exe=root/label;t=time.perf_counter();r=subprocess.run([str(KCC),'build',str(root/(label+'.aw')),'-O','2','-o',str(exe)],env=env,capture_output=True,text=True,timeout=120);build=(time.perf_counter()-t)*1000;assert r.returncode==0,r.stderr

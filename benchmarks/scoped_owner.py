@@ -7,11 +7,11 @@ def main():
  env={**os.environ,'PATH':'/no-host-tools','XDG_CACHE_HOME':str(Path.home()/'.cache')};samples={k:{'build_ms':[],'runtime_ms':[]} for k in ['manual','defer','scoped']}
  with tempfile.TemporaryDirectory(prefix='Awl-scoped-owner-bench-') as td:
   root=Path(td)
-  common='local b:spool=spool_new(64) if not spool_valid(b) then return -1 end '
-  deferred=common+'defer spool_free(b) if spool_append(b,"frame=")!=0 then return -2 end if spool_i64(b,i)!=0 then return -3 end return spool_bytes(b)'
-  manual=common+'if spool_append(b,"frame=")!=0 then spool_free(b) return -2 end if spool_i64(b,i)!=0 then spool_free(b) return -3 end local n:i64=spool_bytes(b) spool_free(b) return n'
+  common='local b:spool=spool.new(64) if not spool.valid(b) then return -1 end '
+  deferred=common+'defer spool.free(b) if spool.append(b,"frame=")!=0 then return -2 end if spool.i64(b,i)!=0 then return -3 end return spool.bytes(b)'
+  manual=common+'if spool.append(b,"frame=")!=0 then spool.free(b) return -2 end if spool.i64(b,i)!=0 then spool.free(b) return -3 end local n:i64=spool.bytes(b) spool.free(b) return n'
   tail='function main()->i64 local i:i64=0 local sum:i64=0 while i<100000 do local n:i64=step(i) if n<0 then return 1 end sum=sum+n i=i+1 end print(sum) return 0 end'
-  scoped=common.replace('local b:','scoped b:')+'if spool_append(b,"frame=")!=0 then return -2 end if spool_i64(b,i)!=0 then return -3 end return spool_bytes(b)'
+  scoped=common.replace('local b:','scoped b:')+'if spool.append(b,"frame=")!=0 then return -2 end if spool.i64(b,i)!=0 then return -3 end return spool.bytes(b)'
   for label,body in [('manual',manual),('defer',deferred),('scoped',scoped)]: (root/(label+'.aw')).write_text('function step(i:i64)->i64 '+body+' end '+tail)
   def sample(label):
    exe=root/label;start=time.perf_counter();r=subprocess.run([str(KCC),'build',str(root/(label+'.aw')),'-O','2','-o',str(exe)],capture_output=True,text=True,env=env,timeout=120);build=(time.perf_counter()-start)*1000;assert r.returncode==0,r.stderr

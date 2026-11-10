@@ -7,7 +7,7 @@ env={**os.environ,'PATH':'/no-host-tools','XDG_CACHE_HOME':str(Path.home()/'.cac
 r=subprocess.run([str(kcc),'run',str(ROOT/'examples/branch-joins/main.aw')],env=env,capture_output=True,text=True,check=True,timeout=120)
 assert r.stdout=='frame=99999 / odd\n100000 conditional handoffs: one owner per path\n1738890\n',r.stdout
 with tempfile.TemporaryDirectory() as td:
- p=Path(td)/'discard.aw';p.write_text('function main()->i64 scoped a:spool=spool_new(8) if true then scoped b:spool=move a end spool_print(a) return 0 end')
+ p=Path(td)/'discard.aw';p.write_text('function main()->i64 scoped a:spool=spool.new(8) if true then scoped b:spool=move a end spool.print(a) return 0 end')
  q=subprocess.run([str(kcc),'check',str(p),'--diagnostic-format','json'],env=env,capture_output=True,text=True);assert q.returncode==1
  diagnostic=json.loads(q.stderr)['diagnostics'][0];assert diagnostic['code']=='E221'
 im=Image.new('RGB',(1400,940),'#101621');d=ImageDraw.Draw(im)
@@ -20,7 +20,7 @@ code=['if n%2==0 then','    local taken:i64=finish(move b,n)','    count=taken',
 for i,line in enumerate(code):d.text((69,332+i*28),line,font=f(21,True),fill='#dbe8fc')
 d.rounded_rectangle((48,537,1352,730),radius=14,fill='#0a101a');d.text((69,557),'ACTUAL FINAL EXTRACTED-BUNDLE OUTPUT',font=f(15),fill='#78e2bd')
 for i,line in enumerate(r.stdout.splitlines()):d.text((69,597+i*36),line,font=f(23,True),fill='#88edc0')
-d.rounded_rectangle((48,752,1352,852),radius=14,fill='#30202b');d.text((69,769),'ACTUAL REJECTION · use after conditional transfer: spool_print(a)',font=f(18),fill='#f3b6ba')
+d.rounded_rectangle((48,752,1352,852),radius=14,fill='#30202b');d.text((69,769),'ACTUAL REJECTION · use after conditional transfer: spool.print(a)',font=f(18),fill='#f3b6ba')
 for i,line in enumerate(textwrap.wrap(diagnostic['code']+': '+diagnostic['message'],100)):d.text((69,801+i*23),line,font=f(18,True),fill='#f3b6ba')
 d.text((48,874),'Roadmap ~18.8% (+0.50 subjective planning points). No loop-carried moves, reinitialization or abort unwind.',font=f(18),fill='#afbed3')
 d.text((48,913),'Actual program/compiler output preview, not a GUI screenshot. One complete native bundle; no base/update install.',font=f(15),fill='#8295b0')

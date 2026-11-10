@@ -16,7 +16,7 @@ the header mark is the project owl, static, taken from `assets/branding/awl.svg`
 - top-level `use ... as ...;`, `exports{ @r|@w ... };`, `@p`/`@s` bindings, `func name :: params: type { ... };`, enums and `match ... end;`
 - checked integer widths with traps on overflow, division by zero and out-of-range conversion, f64 math, `pi`/`tau`, text and `..` concatenation
 - module state, `@r` read-only and `@w` writable access from the importing file, private defining-file context
-- `print`, monotonic clock, wall clock and sleep, math helpers, string helpers, `window_open`/`window_set_pixel`/`window_present`/`window_title`/`window_close`
+- `print`, monotonic clock, wall clock and sleep, math helpers, string helpers, `window.open`/`window.pixel`/`window.present`/`window_title`/`window.close`
 
 ## not supported
 
@@ -26,4 +26,4 @@ vectors, views, structs, builders, files, processes, sockets, `defer` clean-up o
 
 ## verification
 
-`tests/awl_editor.js` drives the interpreter outside a browser, `tests/awl_editor.py` runs it plus `kcc check` on every bundled example and records tests/awl-editor.json, no screenshot or visual comparison replaces those checks
+`tests/awl_editor.js` drives the interpreter outside a browser, `tests/awl_editor.py` runs it plus `acc check` on every bundled example and records tests/awl-editor.json, no screenshot or visual comparison replaces those checks

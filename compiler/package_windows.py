@@ -36,8 +36,8 @@ def main():
  if os.name!='nt':
   def affinity():os.sched_setaffinity(0,set(sorted(os.sched_getaffinity(0))[:4]))
   kwargs['preexec_fn']=affinity
- subprocess.run([str(zig),'c++',*flags,*[str(native/n) for n in ['klex.cpp','kparse.cpp','kcc.cpp','kbuild.cpp']],'-lbcrypt','-ladvapi32','-o',str(package/'bin/kcc.exe')],check=True,timeout=360,**kwargs)
- shutil.copy2(package/'bin/kcc.exe',package/'bin/awl.exe')
+ subprocess.run([str(zig),'c++',*flags,*[str(native/n) for n in ['lex.cpp','parse.cpp','acc.cpp','build.cpp']],'-lbcrypt','-ladvapi32','-o',str(package/'bin/acc.exe')],check=True,timeout=360,**kwargs)
+ shutil.copy2(package/'bin/acc.exe',package/'bin/awl.exe')
  shutil.copy2(ROOT/'docs/ASDK.md',package/'ASDK.md')
  shutil.copy2(ROOT/'docs/STREAMS.md',package/'STREAMS.md')
  shutil.copy2(ROOT/'docs/NETWORK.md',package/'NETWORK.md')
@@ -56,7 +56,7 @@ def main():
  for bench in [ROOT/'benchmarks'/n for n in ['files-latest.json','persistence-latest.json','persistence-build-latest.json']]:
   if bench.is_file():shutil.copy2(bench,validation/bench.name)
  scrub_private(package)
- manifest={'toolkit':{'name':'Awl Software Development Kit [Beta]','command':'bin/awl.exe','commands':['init','build']},'version':'0.24.0-dev','status':'experimental source candidate using Aesop syntax; real-Windows end-to-end acceptance pending','host':'x86_64-windows','toolchain':lock,'compiler_build_flags':flags,'compiler_link_libraries':['bcrypt','advapi32'],'program_link_libraries':['user32','gdi32','shell32'],'kcc_sha256':digest(package/'bin/kcc.exe'),'zig_sha256':digest(tool/'zig.exe'),'compiler_sources_sha256':{f.name:digest(f) for f in sorted(src.iterdir())},'resources':'Complete unmodified upstream Windows Zig distribution, libc/linker/headers/resources/licenses retained. No host compiler/SDK/Python/download needed by installed kcc.','execution_evidence':'See validation; Wine is not real Windows. Current Wine10 fails in upstream Zig self-executable-path resolution; check/emit and separate driver fixtures do not substitute for actual backend acceptance.'}
+ manifest={'toolkit':{'name':'Awl Software Development Kit [Beta]','command':'bin/awl.exe','commands':['init','build']},'version':'0.24.0-dev','status':'experimental source candidate using Aesop syntax; real-Windows end-to-end acceptance pending','host':'x86_64-windows','toolchain':lock,'compiler_build_flags':flags,'compiler_link_libraries':['bcrypt','advapi32'],'program_link_libraries':['user32','gdi32','shell32'],'acc_sha256':digest(package/'bin/acc.exe'),'zig_sha256':digest(tool/'zig.exe'),'compiler_sources_sha256':{f.name:digest(f) for f in sorted(src.iterdir())},'resources':'Complete unmodified upstream Windows Zig distribution, libc/linker/headers/resources/licenses retained. No host compiler/SDK/Python/download needed by installed acc.','execution_evidence':'See validation; Wine is not real Windows. Current Wine10 fails in upstream Zig self-executable-path resolution; check/emit and separate driver fixtures do not substitute for actual backend acceptance.'}
  (package/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
  print(package,flush=True)
  if not a.no_archive:

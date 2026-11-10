@@ -7,11 +7,11 @@ ROOT=Path(__file__).resolve().parents[2];out=Path(__file__).resolve().parent
 binary=Path(os.environ.get('Awl_STREAMS_BINARY','/tmp/Awl-streams-bundle/Awl/bin/Awl'))
 with tempfile.TemporaryDirectory(prefix='Awl-stream-photo-',dir='/var/tmp') as td:
  work=Path(td)
- for name in ['main.aw','kpipe.awproj']:(work/name).write_bytes((ROOT/'examples/apps/kpipe'/name).read_bytes())
+ for name in ['main.aw','pipe.awproj']:(work/name).write_bytes((ROOT/'examples/apps/pipe'/name).read_bytes())
  transcript=work/'transcript.txt';script=work/'demo.sh';oracle=work/'oracle.py'
  oracle.write_text('''import hashlib,os,subprocess
 payload=bytes(range(256))*1024
-r=subprocess.run(['./build/kpipe'],input=payload,capture_output=True,env={**os.environ,'KPIPE_MODE':'copy'})
+r=subprocess.run(['./build/pipe'],input=payload,capture_output=True,env={**os.environ,'KPIPE_MODE':'copy'})
 assert r.returncode==0 and r.stdout==payload and not r.stderr
 print('binary roundtrip:',len(payload),'bytes, sha256 matches')
 print(hashlib.sha256(r.stdout).hexdigest())
@@ -24,14 +24,14 @@ cd "'''+td+'''"
 {
 printf '$ awl build\\n'
 awl build
-printf '\\n$ printf "hello, Awl!\\\\n" | KPIPE_MODE=upper KPIPE_REPORT=1 ./build/kpipe\\n'
-printf 'hello, Awl!\\n' | KPIPE_MODE=upper KPIPE_REPORT=1 ./build/kpipe 2>report.txt
+printf '\\n$ printf "hello, Awl!\\\\n" | KPIPE_MODE=upper KPIPE_REPORT=1 ./build/pipe\\n'
+printf 'hello, Awl!\\n' | KPIPE_MODE=upper KPIPE_REPORT=1 ./build/pipe 2>report.txt
 printf '\\n$ cat report.txt  # separate stderr report\\n'
 cat report.txt
-printf '\\n$ printf "AbC 123\\\\n" | KPIPE_MODE=lower ./build/kpipe\\n'
-printf 'AbC 123\\n' | KPIPE_MODE=lower ./build/kpipe
-printf '\\n$ KPIPE_MODE=invalid ./build/kpipe < /dev/null\\n'
-KPIPE_MODE=invalid ./build/kpipe < /dev/null
+printf '\\n$ printf "AbC 123\\\\n" | KPIPE_MODE=lower ./build/pipe\\n'
+printf 'AbC 123\\n' | KPIPE_MODE=lower ./build/pipe
+printf '\\n$ KPIPE_MODE=invalid ./build/pipe < /dev/null\\n'
+KPIPE_MODE=invalid ./build/pipe < /dev/null
 printf 'exit code: %s\\n' "$?"
 printf '\\n$ binary roundtrip oracle, all 256 byte values\\n'
 /usr/bin/python3 "'''+str(oracle)+'''"

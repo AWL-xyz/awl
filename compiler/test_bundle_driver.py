@@ -19,7 +19,7 @@ def main():
         prefix=Path(td);(prefix/'bin').mkdir();(prefix/'libexec').mkdir()
         (prefix/'libexec/zig').symlink_to(ROOT/'build/Awl-linux-x86_64/libexec/zig',target_is_directory=True)
         native=ROOT/'compiler/native';binary=prefix/'bin/kcc'
-        subprocess.run([os.environ.get('CXX','g++'),*flags,*[str(native/name) for name in ['klex.cpp','kparse.cpp','kcc.cpp','kbuild.cpp']],'-o',str(binary)],check=True,timeout=150)
+        subprocess.run([os.environ.get('CXX','g++'),*flags,*[str(native/name) for name in ['lex.cpp','parse.cpp','acc.cpp','build.cpp']],'-o',str(binary)],check=True,timeout=150)
         env={**os.environ,'PATH':'/no-tools','XDG_CACHE_HOME':str(ROOT/'build/driver-sanitizer-cache'),'ASAN_OPTIONS':'detect_leaks=1:abort_on_error=1'}
         source=prefix/'source with spaces.aw';source.write_text('function main()->i64 print(42) return 0 end');out=prefix/'output with spaces'
         def invoke(argv,code):

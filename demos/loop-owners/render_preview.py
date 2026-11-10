@@ -7,7 +7,7 @@ env={**os.environ,'PATH':'/no-host-tools','XDG_CACHE_HOME':str(Path.home()/'.cac
 r=subprocess.run([str(kcc),'run',str(ROOT/'examples/loop-owners/main.aw')],env=env,capture_output=True,text=True,check=True,timeout=120)
 assert r.stdout=='frame=99999\n100000 loop-carried owners: state restored on every backedge\n1088890\nFinal owner remains live\nframe=100000\n',r.stdout
 with tempfile.TemporaryDirectory() as td:
- p=Path(td)/'discard.aw';p.write_text('function take(own b:spool)->unit end function main()->i64 scoped a:spool=spool_new(8) while false do take(move a) end return 0 end')
+ p=Path(td)/'discard.aw';p.write_text('function take(own b:spool)->unit end function main()->i64 scoped a:spool=spool.new(8) while false do take(move a) end return 0 end')
  q=subprocess.run([str(kcc),'check',str(p),'--diagnostic-format','json'],env=env,capture_output=True,text=True);assert q.returncode==1
  diagnostic=json.loads(q.stderr)['diagnostics'][0];assert diagnostic['code']=='E225'
 im=Image.new('RGB',(1400,940),'#101621');d=ImageDraw.Draw(im)

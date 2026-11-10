@@ -5,7 +5,7 @@ exports{
         if size == 0 { return false; };
         @p index: 0;
         @p negative: false;
-        @p first: string.byte_at(payload, 0);
+        @p first: string.byteat(payload, 0);
         if first == 45u8 or first == 43u8 {
             negative: first == 45u8;
             index: 1;
@@ -15,7 +15,7 @@ exports{
         if negative { limit: -9223372036854775808; };
         @p value: 0;
         while index < size {
-            @p digit: decode(string.byte_at(payload, index));
+            @p digit: decode(string.byteat(payload, index));
             if digit < 0 or digit >= base { return false; };
             -- keep the accumulator negative so the minimum i64 never needs negating
             if value < limit / base { return false; };
@@ -32,13 +32,13 @@ exports{
         @p size: string.bytes(payload);
         if size == 0 { return false; };
         @p index: 0;
-        if string.byte_at(payload, 0) == 43u8 { index: 1; };
+        if string.byteat(payload, 0) == 43u8 { index: 1; };
         if index == size { return false; };
         @p value: 0u64;
         @p radix: u64(base);
         @p limit: 18446744073709551615u64;
         while index < size {
-            @p decoded: decode(string.byte_at(payload, index));
+            @p decoded: decode(string.byteat(payload, index));
             if decoded < 0 or decoded >= base { return false; };
             @p digit: u64(decoded);
             if value > (limit - digit) / radix { return false; };
