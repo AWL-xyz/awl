@@ -10,6 +10,7 @@
 #include <memory>
 #include <optional>
 #include <queue>
+#include <set>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -46,7 +47,7 @@ struct Unit {
     List global_order;
     std::vector<uint32_t> module_order{0};
     std::vector<std::vector<uint32_t>> module_dependencies{{}};
-    std::vector<std::string> files;
+    std::vector<std::string> files,package_manifests;
     std::vector<uint32_t> file_lengths;
     std::vector<Origin> origins;
     std::unordered_map<std::string,std::string> display_names;
@@ -716,6 +717,10 @@ std::string render(Unit &u,const std::string &filename,bool json) {
     return out;
 }
 
+}
+void Awl_package::append_manifest_inputs(const void *opaque,std::vector<std::string> &paths) {
+    const auto &manifests=static_cast<const Unit*>(opaque)->package_manifests;
+    paths.insert(paths.end(),manifests.begin(),manifests.end());
 }
 extern "C" {
 uint32_t Awl_parse_abi_version(void) { return 2; }

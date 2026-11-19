@@ -22,6 +22,7 @@ class Project {
     static constexpr bool aesop=true;
     std::vector<Module> modules;
     std::vector<uint32_t> module_order;
+    std::set<std::string> package_manifests;
     size_t source_bytes=0,tokens=0,nodes=0,edges=0;
     [[noreturn]] void fail(size_t module,uint32_t token,const std::string &message,const std::string &code="E300") {
         modules.at(module).unit->diagnostics={{code,message,token}};
@@ -103,6 +104,7 @@ class Project {
                     if(manifest_error||!within(resolved)) fail(id,node.token,"package manifest escapes project root: "+name);
                     try {
                         const auto spec=Awl_package::read_manifest(manifest,name);
+                        package_manifests.insert(project_path_text(resolved));
                         target=root;spelled="packages/"+name+"/"+spec.entry;
                     } catch(const std::runtime_error &e) {fail(id,node.token,"invalid package '"+name+"': "+e.what());}
                 }
@@ -196,6 +198,7 @@ class Project {
     }
     std::unique_ptr<Unit> merge() {
         auto result=std::make_unique<Unit>();result->project_syntax=true;result->aesop_syntax=true;
+        result->package_manifests.assign(package_manifests.begin(),package_manifests.end());
         result->module_order=module_order;result->module_dependencies.assign(modules.size(),{});std::vector<Id> node_bases;
         for(size_t i=0;i<modules.size();++i) {
             const auto &m=modules[i];const auto &u=*m.unit;

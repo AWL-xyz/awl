@@ -1,6 +1,7 @@
 # unreleased local Package installation
 
 - `awl add FILE.awpkg` vendors local manifest and source files into the current project without a backend or network. Existing installations are preserved; compiler imports and installer share one bounded manifest reader. There is no registry, lockfile, or dependency solver yet.
+- A build refuses to use a loaded `.awpkg` file as its executable destination, even through a hard link.
 
 # unreleased text runtime
 

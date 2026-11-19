@@ -301,6 +301,29 @@ class ToolkitTests(unittest.TestCase):
                 alias.unlink()
         self.assert_no_temps()
 
+    def test_output_protects_package_manifest_and_hardlink(self):
+        source = self.init()
+        package = self.work / 'library'
+        package.mkdir()
+        self.invoke('init', 'Local', '--pkg', cwd=package)
+        self.invoke('add', package / 'Local.awpkg')
+        source.write_text('use Wrapper.aw; func main { print(Wrapper.message()); return 0; };')
+        (self.project / 'Wrapper.aw').write_text('use Local; exports { @r func message { return Local.hello("Awl"); }; };')
+        manifest = self.project / 'packages' / 'Local' / 'Local.awpkg'
+        original = manifest.read_bytes()
+        alias = self.project / 'output'
+        os.link(manifest, alias)
+        for driver, args in [(self.awl, ()), (self.driver, (source.name,))]:
+            for output in [manifest, alias]:
+                with self.subTest(driver=driver.name, output=output.name):
+                    result = self.invoke('build', *args, '--cc', '/bin/false', '-o', output,
+                                         exe=driver, code=2)
+                    self.assertIn('refusing to overwrite', result.stderr)
+                    self.assertIn('Local.awpkg', result.stderr)
+                    self.assertEqual(manifest.read_bytes(), original)
+                    self.assertTrue(alias.samefile(manifest))
+        self.assert_no_temps()
+
     def test_backend_and_program_timeouts(self):
         source = self.init()
         source.write_text('func main { clock.sleep(5000); return 0; };')

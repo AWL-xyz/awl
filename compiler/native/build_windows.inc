@@ -132,8 +132,7 @@ int build(const char *c_source,size_t length,const std::string &source_path,cons
         Temporary temp;auto local=env(L"LOCALAPPDATA");fs::path cache=local.empty()?temp.path/L"global-cache":fs::path(local)/L"Awl/zig-0.15.2";fs::create_directories(cache);
         auto cfile=temp.path/L"program.c";{std::ofstream file(cfile,std::ios::binary);file.write(c_source,static_cast<std::streamsize>(length));file.close();if(!file) throw std::runtime_error("cannot write generated C");}
         fs::path destination=run?temp.path/L"program.exe":fs::absolute(output.empty()?fs::path(wide(source_path)).stem().wstring()+L".exe":wide(output));
-        std::vector<std::string> sources=options.protected_sources;sources.push_back(source_path);
-        for(const auto &p:sources){const auto source=fs::canonical(fs::path(wide(p)));if(fs::weakly_canonical(destination)==source||(fs::exists(destination)&&fs::equivalent(destination,source))) throw std::runtime_error("refusing to overwrite source with executable");}
+        protect_build_inputs(destination,source_path,options);
         Staging staging(destination.parent_path());
         std::vector<std::wstring> vars={L"HOME="+temp.path.wstring(),L"PATH=C:\\no-host-tools",L"TEMP="+temp.path.wstring(),L"TMP="+temp.path.wstring(),L"ZIG_LIB_DIR="+lib.wstring(),L"ZIG_GLOBAL_CACHE_DIR="+cache.wstring(),L"ZIG_LOCAL_CACHE_DIR="+(temp.path/L"local-cache").wstring()};
         for(auto name:{L"SystemRoot",L"WINDIR"}){auto value=env(name);if(!value.empty()) vars.push_back(std::wstring(name)+L"="+value);}

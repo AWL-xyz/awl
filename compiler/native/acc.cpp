@@ -85,8 +85,9 @@ int Awl_compiler_main(int argc,char **argv) {
         for(uint32_t i=0;i<Awl_source_file_count(unit);++i) {
             const auto *file=Awl_source_file_path(unit,i);
             if(!file) {std::cerr<<"acc: source enumeration failed\n";return 2;}
-            options.protected_sources.emplace_back(file);
+            options.protected_inputs.emplace_back(file);
         }
+        Awl_package::append_manifest_inputs(unit,options.protected_inputs);
         return Awl_driver::build(c_output,c_size,argv[0],path,output,options,command=="run");
     }
     if(command=="check") std::cout<<path<<": checked (native frontend)\n";

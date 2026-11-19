@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <vector>
 
 // Private manifest reader shared by the compiler and the local package installer.
 namespace Awl_package {
@@ -94,5 +95,8 @@ inline Manifest read_manifest(const fs::path &file,const std::string &name) {
         throw std::runtime_error("Package entry must be a plain .aw file name without reserved characters or device names");
     return result;
 }
+
+// Private ACC input enumeration, separate from the source/provenance C ABI.
+void append_manifest_inputs(const void *unit,std::vector<std::string> &paths);
 }
 #endif

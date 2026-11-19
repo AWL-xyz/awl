@@ -1,5 +1,26 @@
 #include "build.h"
 #include <iostream>
+#if (defined(__linux__) && defined(__x86_64__)) || (defined(_WIN32) && (defined(__x86_64__) || defined(_M_X64)))
+#include <filesystem>
+#include <stdexcept>
+namespace {
+void protect_build_inputs(const std::filesystem::path &destination,const std::string &source,
+                          const Awl_driver::Options &options) {
+    namespace fs=std::filesystem;
+    const auto resolved=fs::weakly_canonical(destination);
+    const bool exists=fs::exists(destination);
+    auto protect=[&](const std::string &input) {
+        const auto file=fs::canonical(fs::path(std::u8string(input.begin(),input.end())));
+        if(resolved==file||(exists&&fs::equivalent(destination,file))) {
+            const char *kind=file.extension()==".awpkg"?"Package manifest":"source";
+            throw std::runtime_error(std::string("refusing to overwrite ")+kind+" with executable: "+input);
+        }
+    };
+    protect(source);
+    for(const auto &input:options.protected_inputs) protect(input);
+}
+}
+#endif
 #if defined(__linux__) && defined(__x86_64__)
 #include <algorithm>
 #include <array>
@@ -11,9 +32,7 @@
 #include <fcntl.h>
 #include <cstdlib>
 #include <cstring>
-#include <filesystem>
 #include <fstream>
-#include <stdexcept>
 #include <utility>
 #include <vector>
 #include <sched.h>
@@ -255,12 +274,7 @@ int build(const char *c_source,size_t length,const char *argv0,const std::string
         fs::path destination;
         if(run) destination=temp.path/"program";
         else destination=fs::absolute(output.empty()?fs::path(source_path).stem():fs::path(output));
-        const auto source=fs::canonical(source_path);
-        if(fs::weakly_canonical(destination)==source||(fs::exists(destination)&&fs::equivalent(destination,source))) throw std::runtime_error("refusing to overwrite source with executable");
-        for(const auto &path:options.protected_sources) {
-            const auto imported=fs::canonical(path);
-            if(fs::weakly_canonical(destination)==imported||(fs::exists(destination)&&fs::equivalent(destination,imported))) throw std::runtime_error("refusing to overwrite source with executable");
-        }
+        protect_build_inputs(destination,source_path,options);
         Staging staging(destination.parent_path());
         const auto optimization="-O"+std::to_string(options.optimization);
         std::vector<std::string> environment,command;

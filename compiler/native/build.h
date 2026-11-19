@@ -5,7 +5,7 @@
 #include <vector>
 namespace Awl_driver {
 struct Options {
-    std::vector<std::string> protected_sources;
+    std::vector<std::string> protected_inputs; // Loaded module sources and Package manifests.
     std::vector<std::string> program_arguments;
     std::string host_cc; // Explicit absolute compiler path, Linux x86-64 only.
     int optimization=2;
