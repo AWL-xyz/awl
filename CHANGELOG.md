@@ -1,7 +1,8 @@
-# unreleased source formatting and unsigned bits
+# unreleased source formatting, unsigned bits, and CRC-32
 
 - `awl fmt` previews or checks Aesop indentation and line endings without changing tokens or loading imports. On Unix, `--write` atomically replaces changed sources, preserving ordinary permission bits and leaving unchanged sources alone.
 - `bits.and`, `bits.or`, `bits.xor`, `bits.not`, `bits.shl`, `bits.shr`, `bits.rotl`, `bits.rotr`, and `bits.popcount` work on exact-width unsigned words, with checked shift and rotate counts. ACC specializes and independently verifies each call; the offline editor supports the same operations.
+- The local `crc32` Package checksums raw bytes incrementally. Its [CLI example](examples/crc32-demo/) reads binary stdin with a reusable 64 KiB buffer, emits hexadecimal CRC-32, and includes a project test for split updates.
 
 # unreleased project scaffolding and testing
 

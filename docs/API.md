@@ -58,7 +58,7 @@ func main {
 };
 ```
 
-The native backend emits only the word helpers used by the program. The offline editor subset supports the same word widths and count rules.
+The native backend emits only the word helpers used by the program. The offline editor subset supports the same word widths and count rules. For a streaming example, see the [CRC-32 Package](CRC32.md).
 
 ## grouped calls
 

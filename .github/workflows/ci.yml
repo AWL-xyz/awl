@@ -42,6 +42,8 @@ jobs:
         run: python3 tests/byte_search_sort.py --sanitize
       - name: Local CSV Package and demo with generated-program sanitizers
         run: python3 tests/csv_package.py --sanitize
+      - name: Streaming CRC-32 Package and CLI with generated-program sanitizers
+        run: python3 tests/crc32_package.py --sanitize
       - name: Local time Package with generated-program sanitizers
         run: python3 tests/aesop_time.py --acc compiler/native/bin/acc --sanitize --report tests/aesop-time.json
       - name: Offline editor interpreter and bundled examples

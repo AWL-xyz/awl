@@ -8,11 +8,13 @@ the [project README](../README.md) is the main project page and should not be du
 - [built-in API and conversions](API.md)
 - [toolkit](ASDK.md)
 - [local Packages](PACKAGES.md)
+- [CSV Package](CSV.md)
+- [CRC-32 Package](CRC32.md)
 - [time Package](TIME.md)
 - [capability assessment](CAPABILITY-ASSESSMENT.md)
 - [performance methodology](PERFORMANCE.md)
 - [offline editor](EDITOR.md)
-- [integer semantics](INTEGERS.md)
+- [unsigned bit operation semantics](API.md#unsigned-bit-operations)
 
 ## historical material
 
