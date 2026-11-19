@@ -97,7 +97,7 @@ def main():
     shutil.copy2(ROOT/'docs/PIXELBOARD-FILES.md',package/'PIXELBOARD-FILES.md')
     shutil.copy2(ROOT/'docs/CAPABILITY-ASSESSMENT.md',package/'CAPABILITY-ASSESSMENT.md')
     scrub_private(package)
-    manifest={'toolkit':{'name':'Awl Software Development Kit [Beta]','command':'bin/awl','commands':['init','build']},'version':'0.24.0-dev','status':'experimental source candidate using Aesop syntax; Linux x86-64 only','toolchain':lock,'compiler_build_flags':flags,
+    manifest={'toolkit':{'name':'Awl Software Development Kit [Beta]','command':'bin/awl','commands':['new','init','add','check','build','run','test']},'version':'0.24.0-dev','status':'experimental source candidate using Aesop syntax; Linux x86-64 only','toolchain':lock,'compiler_build_flags':flags,
         'acc_sha256':digest(package/'bin/acc'),'zig_sha256':digest(tool/'zig'),
         'compiler_sources_sha256':{f.name:digest(f) for f in sorted(src.iterdir()) if f.suffix in ['.cpp','.h','.inc','.c']},
         'resources':'Complete upstream Zig distribution, including libc sources/headers, compiler-rt, libc++/libc++abi/libunwind resources and notices. No host development tools required at runtime.',

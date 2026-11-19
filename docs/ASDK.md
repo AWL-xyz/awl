@@ -28,15 +28,19 @@ cc -std=c11 -O2 /tmp/collections.c -lm -o /tmp/collections
 
 ```sh
 awl
-awl init Demo
-awl add /path/to/awl/packages/time/time.awpkg
-awl check
+awl new Demo
+awl check Demo
+awl test Demo --list
+awl test Demo --check
 awl build Demo
+cd Demo
+awl add /path/to/awl/packages/time/time.awpkg
 awl build path/main.aw -o program
 awl run path/main.aw -- --name "Ada Lovelace"
 ```
 
-- Bare `awl` displays help. `init Demo` creates `Demo.awproj` and, only if absent, `main.aw` in the current directory. `init Greeting --pkg` or `init --pkg Greeting` creates `Greeting.awpkg` and a Package starter. Initialization never overwrites existing files.
+- Bare `awl` displays help. `new Demo` creates a fresh `Demo/` directory containing `Demo.awproj`, `main.aw`, a shared `App.aw` module, `Smoke.test.aw`, and `.gitignore` for `/build/`. It refuses any existing destination, including a symlink, and removes the starter files it created if a write fails.
+- To work in an existing directory, use `init Demo`. It creates `Demo.awproj` and, only if absent, `main.aw`. `init Greeting --pkg` or `init --pkg Greeting` creates `Greeting.awpkg` and a Package starter. Initialization never overwrites existing files. Names for `new` and `init` are 1–64 ASCII letters, digits, underscores or hyphens, start alphanumeric, and cannot be reserved device names.
 - `add FILE.awpkg` copies a local Package into the sole project in the current directory, under `packages/` beside its entry file. It does not fetch packages, resolve dependencies, or overwrite an existing installation. See [Package layout and limits](PACKAGES.md).
 - `check`, `build`, `run`, and `test` use the same target selection: omit the target for the sole `.awproj` in the current directory, give a project name to search immediate child directories for the exact manifest name, or give a `.aw` file including project-local imports.
 - `check` parses, type-checks and verifies the project without a C backend or executable. Source errors exit with status `1`.
@@ -57,8 +61,10 @@ From the repository root, try the [complete example](../examples/testing/) with 
 
 - Project tests run in case-sensitive filename order, from the directory containing the `.awproj`. Discovery is not recursive. It skips hidden files and the selected entry itself, rejects symlinks and other non-regular `.test.aw` files, and is bounded to 4,096 directory entries and 64 tests. No tests found is a configuration error, not a successful empty run.
 - `awl test path/One.aw` runs just that file and keeps the caller's working directory. Each test builds a temporary executable with the same backend as `awl run`. Tests get EOF on stdin and no arguments; their stdout and stderr are visible.
-- The runner reports `PASS`, `FAIL`, or `TIMEOUT` for each test. A compile error, nonzero program status, or timeout counts as a failure; the suite continues to the next file. It returns `0` if all tests pass, `1` on any test failure, and `2` for invalid invocation or project configuration. Interrupting the runner stops the suite and returns the interruption status.
+- The runner reports `PASS`, `FAIL`, or `TIMEOUT` for each test. A compile error, nonzero program status, or timeout counts as a failure; by default the suite continues. It returns `0` if all selected tests pass, `1` on any failure, and `2` for invalid invocation or project configuration. Interrupting the runner stops the suite and returns the interruption status.
 - The program timeout defaults to 30 seconds **per test**; use `--run-timeout` to change it. `--build-timeout` applies separately to each compilation. No executable is kept. Only run trusted tests: supervision is not a security sandbox.
+- `--filter TEXT` matches a nonempty, case-sensitive substring of the filename, including its extension. Filtering happens **after** discovery and validation, so it cannot hide an invalid test path or bypass suite limits. No match exits with `2`.
+- `--list` prints one selected filename per line, without parsing test sources. `--check` runs frontend checks and reports pass/fail without building or executing anything. Neither accepts backend or timeout flags. Use `--fail-fast` with checks or execution to stop after the first failure and count any remaining selected tests as skipped; it cannot be used with `--list`.
 
 ## project manifest
 
@@ -84,6 +90,10 @@ see [Packages](PACKAGES.md) for the distinct `.awpkg` manifest and local import 
 | `--build-timeout 1..3600` | build, run, test | backend timeout in seconds, default `120` |
 | `--build-memory-mib 512..16384` | build, run, test | backend memory bound, default `4096` |
 | `--run-timeout 0..86400` | run, test | per-program timeout in seconds; `0` means unlimited, the default is `0` for `run` and `30` for `test` |
+| `--filter TEXT` | test | select tests whose filenames contain a case-sensitive substring |
+| `--list` | test | list selected filenames without compiling |
+| `--check` | test | check selected sources without building or executing |
+| `--fail-fast` | test | stop after the first failure |
 | `-- ARG ...` | run | pass the remaining arguments to the program, unchanged |
 
 Options follow the optional target. `-o` and `-O` are different options. `build` and `run` return `124` when a backend or program exceeds its wall-time limit. `test` counts each timeout as a failed test. With `--diagnostic-format json`, each source failure emits its own JSON report on stderr; this does not change the suite summary or test program output. Registry publishing and server-based `add`/`install` are not implemented.

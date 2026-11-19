@@ -1,5 +1,7 @@
-# unreleased project testing
+# unreleased project scaffolding and testing
 
+- `awl new NAME` creates a fresh project directory with a shared module, an application, a smoke test, and a build-output `.gitignore`. It refuses to overwrite an existing path. `awl init` still initializes the current directory.
+- `awl test` adds `--filter TEXT`, `--list`, `--check`, and `--fail-fast` for selecting, listing, checking, and stopping a suite.
 - `awl test [TARGET]` runs `.test.aw` files next to a project's entry source (or one explicit `.aw` program). It reports per-file results, defaults to a 30-second program timeout, and keeps no executables. Tests use ordinary Awl imports and `main`; no new syntax or manifest keys are required. See [the testing example](examples/testing/).
 
 # unreleased checked buffer search and sort utility

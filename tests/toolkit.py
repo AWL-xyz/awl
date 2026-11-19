@@ -16,6 +16,14 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def limit_file_size(size):
+    def apply():
+        # Let write() return an error after a short write rather than exiting on SIGXFSZ.
+        signal.signal(signal.SIGXFSZ, signal.SIG_IGN)
+        resource.setrlimit(resource.RLIMIT_FSIZE, (size, size))
+    return apply
+
+
 class ToolkitTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -67,6 +75,47 @@ class ToolkitTests(unittest.TestCase):
         self.assertEqual(self.invoke('BuIlD', '--cc', self.cc, '-O', '0').stdout, f'{out}\n')
         self.assertEqual(self.invoke(exe=out).stdout, 'Hello from Awl!\n')
         self.assert_no_temps()
+
+    def test_new_project_runs_and_never_overwrites(self):
+        self.assertIn('awl new', self.invoke('--help').stdout)
+        starter = self.project / 'Demo_2'
+        self.assertIn('with a starter test', self.invoke('NeW', starter.name).stdout)
+        before = {p.name: p.read_bytes() for p in starter.iterdir()}
+        self.assertEqual(set(before), {'Demo_2.awproj', 'App.aw', 'main.aw', 'Smoke.test.aw', '.gitignore'})
+        self.assertEqual(before['.gitignore'], b'/build/\n')
+        self.invoke('check', starter.name)
+        self.assertEqual(self.invoke('run', starter.name, '--cc', self.cc).stdout, 'Hello, Awl!\n')
+        self.assertEqual(self.invoke('test', '--list', cwd=starter).stdout, 'Smoke.test.aw\n')
+        self.assertIn('1 passed, 0 failed', self.invoke('test', starter.name, '--cc', self.cc).stdout)
+        self.assertIn('refusing to overwrite', self.invoke('new', starter.name, code=2).stderr)
+        self.assertEqual({p.name: p.read_bytes() for p in starter.iterdir()}, before)
+        self.assert_no_temps()
+
+    def test_new_rejects_unsafe_names_and_existing_paths(self):
+        for name in ('', '../escape', 'foo.bar', '_hidden', 'Con', 'LPT9', 'a' * 65):
+            with self.subTest(name=name):
+                self.assertIn('usage: awl new', self.invoke('new', name, code=2).stderr)
+        self.assertIn('usage: awl new', self.invoke('new', 'Demo', '--pkg', code=2).stderr)
+        self.assertEqual(list(self.project.iterdir()), [])
+        self.assertFalse((self.work / 'escape').exists())
+        outside = self.work / 'outside'
+        outside.mkdir()
+        file = self.project / 'file'
+        file.write_bytes(b'keep')
+        (self.project / 'link').symlink_to(outside, target_is_directory=True)
+        (self.project / 'dangling').symlink_to(outside / 'missing', target_is_directory=True)
+        for name in ('file', 'link', 'dangling'):
+            self.assertIn('refusing to overwrite', self.invoke('new', name, code=2).stderr)
+        self.assertEqual(file.read_bytes(), b'keep')
+        self.assertEqual(list(outside.iterdir()), [])
+
+    def test_new_rolls_back_after_partial_write(self):
+        result = self.invoke('new', 'Demo', code=2, preexec_fn=limit_file_size(128))
+        self.assertIn('cannot write', result.stderr)
+        self.assertIn('Smoke.test.aw', result.stderr)
+        self.assertEqual(list(self.project.iterdir()), [])
+        self.invoke('new', 'Demo')
+        self.invoke('test', 'Demo', '--check')
 
     def test_add_package_from_starter(self):
         source = self.init()
@@ -163,13 +212,8 @@ class ToolkitTests(unittest.TestCase):
         library.write_bytes(library.read_bytes() + b' ' * 2048)
         packages = self.project / 'packages'
 
-        def limit_file_size():
-            # Linux delivers SIGXFSZ after a short write at the file size limit.
-            # Let write() return an error so the installer can clean up.
-            signal.signal(signal.SIGXFSZ, signal.SIG_IGN)
-            resource.setrlimit(resource.RLIMIT_FSIZE, (1024, 1024))
-
-        result = self.invoke('add', manifest, code=2, preexec_fn=limit_file_size)
+        limited = limit_file_size(1024)
+        result = self.invoke('add', manifest, code=2, preexec_fn=limited)
         self.assertIn('cannot write', result.stderr)
         self.assertFalse(packages.exists())
 
@@ -178,7 +222,7 @@ class ToolkitTests(unittest.TestCase):
         previous.mkdir()
         sentinel = previous / 'Previous.aw'
         sentinel.write_text('previous source')
-        result = self.invoke('add', manifest, code=2, preexec_fn=limit_file_size)
+        result = self.invoke('add', manifest, code=2, preexec_fn=limited)
         self.assertIn('cannot write', result.stderr)
         self.assertEqual(list(packages.iterdir()), [previous])
         self.assertEqual(sentinel.read_text(), 'previous source')
@@ -316,6 +360,73 @@ class ToolkitTests(unittest.TestCase):
         self.assertTrue(report['diagnostics'])
         self.assert_no_temps()
 
+    def test_list_and_filter_tests_without_loading_source(self):
+        self.init()
+        names = ['A smoke λ.test.aw', 'B smoke.test.aw', 'Z Smoke.test.aw']
+        for name in reversed(names):
+            (self.project / name).write_text('this cannot compile')
+        (self.project / '.Hidden smoke.test.aw').touch()
+        for cwd, args in [(self.project, ()), (self.work, ('Demo',))]:
+            self.assertEqual(self.invoke('test', *args, '--list', cwd=cwd).stdout.splitlines(), names)
+            listed = self.invoke('test', *args, '--filter', 'smoke', '--list', cwd=cwd)
+            self.assertEqual(listed.stdout.splitlines(), names[:2])
+            self.assertEqual(listed.stderr, '')
+        (self.project / names[0]).write_text('func main { return 0; };')
+        selected = self.invoke('test', '--filter', 'λ', '--cc', self.cc)
+        self.assertEqual(selected.stdout.splitlines(), [f'Testing {names[0]}', f'PASS {names[0]}',
+                                                        'Test result: 1 passed, 0 failed'])
+        self.assertEqual(selected.stderr, '')
+        self.assertEqual(self.invoke('test', names[1], '--list', '--filter', 'smoke').stdout, names[1] + '\n')
+        none = self.invoke('test', '--filter', 'SMOKE', '--list', code=2)
+        self.assertIn('no tests match --filter', none.stderr)
+        self.assertEqual(none.stdout, '')
+        self.assert_no_temps()
+
+    def test_check_only_and_failure_cutoff(self):
+        self.init()
+        (self.project / 'A.test.aw').write_text('func main { print("must not run"); return 9; };')
+        bad = self.project / 'B.test.aw'
+        bad.write_text('func main[i64] { return false; };')
+        (self.project / 'C.test.aw').write_text('func main { return 0; };')
+        check = self.invoke('test', '--check', '--diagnostic-format', 'json', code=1)
+        self.assertEqual([line for line in check.stdout.splitlines() if 'native frontend' not in line], [
+            'Checking A.test.aw', 'PASS A.test.aw', 'Checking B.test.aw', 'FAIL B.test.aw (status 1)',
+            'Checking C.test.aw', 'PASS C.test.aw', 'Test result: 2 passed, 1 failed'])
+        self.assertEqual(Path(json.loads(check.stderr)['file']), bad)
+        stopped = self.invoke('test', '--check', '--fail-fast', code=1)
+        self.assertNotIn('C.test.aw', stopped.stdout)
+        self.assertIn('Test result: 1 passed, 1 failed, 1 skipped', stopped.stdout)
+        cutoff = self.invoke('test', '--cc', self.cc, '--fail-fast', code=1)
+        self.assertEqual(cutoff.stdout.splitlines(), ['Testing A.test.aw', 'must not run',
+                         'FAIL A.test.aw (status 9)', 'Test result: 0 passed, 1 failed, 2 skipped'])
+        self.assertEqual(cutoff.stderr, '')
+        self.assertFalse((self.project / 'build').exists())
+        self.assert_no_temps()
+
+    def test_test_mode_option_errors(self):
+        self.init()
+        (self.project / 'A.test.aw').touch()
+        for opts, message in [
+            (('--list', '--check'), 'cannot be combined'),
+            (('--list', '--fail-fast'), 'cannot be combined'),
+            (('--check', '--cc', self.cc), 'requires building and running tests'),
+            (('--list', '-O', '0'), 'requires building and running tests'),
+            (('--check', '--run-timeout', '5'), 'requires building and running tests'),
+            (('--check', '--build-timeout', '5'), 'requires building and running tests'),
+            (('--list', '--build-memory-mib', '512'), 'requires building and running tests'),
+            (('--list', '--list'), 'duplicate option'),
+            (('--filter', ''), 'nonempty filename substring'),
+            (('--filter',), 'missing value'),
+            (('--filter', 'A', '--filter', 'B'), 'duplicate option'),
+        ]:
+            with self.subTest(opts=opts):
+                rejected = self.invoke('test', *opts, code=2)
+                self.assertIn(message, rejected.stderr)
+                self.assertEqual(rejected.stdout, '')
+        for flag in ('--list', '--check', '--fail-fast', '--filter'):
+            self.assertIn('unknown run option', self.invoke('run', flag, code=2).stderr)
+        self.assert_no_temps()
+
     def test_test_discovery_errors_do_not_run_anything(self):
         self.init()
         self.assertIn('awl test', self.invoke('--help').stdout)
@@ -338,6 +449,9 @@ class ToolkitTests(unittest.TestCase):
                 self.assertIn('test must be a regular non-symlink file', rejected.stderr)
                 self.assertIn(unsafe.name, rejected.stderr)
                 self.assertEqual(rejected.stdout, '')
+                filtered = self.invoke('test', '--filter', 'A', '--list', code=2)
+                self.assertIn(unsafe.name, filtered.stderr)
+                self.assertEqual(filtered.stdout, '')
                 if form == 'directory':
                     unsafe.rmdir()
                 else:
@@ -358,6 +472,9 @@ class ToolkitTests(unittest.TestCase):
         self.assertIn('program wall-time limit exceeded', result.stderr)
         self.assertEqual(result.stdout.splitlines(), ['Testing A.test.aw', 'TIMEOUT A.test.aw',
                          'Testing Z.test.aw', 'PASS Z.test.aw', 'Test result: 1 passed, 1 failed'])
+        stopped = self.invoke('test', '--cc', self.cc, '--run-timeout', '1', '--fail-fast', code=1)
+        self.assertEqual(stopped.stdout.splitlines(), ['Testing A.test.aw', 'TIMEOUT A.test.aw',
+                         'Test result: 0 passed, 1 failed, 1 skipped'])
         backend = self.work / 'sleeping backend'
         backend.write_text('#!/bin/sh\nexec /bin/sleep 5\n')
         backend.chmod(0o700)

@@ -25,6 +25,7 @@ void help() {
     std::cout<<"Awl Software Development Kit [Beta]\n"
         <<"Usage:\n"
         <<"  awl                         Show this help\n"
+        <<"  awl new NAME                Create a new project directory with a starter test\n"
         <<"  awl init NAME               Create NAME.awproj and, if absent, main.aw here\n"
         <<"  awl init NAME --pkg         Create NAME.awpkg and, if absent, NAME.aw (a library package) here\n"
         <<"  awl add FILE.awpkg          Copy a local Package into the current project (no network)\n"
@@ -44,10 +45,15 @@ void help() {
         <<"  --build-memory-mib 512..16384 Backend memory bound (default 4096)\n"
         <<"Build only: -o FILE             Executable destination (relative to terminal cwd)\n"
         <<"Run/test: --run-timeout 0..86400  Per-program timeout in seconds (0 = unlimited)\n"
-        <<"                                Default: unlimited for run, "<<test_timeout_seconds<<" seconds for test\n\n"
+        <<"                                Default: unlimited for run, "<<test_timeout_seconds<<" seconds for test\n"
+        <<"Test-only options:\n"
+        <<"  --filter TEXT                Select filenames containing TEXT (case-sensitive)\n"
+        <<"  --list                       List the selected tests without compiling\n"
+        <<"  --check                      Check the selected tests without a backend\n"
+        <<"  --fail-fast                  Stop after the first failure\n\n"
         <<"Project output: <project>/build/<manifest-name> (.exe on Windows).\n"
         <<"Single-file output: <cwd>/<source-stem> (.exe on Windows).\n"
-        <<"Init never overwrites existing files. NAME: 1..64 letters/digits/_/-, starts alphanumeric.\n"
+        <<"New and init never overwrite files. NAME: 1..64 letters/digits/_/-, starts alphanumeric.\n"
         <<"Build/run/test use the bundled backend unless --cc is specified.\n";
 }
 // Exclusive creation, no shell and no truncation of pre-existing files/symlinks.
@@ -57,15 +63,60 @@ void create_new(const fs::path &p,const std::string &bytes) {
     if(h==INVALID_HANDLE_VALUE) throw std::runtime_error("cannot exclusively create "+utf8(p));
     DWORD wrote=0;const bool ok=WriteFile(h,bytes.data(),static_cast<DWORD>(bytes.size()),&wrote,nullptr)&&wrote==bytes.size();
     const bool closed=CloseHandle(h)!=0;
-    if(!ok||!closed) throw std::runtime_error("cannot write "+utf8(p));
 #else
     int fd=open(p.c_str(),O_WRONLY|O_CREAT|O_EXCL|O_CLOEXEC,0666);
     if(fd<0) throw std::runtime_error("cannot exclusively create "+utf8(p));
     size_t offset=0;bool ok=true;
     while(offset<bytes.size()) {const auto n=write(fd,bytes.data()+offset,bytes.size()-offset);if(n<0&&errno==EINTR) continue;if(n<=0){ok=false;break;}offset+=static_cast<size_t>(n);}
     const bool closed=close(fd)==0;
-    if(!ok||!closed) throw std::runtime_error("cannot write "+utf8(p));
 #endif
+    if(!ok||!closed) {
+        std::error_code ec;fs::remove(p,ec);
+        throw std::runtime_error("cannot write "+utf8(p));
+    }
+}
+constexpr const char *project_manifest="format: 1\nentry: main.aw\nsyntax: aesop\n";
+fs::path new_project(const fs::path &cwd,const std::string &name) {
+    const auto folder=cwd/path(name);
+    const std::pair<fs::path,std::string> files[]={
+        {folder/"App.aw",R"AWL(exports {
+    @r func greet :: who:text {
+        return "Hello, " + who + "!";
+    };
+};
+)AWL"},
+        {folder/"main.aw",R"AWL(use App.aw as app;
+
+func main {
+    print(app.greet("Awl"));
+    return 0;
+};
+)AWL"},
+        {folder/"Smoke.test.aw",R"AWL(use App.aw as app;
+
+func main {
+    if app.greet("Awl") != "Hello, Awl!" {
+        print("the starter greeting changed unexpectedly");
+        return 1;
+    };
+    return 0;
+};
+)AWL"},
+        {folder/".gitignore","/build/\n"},
+        {folder/path(name+".awproj"),project_manifest} // Publish the manifest last.
+    };
+    if(fs::symlink_status(folder).type()!=fs::file_type::not_found||!fs::create_directory(folder))
+        throw std::runtime_error("project path already exists; refusing to overwrite "+utf8(folder));
+    size_t written=0;
+    try {
+        for(const auto &[file,bytes]:files) {create_new(file,bytes);++written;}
+    } catch(...) {
+        std::error_code ec;
+        while(written) fs::remove(files[--written].first,ec);
+        fs::remove(folder,ec); // Leave the directory alone if it is no longer empty.
+        throw;
+    }
+    return folder;
 }
 std::vector<fs::path> manifests(const fs::path &folder) {
     std::vector<fs::path> found;size_t seen=0;
@@ -205,18 +256,18 @@ Awl_driver::Result invoke_compiler(std::vector<std::string> &args,bool stdin_eof
     return Awl_compiler_main(static_cast<int>(args.size()),raw.data(),stdin_eof);
 }
 int run_tests(const char *argv0,const std::vector<fs::path> &tests,const fs::path &cwd,
-              const std::string &syntax,const std::vector<std::string> &flags) {
+              const std::string &syntax,const std::vector<std::string> &flags,bool check_only,bool fail_fast) {
     // Test sources are already absolute. Named and local project invocations
     // use the same working directory for relative fixtures.
     fs::current_path(cwd);
     size_t passed=0,failed=0;
     for(const auto &test:tests) {
         const auto name=utf8(test.filename());
-        std::cout<<"Testing "<<name<<'\n'<<std::flush;
+        std::cout<<(check_only?"Checking ":"Testing ")<<name<<'\n'<<std::flush;
         if(!std::cout) return 2;
-        std::vector<std::string> args={argv0,"run",utf8(test),"--syntax",syntax};
+        std::vector<std::string> args={argv0,check_only?"check":"run",utf8(test),"--syntax",syntax};
         args.insert(args.end(),flags.begin(),flags.end());
-        const auto result=invoke_compiler(args,true);
+        const auto result=invoke_compiler(args,!check_only);
         if(result.termination==Awl_driver::Termination::Interrupted) {
             std::cout<<"INTERRUPTED "<<name<<'\n'<<std::flush;
             return result.code;
@@ -226,9 +277,13 @@ int run_tests(const char *argv0,const std::vector<fs::path> &tests,const fs::pat
             ++failed;
             if(result.termination==Awl_driver::Termination::TimedOut) std::cout<<"TIMEOUT "<<name<<'\n';
             else std::cout<<"FAIL "<<name<<" (status "<<result.code<<")\n";
+            if(fail_fast) break;
         }
     }
-    std::cout<<"Test result: "<<passed<<" passed, "<<failed<<" failed\n"<<std::flush;
+    std::cout<<"Test result: "<<passed<<" passed, "<<failed<<" failed";
+    const auto skipped=tests.size()-passed-failed;
+    if(skipped) std::cout<<", "<<skipped<<" skipped";
+    std::cout<<'\n'<<std::flush;
     if(!std::cout) return 2;
     return failed?1:0;
 }
@@ -237,6 +292,12 @@ int run(int argc,char **argv) {
         if(argc==1||(argc==2&&(command_key(argv[1])=="--help"||std::string(argv[1])=="-h"))) {help();return std::cout?0:2;}
         if(argc==2&&command_key(argv[1])=="--version") {std::cout<<"Awl Software Development Kit [Beta] 0.26.0-dev\n";return std::cout?0:2;}
         const std::string command=command_key(argv[1]);const auto cwd=fs::current_path();
+        if(command=="new") {
+            if(argc!=3||!project_name(argv[2])) throw std::runtime_error("usage: awl new NAME (1..64 letters/digits/_/-, starts alphanumeric; no reserved device names)");
+            const auto folder=new_project(cwd,argv[2]);
+            std::cout<<"Created "<<utf8(folder)<<" with a starter test.\nCheck with: awl check "<<argv[2]<<"\nTest with: awl test "<<argv[2]<<'\n';
+            return std::cout?0:2;
+        }
         if(command=="init") {
             const bool package=argc==4&&(std::string(argv[3])=="--pkg"||std::string(argv[2])=="--pkg");
             const char *project_arg=package&&std::string(argv[2])=="--pkg"?argv[3]:argv[2];
@@ -259,7 +320,7 @@ int run(int argc,char **argv) {
             if(source_status.type()!=fs::file_type::not_found&&(fs::is_symlink(source_status)||!fs::is_regular_file(source_status))) throw std::runtime_error("main.aw exists but is not a regular non-symlink source");
             bool made=false;
             if(source_status.type()==fs::file_type::not_found) {create_new(source,"func main {\n    print(\"Hello from Awl!\");\n    return 0;\n};\n");made=true;}
-            create_new(manifest,"format: 1\nentry: main.aw\nsyntax: aesop\n");
+            create_new(manifest,project_manifest);
             std::cout<<"Initialized "<<argv[2]<<" in "<<utf8(cwd)<<"\n"<<(made?"Created":"Preserved")<<" main.aw\nCreated "<<utf8(manifest.filename())<<"\nCheck with: awl check\n";return std::cout?0:2;
         }
         if(command=="add") {
@@ -272,18 +333,24 @@ int run(int argc,char **argv) {
         const bool build=command=="build",run=command=="run",test=command=="test";
         const bool running=run||test,building=build||running;
         if(command!="check"&&!building) throw std::runtime_error("unknown command '"+command+"'; use awl --help");
-        int i=2;std::string target,explicit_output;
+        int i=2;std::string target,explicit_output,test_filter;
         if(i<argc&&argv[i][0]!='-') target=argv[i++];
         std::vector<std::string> flags;std::set<std::string> seen;
         for(;i<argc;++i) {
             const std::string option=argv[i];
             if(run&&option=="--") break; // Forward the delimiter and all following arguments unchanged.
             if(!seen.insert(option).second) throw std::runtime_error("duplicate option: "+option);
+            if(test&&(option=="--list"||option=="--check"||option=="--fail-fast")) continue;
             const bool common=option=="--syntax"||option=="--diagnostic-format";
             const bool backend=option=="--cc"||option=="-O"||option=="--build-timeout"||option=="--build-memory-mib";
-            if(!(common||(building&&backend)||(build&&option=="-o")||(running&&option=="--run-timeout"))) throw std::runtime_error("unknown "+command+" option: "+option);
+            if(!(common||(building&&backend)||(build&&option=="-o")||(running&&option=="--run-timeout")||(test&&option=="--filter")))
+                throw std::runtime_error("unknown "+command+" option: "+option);
             if(++i>=argc||(running&&std::string(argv[i])=="--")) throw std::runtime_error("missing value for "+option);
             const std::string value=argv[i];unsigned parsed=0;
+            if(option=="--filter") {
+                if(value.empty()) throw std::runtime_error("--filter requires a nonempty filename substring");
+                test_filter=value;continue;
+            }
             if(option=="--syntax"&&value!="aesop") throw std::runtime_error("syntax must be aesop");
             if(option=="--diagnostic-format"&&value!="text"&&value!="json") throw std::runtime_error("diagnostic format must be text or json");
             if(option=="--cc"&&value.empty()) throw std::runtime_error("--cc requires an absolute compiler path");
@@ -294,6 +361,12 @@ int run(int argc,char **argv) {
             if(option=="-o") {if(value.empty()) throw std::runtime_error("empty output path");explicit_output=value;}
             else if(option!="--syntax") {flags.push_back(option);flags.push_back(value);}
         }
+        const bool list_only=seen.contains("--list"),check_only=seen.contains("--check"),fail_fast=seen.contains("--fail-fast");
+        if(list_only&&(check_only||fail_fast)) throw std::runtime_error("--list cannot be combined with --check or --fail-fast");
+        if(list_only||check_only) {
+            for(const auto *option:{"--cc","-O","--build-timeout","--build-memory-mib","--run-timeout"})
+                if(seen.contains(option)) throw std::runtime_error(std::string(option)+" requires building and running tests");
+        }
         Project project;
         const bool single=!target.empty()&&path(target).extension()==".aw";
         if(single) {
@@ -302,9 +375,21 @@ int run(int argc,char **argv) {
         } else project=read_project(discover(cwd,target));
         const auto &source=project.entry,&manifest=project.manifest;
         if(test) {
-            if(!seen.contains("--run-timeout")) {flags.push_back("--run-timeout");flags.push_back(std::to_string(test_timeout_seconds));}
-            const auto tests=single?std::vector<fs::path>{source}:discover_tests(source);
-            return run_tests(argv[0],tests,single?cwd:manifest.parent_path(),project.syntax,flags);
+            auto tests=single?std::vector<fs::path>{source}:discover_tests(source);
+            if(!test_filter.empty()) {
+                tests.erase(std::remove_if(tests.begin(),tests.end(),[&](const fs::path &file) {
+                    return utf8(file.filename()).find(test_filter)==std::string::npos;
+                }),tests.end());
+                if(tests.empty()) throw std::runtime_error("no tests match --filter: "+test_filter);
+            }
+            if(list_only) {
+                for(const auto &file:tests) std::cout<<utf8(file.filename())<<'\n';
+                return (std::cout<<std::flush)?0:2;
+            }
+            if(!check_only&&!seen.contains("--run-timeout")) {
+                flags.push_back("--run-timeout");flags.push_back(std::to_string(test_timeout_seconds));
+            }
+            return run_tests(argv[0],tests,single?cwd:manifest.parent_path(),project.syntax,flags,check_only,fail_fast);
         }
         if(build&&!explicit_output.empty()) {
             // Protect the selected manifest (even through a hardlink) and .awproj destinations.

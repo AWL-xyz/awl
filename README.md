@@ -23,7 +23,7 @@
 | compiler | **Awl Compiler Collection (ACC)**, native C++20 frontend with checked IR, an independent verifier and a C11 backend |
 | source files | `.aw` |
 | manifests | `.awproj` for projects, `.awpkg` for local Packages |
-| public toolkit | `awl init`, `awl add` (local Packages), `awl check`, `awl build`, `awl run`, `awl test` |
+| public toolkit | `awl new`, `awl init`, `awl add` (local Packages), `awl check`, `awl build`, `awl run`, `awl test` |
 | development version | `0.26.0-dev`, a development identifier, not a compatibility guarantee |
 | release readiness | experimental source candidate, not production-ready |
 
@@ -72,18 +72,20 @@ python3 compiler/build_native.py --standalone --strip
 export PATH="$PWD/compiler/native/bin:$PATH"
 
 cd "$(mktemp -d)"
-awl init Demo
-awl check
-awl run --cc "$(command -v cc)"           # Hello from Awl!
-awl build --cc "$(command -v cc)"
-./build/Demo
+awl new Demo
+awl check Demo
+awl test Demo --list
+awl test Demo --cc "$(command -v cc)"
+awl run Demo --cc "$(command -v cc)"      # Hello, Awl!
+awl build Demo --cc "$(command -v cc)"
+./Demo/build/Demo
 ```
 
-`awl init` writes starter files in the current directory without overwriting existing files. `awl check` needs no C backend. `--cc` explicitly selects a host compiler for a local build; without it, `build` and `run` still require a complete, matching SDK. The contributor build above is not a redistributable SDK.
+`awl new` creates a fresh project with a shared module and a smoke test. Use `awl init` to start in the current directory instead. Neither overwrites existing files. `awl check` and `awl test --check` need no C backend. `--cc` explicitly selects a host C compiler for local execution; without it, builds and execution require a complete, matching SDK. The contributor build above is not a redistributable SDK.
 
 ### toolkit workflow
 
-`check`, `build`, `run`, and `test` all accept the same targets: omit the target for the sole `.awproj` in the current directory, pass `Demo` to look for `Demo.awproj` in immediate child directories, or pass a `.aw` file directly. `awl run` passes arguments after `--` to the program and doesn't keep an executable. `awl test` runs `.test.aw` files beside a project's entry, reports failures, and keeps no executables. Try the [testing example](examples/testing/).
+`check`, `build`, `run`, and `test` all accept the same targets: omit the target for the sole `.awproj` in the current directory, pass `Demo` to look for `Demo.awproj` in immediate child directories, or pass a `.aw` file directly. `awl run` passes arguments after `--` to the program and doesn't keep an executable. `awl test` runs `.test.aw` files beside a project's entry and keeps no executables. Use `--filter`, `--list`, `--check`, or `--fail-fast` to narrow or inspect a suite. Try the [testing example](examples/testing/).
 
 For example, from the repository root, run the shipped sort utility with redirected input:
 
