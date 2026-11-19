@@ -12,9 +12,15 @@ struct Options {
     unsigned build_timeout_seconds=120;
     unsigned build_memory_mib=4096;
     unsigned run_timeout_seconds=0;
+    bool stdin_eof=false; // Test builds/programs cannot consume the caller's input.
+};
+enum class Termination { Exited, TimedOut, Interrupted };
+struct Result {
+    int code=2;
+    Termination termination=Termination::Exited;
 };
 // Linux/Windows x86-64 bundles by default. No implicit host-tool fallback.
-int build(const char *c_source,size_t length,const char *argv0,const std::string &source_path,
-          const std::string &output,const Options &options,bool run);
+Result build(const char *c_source,size_t length,const char *argv0,const std::string &source_path,
+             const std::string &output,const Options &options,bool run);
 }
 #endif

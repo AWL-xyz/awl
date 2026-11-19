@@ -1,0 +1,6 @@
+format: 1
+kind: package
+name: csv
+version: 0.1.0
+entry: csv.aw
+syntax: aesop

@@ -1,7 +1,17 @@
+# unreleased project scaffolding and testing
+
+- `awl new NAME` creates a fresh project directory with a shared module, an application, a smoke test, and a build-output `.gitignore`. It refuses to overwrite an existing path. `awl init` still initializes the current directory.
+- `awl test` adds `--filter TEXT`, `--list`, `--check`, and `--fail-fast` for selecting, listing, checking, and stopping a suite.
+- `awl test [TARGET]` runs `.test.aw` files next to a project's entry source (or one explicit `.aw` program). It reports per-file results, defaults to a 30-second program timeout, and keeps no executables. Tests use ordinary Awl imports and `main`; no new syntax or manifest keys are required. See [the testing example](examples/testing/).
+
 # unreleased checked buffer search and sort utility
 
 - `buffer.findbyte` finds a byte within a checked range without allocating or interpreting it as text. Platform argument diagnostics show public names like `buffer.findbyte`.
 - The shipped line sorter scans for LF in bulk and reuses its input buffer for output, including retrying successful short writes. Its stable order, `--unique` behavior, and input limits are unchanged. See the [before/after benchmark](docs/PERFORMANCE.md#current-source-sorting-utf-8-lines).
+
+# unreleased CSV Package
+
+- Local `csv` Package parses bounded UTF-8 tables with quoted and multiline fields, reports source offsets, and encodes a table back to CSV. The [order-summary demo](examples/csv-demo/) uses checked decimal conversion and ships with an Awl test.
 
 # unreleased local Package installation
 
@@ -10,6 +20,8 @@
 
 # unreleased text runtime
 
+- `string.slice` and `string.codepoint` use direct ASCII indexing and can seek mixed UTF-8 from either end without allocating or changing bounds checks.
+- `string.i64valid` and `string.toi64` parse strict signed decimal text, including slices. They share the faster single-pass parser used by `arg.i64valid` and `arg.i64`. See [measured workloads and tradeoffs](docs/PERFORMANCE.md#current-source-utf-8-slicing-and-decimal-arguments).
 - `string.replace` no longer retains intermediate copies; a changed, nonempty result is allocated once. Exact UTF-8 matching, empty-needle traps, and text heap limits are unchanged. See the [before/after benchmark](docs/PERFORMANCE.md#current-source-replacing-text-in-utf-8-records).
 
 # unreleased toolkit workflow and checked arithmetic

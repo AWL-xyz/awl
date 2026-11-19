@@ -24,24 +24,24 @@ bool number(const std::string &text,unsigned low,unsigned high,unsigned &value) 
 #define NOMINMAX
 #include <windows.h>
 #endif
-int Awl_compiler_main(int argc,char **argv);
+Awl_driver::Result Awl_compiler_main(int argc,char **argv,bool stdin_eof=false);
 #include "ASDK.inc"
 int Awl_main(int argc,char **argv) {
     const auto invoked=Awl_toolkit::utf8(Awl_toolkit::path(argv[0]).filename());
-    if(invoked=="acc"||invoked=="acc.exe"||invoked=="kcc"||invoked=="kcc.exe") return Awl_compiler_main(argc,argv);
-    return Awl_toolkit::run(argc,argv,Awl_compiler_main);
+    if(invoked=="acc"||invoked=="acc.exe"||invoked=="kcc"||invoked=="kcc.exe") return Awl_compiler_main(argc,argv).code;
+    return Awl_toolkit::run(argc,argv);
 }
-int Awl_compiler_main(int argc,char **argv) {
-    if(argc==2&&std::string(argv[1])=="--version") {std::cout<<"Awl Compiler Collection (ACC) 0.26.0-dev development candidate\n";return 0;}
+Awl_driver::Result Awl_compiler_main(int argc,char **argv,bool stdin_eof) {
+    if(argc==2&&std::string(argv[1])=="--version") {std::cout<<"Awl Compiler Collection (ACC) 0.26.0-dev development candidate\n";return {0};}
     if(argc<3) {
         std::cerr<<"Usage: acc check|emit-ast|emit-checked-ast|emit-c|build|run source.aw [options]\n"
                  <<"Build/run use the bundled backend by default. On Linux x86-64, --cc ABSOLUTE_PATH selects a host C compiler.\n"
-                 <<"Run: [--run-timeout 0..86400] [-- ARG ...]. See awl --help for common options.\n";return 2;
+                 <<"Run: [--run-timeout 0..86400] [-- ARG ...]. See awl --help for common options.\n";return {2};
     }
-    const std::string command=argv[1],path=argv[2]; bool json=false;std::string output;Awl_driver::Options options;
+    const std::string command=argv[1],path=argv[2]; bool json=false;std::string output;Awl_driver::Options options;options.stdin_eof=stdin_eof;
     const bool building=command=="build"||command=="run";
     if(command!="check"&&command!="emit-ast"&&command!="emit-checked-ast"&&command!="emit-c"&&!building) {
-        std::cerr<<"acc: command not implemented in native-checker preview: "<<command<<"\n";return 2;
+        std::cerr<<"acc: command not implemented in native-checker preview: "<<command<<"\n";return {2};
     }
     for(int i=3;i<argc;++i) {
         const std::string option=argv[i];
@@ -49,7 +49,7 @@ int Awl_compiler_main(int argc,char **argv) {
             options.program_arguments.assign(argv+i+1,argv+argc);
             break;
         }
-        if(i+1>=argc) {std::cerr<<"acc: missing value for "<<option<<'\n';return 2;}
+        if(i+1>=argc) {std::cerr<<"acc: missing value for "<<option<<'\n';return {2};}
         const std::string value=argv[++i];
         if(option=="--syntax"&&value=="aesop") {}
         else if(option=="--diagnostic-format"&&(value=="text"||value=="json")) json=value=="json";
@@ -59,32 +59,32 @@ int Awl_compiler_main(int argc,char **argv) {
         else if(option=="--build-timeout"&&building&&number(value,1,3600,options.build_timeout_seconds)) {}
         else if(option=="--build-memory-mib"&&building&&number(value,512,16384,options.build_memory_mib)) {}
         else if(option=="--run-timeout"&&command=="run"&&number(value,0,86400,options.run_timeout_seconds)) {}
-        else {std::cerr<<"acc: invalid option or value\n";return 2;}
+        else {std::cerr<<"acc: invalid option or value\n";return {2};}
     }
-    if(!path.ends_with(".aw")) {std::cerr<<"acc: Awl source files must use .aw\n";return 1;}
+    if(!path.ends_with(".aw")) {std::cerr<<"acc: Awl source files must use .aw\n";return {1};}
     void *unit=nullptr;
-    if(Awl_parse_file(path.c_str(),&unit)||!unit) {std::cerr<<"acc: internal project parse failure\n";return 2;}
+    if(Awl_parse_file(path.c_str(),&unit)||!unit) {std::cerr<<"acc: internal project parse failure\n";return {2};}
     struct Cleanup { void *p; ~Cleanup(){Awl_parse_free(p);} } cleanup{unit};
     if(!Awl_diagnostic_count(unit)&&command!="emit-ast") {
         const auto status=Awl_check_unit(unit);
-        if(status==2) {std::cerr<<"acc: internal semantic failure\n";return 2;}
+        if(status==2) {std::cerr<<"acc: internal semantic failure\n";return {2};}
     }
     const char *c_output=nullptr;size_t c_size=0;
     bool verification_failed=false;
     if(!Awl_diagnostic_count(unit)&&command!="emit-ast") {
         const auto status=(command=="emit-c"||building)?Awl_emit_c(unit,&c_output,&c_size):Awl_verify_unit(unit);
-        if(status==2) {std::cerr<<"acc: internal verification failure\n";return 2;}
+        if(status==2) {std::cerr<<"acc: internal verification failure\n";return {2};}
         verification_failed=status!=0;
     }
     if(Awl_diagnostic_count(unit)) {
         size_t size=0; const auto *report=Awl_render_diagnostics(unit,path.c_str(),json,&size);
-        if(!report) {std::cerr<<"acc: diagnostic rendering failed\n";return 2;}
-        std::cerr.write(report,static_cast<std::streamsize>(size)); return verification_failed?2:1;
+        if(!report) {std::cerr<<"acc: diagnostic rendering failed\n";return {2};}
+        std::cerr.write(report,static_cast<std::streamsize>(size)); return {verification_failed?2:1};
     }
     if(building) {
         for(uint32_t i=0;i<Awl_source_file_count(unit);++i) {
             const auto *file=Awl_source_file_path(unit,i);
-            if(!file) {std::cerr<<"acc: source enumeration failed\n";return 2;}
+            if(!file) {std::cerr<<"acc: source enumeration failed\n";return {2};}
             options.protected_inputs.emplace_back(file);
         }
         Awl_package::append_manifest_inputs(unit,options.protected_inputs);
@@ -94,11 +94,11 @@ int Awl_compiler_main(int argc,char **argv) {
     else if(command=="emit-c") std::cout.write(c_output,static_cast<std::streamsize>(c_size));
     else {
         size_t size=0; const auto *syntax=Awl_parse_json(unit,&size);
-        if(!syntax) {std::cerr<<"acc: syntax export failed\n";return 2;}
+        if(!syntax) {std::cerr<<"acc: syntax export failed\n";return {2};}
         std::cout.write(syntax,static_cast<std::streamsize>(size)); std::cout<<'\n';
     }
-    std::cout.flush();if(!std::cout) {std::cerr<<"acc: cannot write output\n";return 2;}
-    return 0;
+    std::cout.flush();if(!std::cout) {std::cerr<<"acc: cannot write output\n";return {2};}
+    return {0};
 }
 
 #if defined(_WIN32)

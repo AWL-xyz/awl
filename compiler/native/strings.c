@@ -60,15 +60,22 @@ static bool k_utf8_scan(const unsigned char *data,size_t bytes,size_t *scalars) 
 static size_t k_string_width(unsigned char c) {
     return c<0x80?1:c<0xe0?2:c<0xf0?3:4;
 }
-static size_t k_string_offset(KString s,size_t scalar) {
-    if(scalar>s.scalars) k_string_trap();
-    size_t p=0;
-    for(size_t i=0;i<scalar;++i) p+=k_string_width(s.data[p]);
-    return p;
+static size_t k_string_forward(const unsigned char *data,size_t offset,size_t count) {
+    for(size_t i=0;i<count;++i) offset+=k_string_width(data[offset]);
+    return offset;
+}
+static size_t k_string_backward(const unsigned char *data,size_t offset,size_t count) {
+    for(size_t i=0;i<count;++i) {
+        while((data[--offset]&0xc0)==0x80) {} // Skip continuation bytes to the lead byte.
+    }
+    return offset;
 }
 static uint32_t k_string_codepoint(KString s,int64_t index) {
     if(index<0||(uint64_t)index>=s.scalars) k_string_trap();
-    size_t p=k_string_offset(s,(size_t)index),width=k_string_width(s.data[p]);
+    if(s.bytes==s.scalars) return s.data[index];
+    const size_t left=(size_t)index,right=(size_t)s.scalars-left;
+    const size_t p=left<=right?k_string_forward(s.data,0,left):k_string_backward(s.data,(size_t)s.bytes,right);
+    const size_t width=k_string_width(s.data[p]);
     uint32_t cp=width==1?s.data[p]:s.data[p]&((1u<<(7-width))-1u);
     for(size_t i=1;i<width;++i) cp=(cp<<6)|(s.data[p+i]&63);
     return cp;
@@ -116,9 +123,23 @@ static int64_t k_string_compare(KString a,KString b) {
 }
 static KString k_string_slice(KString s,int64_t start,int64_t count) {
     if(start<0||count<0||(uint64_t)start>s.scalars||(uint64_t)count>s.scalars-(uint64_t)start) k_string_trap();
-    size_t a=k_string_offset(s,(size_t)start),end=a;
-    for(size_t i=0;i<(size_t)count;++i) end+=k_string_width(s.data[end]);
-    return (KString){s.data+a,end-a,(size_t)count};
+    if(!count) return (KString){(const unsigned char *)"",0,0};
+    const size_t prefix=(size_t)start,span=(size_t)count,suffix=(size_t)s.scalars-prefix-span;
+    if(s.bytes==s.scalars) return (KString){s.data+prefix,span,span};
+    // Find both boundaries without walking the largest of the three pieces.
+    // The bounds check above and the UTF-8 invariant make both walks safe.
+    size_t first,end;
+    if(suffix>=prefix&&suffix>=span) {
+        first=k_string_forward(s.data,0,prefix);
+        end=k_string_forward(s.data,first,span);
+    } else if(prefix>=span) {
+        end=k_string_backward(s.data,(size_t)s.bytes,suffix);
+        first=k_string_backward(s.data,end,span);
+    } else {
+        first=k_string_forward(s.data,0,prefix);
+        end=k_string_backward(s.data,(size_t)s.bytes,suffix);
+    }
+    return (KString){s.data+first,end-first,span};
 }
 /* byte-offset cursor, O(1) per step so for-in over text is linear */
 static bool k_string_next(KString s,int64_t *offset,uint32_t *out) {

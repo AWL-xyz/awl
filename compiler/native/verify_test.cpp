@@ -358,6 +358,13 @@ int main() {
         auto argument_seed=checked_source("func main[i64] { if arg.i64valid(0) { print(arg.i64(0)); }; print(arg.count()); return 0; };");verify_expected(*argument_seed,true);
         Unit argument_bad=*argument_seed;argument_bad.arena[find_kind(argument_bad,"call","arg_i64")].type="u64";verify_expected(argument_bad,false);++targeted;
         Unit argument_arity=*argument_seed;argument_arity.arena[find_kind(argument_arity,"call","arg_count")].children.push_back(find_kind(argument_arity,"int"));verify_expected(argument_arity,false);++targeted;
+        auto decimal_seed=checked_source("func main[i64] { if string.i64valid(\"-42\") { print(string.toi64(\"-42\")); }; return 0; };");
+        verify_expected(*decimal_seed,true);
+        for(const auto &change:std::vector<std::function<void(Unit&)>>{
+            [](Unit &v){v.arena[find_kind(v,"call","string_to_i64")].type="u64";},
+            [](Unit &v){v.arena[find_kind(v,"call","string_i64_valid")].children.clear();},
+            [](Unit &v){v.arena[find_kind(v,"call","string_to_i64")].children[0]=find_kind(v,"int");}
+        }) {Unit bad=*decimal_seed;change(bad);verify_expected(bad,false);++targeted;}
         auto file_seed=checked_source("func main[i64] { @p f i64: file.open(\"input\", 0); defer file.close(f); print(file.valid(f)); print(file.size(f)); return 0; };");verify_expected(*file_seed,true);
         for(const auto &change:std::vector<std::function<void(Unit&)>>{
             [](Unit &v){v.arena[find_kind(v,"call","file_close")].type="unit";},

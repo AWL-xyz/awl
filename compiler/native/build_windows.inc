@@ -13,6 +13,8 @@
 #include <vector>
 namespace Awl_windows {
 namespace fs=std::filesystem;
+using Awl_driver::Result;
+using Awl_driver::Termination;
 struct Handle {
     HANDLE h=INVALID_HANDLE_VALUE;
     Handle()=default;explicit Handle(HANDLE p):h(p) {}
@@ -84,14 +86,14 @@ struct Attributes {
     }
     ~Attributes(){if(list) DeleteProcThreadAttributeList(list);}
 };
-int execute(const std::vector<std::wstring> &args,const std::vector<wchar_t> *environment,unsigned timeout,unsigned memory) {
-    if(cancelled) return 130;
+Result execute(const std::vector<std::wstring> &args,const std::vector<wchar_t> *environment,unsigned timeout,unsigned memory,bool stdin_eof) {
+    if(cancelled) return {130,Termination::Interrupted};
     Handle job(CreateJobObjectW(nullptr,nullptr));if(!job.valid()) fail("cannot create child job");
     JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits{};limits.BasicLimitInformation.LimitFlags=JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
     if(memory){limits.BasicLimitInformation.LimitFlags|=JOB_OBJECT_LIMIT_JOB_MEMORY;limits.JobMemoryLimit=static_cast<SIZE_T>(memory)*1024*1024;}
     if(!SetInformationJobObject(job.h,JobObjectExtendedLimitInformation,&limits,sizeof(limits))) fail("cannot configure child job");
     Handle in,out,err;Handle *streams[]={&in,&out,&err};DWORD ids[]={STD_INPUT_HANDLE,STD_OUTPUT_HANDLE,STD_ERROR_HANDLE};HANDLE inherited[3];
-    for(int i=0;i<3;++i){HANDLE source=GetStdHandle(ids[i]);if(source&&source!=INVALID_HANDLE_VALUE){if(!DuplicateHandle(GetCurrentProcess(),source,GetCurrentProcess(),&streams[i]->h,0,TRUE,DUPLICATE_SAME_ACCESS)) fail("cannot duplicate standard handle");}
+    for(int i=0;i<3;++i){HANDLE source=i==0&&stdin_eof?nullptr:GetStdHandle(ids[i]);if(source&&source!=INVALID_HANDLE_VALUE){if(!DuplicateHandle(GetCurrentProcess(),source,GetCurrentProcess(),&streams[i]->h,0,TRUE,DUPLICATE_SAME_ACCESS)) fail("cannot duplicate standard handle");}
         else {SECURITY_ATTRIBUTES sa{sizeof(sa),nullptr,TRUE};streams[i]->h=CreateFileW(L"NUL",i?GENERIC_WRITE:GENERIC_READ,FILE_SHARE_READ|FILE_SHARE_WRITE,&sa,OPEN_EXISTING,0,nullptr);if(!streams[i]->valid()) fail("cannot open standard handle");}inherited[i]=streams[i]->h;}
     Attributes attrs(inherited);STARTUPINFOEXW si{};si.StartupInfo.cb=sizeof(si);si.StartupInfo.dwFlags=STARTF_USESTDHANDLES;si.StartupInfo.hStdInput=in.h;si.StartupInfo.hStdOutput=out.h;si.StartupInfo.hStdError=err.h;si.lpAttributeList=attrs.list;
     std::wstring command;for(const auto &a:args){if(!command.empty()) command+=L' ';command+=quote(a);}if(command.size()>=32767) throw std::runtime_error("backend command line exceeds Windows limit");
@@ -100,15 +102,24 @@ int execute(const std::vector<std::wstring> &args,const std::vector<wchar_t> *en
     Handle process(pi.hProcess),thread(pi.hThread);
     if(!AssignProcessToJobObject(job.h,process.h)){TerminateProcess(process.h,2);WaitForSingleObject(process.h,INFINITE);fail("cannot supervise child descendants");}
     if(ResumeThread(thread.h)==static_cast<DWORD>(-1)){TerminateJobObject(job.h,2);WaitForSingleObject(process.h,INFINITE);fail("cannot start supervised process");}
-    const ULONGLONG start=GetTickCount64();int status=2;
-    for(;;){DWORD w=WaitForSingleObject(process.h,25);if(w==WAIT_OBJECT_0){DWORD code=0;if(!GetExitCodeProcess(process.h,&code)) fail("cannot read child exit status");status=cancelled||code==0xc000013a?130:code>255?2:static_cast<int>(code);break;}if(w!=WAIT_TIMEOUT) fail("cannot wait for child");
-        if(cancelled||(timeout&&GetTickCount64()-start>=static_cast<ULONGLONG>(timeout)*1000)){status=cancelled?130:124;break;}}
-    if(!TerminateJobObject(job.h,status)) fail("cannot terminate child job");
+    const ULONGLONG start=GetTickCount64();Result result{2};
+    for(;;) {
+        const DWORD wait=WaitForSingleObject(process.h,25);
+        if(wait==WAIT_OBJECT_0) {
+            DWORD code=0;if(!GetExitCodeProcess(process.h,&code)) fail("cannot read child exit status");
+            result=cancelled||code==0xc000013a?Result{130,Termination::Interrupted}:Result{code>255?2:static_cast<int>(code)};
+            break;
+        }
+        if(wait!=WAIT_TIMEOUT) fail("cannot wait for child");
+        if(cancelled) {result={130,Termination::Interrupted};break;}
+        if(timeout&&GetTickCount64()-start>=static_cast<ULONGLONG>(timeout)*1000) {result={124,Termination::TimedOut};break;}
+    }
+    if(!TerminateJobObject(job.h,result.code)) fail("cannot terminate child job");
     if(WaitForSingleObject(process.h,5000)!=WAIT_OBJECT_0) fail("cannot reap child process");
     const ULONGLONG cleanup=GetTickCount64();
     for(;;){JOBOBJECT_BASIC_ACCOUNTING_INFORMATION info{};if(!QueryInformationJobObject(job.h,JobObjectBasicAccountingInformation,&info,sizeof(info),nullptr)) fail("cannot inspect child job cleanup");if(!info.ActiveProcesses)break;if(GetTickCount64()-cleanup>=5000) fail("cannot reap child descendants");Sleep(10);}
     // Closing the non-inherited job handle also kills descendants on exceptions/parent death.
-    return status;
+    return cancelled?Result{130,Termination::Interrupted}:result;
 }
 uint64_t little(const unsigned char *p,size_t n){uint64_t v=0;for(size_t i=0;i<n;++i)v|=uint64_t(p[i])<<(i*8);return v;}
 void inspect(const fs::path &path) {
@@ -125,7 +136,7 @@ void inspect(const fs::path &path) {
     for(uint64_t i=0;i<count;++i){std::array<unsigned char,40> section{};read(offset+24+optional+i*40,section.data(),40);auto address=little(section.data()+12,4),size=little(section.data()+8,4),bytes=little(section.data()+16,4),at=little(section.data()+20,4);if(at>static_cast<uint64_t>(length.QuadPart)||bytes>static_cast<uint64_t>(length.QuadPart)-at) invalid();if((little(section.data()+36,4)&0x20000000)&&entry>=address&&entry-address<size) executable=true;}
     if(!executable) invalid();
 }
-int build(const char *c_source,size_t length,const std::string &source_path,const std::string &output,const Awl_driver::Options &options,bool run) {
+Result build(const char *c_source,size_t length,const std::string &source_path,const std::string &output,const Awl_driver::Options &options,bool run) {
     try {
         Cancellation cancellation;const auto root=self().parent_path().parent_path();const auto zig=root/L"libexec/zig/zig.exe",lib=root/L"libexec/zig/lib";
         if(!fs::is_regular_file(zig)||!fs::is_directory(lib)) throw std::runtime_error("bundled toolchain missing; use the complete Awl Windows bundle (no system-tool fallback)");
@@ -137,18 +148,21 @@ int build(const char *c_source,size_t length,const std::string &source_path,cons
         std::vector<std::wstring> vars={L"HOME="+temp.path.wstring(),L"PATH=C:\\no-host-tools",L"TEMP="+temp.path.wstring(),L"TMP="+temp.path.wstring(),L"ZIG_LIB_DIR="+lib.wstring(),L"ZIG_GLOBAL_CACHE_DIR="+cache.wstring(),L"ZIG_LOCAL_CACHE_DIR="+(temp.path/L"local-cache").wstring()};
         for(auto name:{L"SystemRoot",L"WINDIR"}){auto value=env(name);if(!value.empty()) vars.push_back(std::wstring(name)+L"="+value);}
         std::sort(vars.begin(),vars.end(),[](const auto &a,const auto &b){return _wcsicmp(a.c_str(),b.c_str())<0;});std::vector<wchar_t> environment;for(const auto &v:vars){environment.insert(environment.end(),v.begin(),v.end());environment.push_back(0);}environment.push_back(0);
-        int status=execute({zig.wstring(),L"cc",L"-std=c11",L"-target",L"x86_64-windows-gnu",L"-mcpu=baseline",L"-O"+std::to_wstring(options.optimization),L"-g0",L"-s",cfile.wstring(),L"-luser32",L"-lgdi32",L"-lshell32",L"-o",staging.path.wstring()},&environment,options.build_timeout_seconds,options.build_memory_mib);
-        if(status){std::cerr<<"kcc: bundled backend failed/interrupted or wall-time limit exceeded ("<<status<<")\n";return status==124||status==130?status:2;}
-        inspect(staging.path);if(cancelled) return 130;
+        const auto status=execute({zig.wstring(),L"cc",L"-std=c11",L"-target",L"x86_64-windows-gnu",L"-mcpu=baseline",L"-O"+std::to_wstring(options.optimization),L"-g0",L"-s",cfile.wstring(),L"-luser32",L"-lgdi32",L"-lshell32",L"-o",staging.path.wstring()},&environment,options.build_timeout_seconds,options.build_memory_mib,options.stdin_eof);
+        if(status.termination==Termination::Interrupted) {std::cerr<<"acc: build interrupted\n";return status;}
+        if(status.termination==Termination::TimedOut) {std::cerr<<"acc: backend wall-time limit exceeded\n";return status;}
+        if(status.code) {std::cerr<<"acc: bundled code generation/linking failed ("<<status.code<<")\n";return {2};}
+        inspect(staging.path);if(cancelled) return {130,Termination::Interrupted};
         if(!MoveFileExW(staging.path.c_str(),destination.c_str(),MOVEFILE_REPLACE_EXISTING|MOVEFILE_WRITE_THROUGH)) fail("cannot publish executable");staging.path.clear();
         if(run) {
             std::vector<std::wstring> args={destination.wstring()};
             for(const auto &arg:options.program_arguments) args.push_back(wide(arg));
-            status=execute(args,nullptr,options.run_timeout_seconds,0);
-            if(status==124) std::cerr<<"acc: program wall-time limit exceeded\n";
-            return status;
+            const auto program=execute(args,nullptr,options.run_timeout_seconds,0,options.stdin_eof);
+            if(program.termination==Termination::Interrupted) std::cerr<<"acc: run interrupted\n";
+            else if(program.termination==Termination::TimedOut) std::cerr<<"acc: program wall-time limit exceeded\n";
+            return program;
         }
-        auto utf8=destination.u8string();std::cout.write(reinterpret_cast<const char*>(utf8.data()),utf8.size());std::cout<<'\n';std::cout.flush();return std::cout?0:2;
-    }catch(const std::exception &e){std::cerr<<"kcc: "<<e.what()<<'\n';return 2;}
+        auto utf8=destination.u8string();std::cout.write(reinterpret_cast<const char*>(utf8.data()),utf8.size());std::cout<<'\n';std::cout.flush();return {std::cout?0:2};
+    }catch(const std::exception &e){std::cerr<<"acc: "<<e.what()<<'\n';return {2};}
 }
 }

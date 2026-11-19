@@ -1,21 +1,17 @@
-/* Initial native CLI input: integer arguments, zero-based excluding argv[0].
- * No borrowed pointers escape; strict ASCII decimal signed-i64 parsing. */
+/* Native CLI input, zero-based excluding argv[0]. No borrowed pointers escape. */
 static int k_program_argc;
 static char **k_program_argv;
 static int64_t k_arg_count(void) {return k_program_argc>0?(int64_t)k_program_argc-1:0;}
+#ifdef Awl_DECIMAL_RUNTIME
 static bool k_argument_parse(int64_t index,int64_t *out) {
     if(index<0||index>=k_arg_count()) return false;
-    const unsigned char *p=(const unsigned char *)k_program_argv[index+1];bool negative=false;
-    if(*p=='-'||*p=='+') {negative=*p=='-';++p;}
-    if(!*p) return false;
-    uint64_t n=0,limit=negative?UINT64_C(9223372036854775808):UINT64_C(9223372036854775807);
-    for(;*p;++p) {if(*p<'0'||*p>'9') return false;uint64_t digit=*p-'0';if(n>(limit-digit)/10) return false;n=n*10+digit;}
-    *out=negative?(n==UINT64_C(9223372036854775808)?INT64_MIN:-(int64_t)n):(int64_t)n;return true;
+    return k_decimal_i64((const unsigned char *)k_program_argv[index+1],NULL,out);
 }
 static bool k_arg_i64_valid(int64_t index) {int64_t value;return k_argument_parse(index,&value);}
 static int64_t k_arg_i64(int64_t index) {
     int64_t value;if(!k_argument_parse(index,&value)) {fputs("Awl argument trap: index or signed integer\n",stderr);abort();}return value;
 }
+#endif
 
 #ifdef Awl_STRINGS_RUNTIME
 #if defined(_WIN32)

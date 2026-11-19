@@ -397,7 +397,13 @@ public:
         // Never render types or infer runtime dependencies from orphan nodes.
         std::vector<Id> reachable,work=u.roots;
         while(!work.empty()) {const auto id=work.back();work.pop_back();reachable.push_back(id);const auto &node=n(id);work.insert(work.end(),node.children.begin(),node.children.end());}
-        for(auto id:reachable) {const auto &node=n(id);collect(node.type);if(node.kind=="function"||(node.kind=="param"||(node.kind=="borrow_param"||node.kind=="own_param"))||(node.kind=="local"||node.kind=="scoped_local")||node.kind=="field_decl") collect(node.second);}
+        bool decimal_used=false;
+        for(auto id:reachable) {
+            const auto &node=n(id);collect(node.type);
+            if(node.kind=="function"||(node.kind=="param"||(node.kind=="borrow_param"||node.kind=="own_param"))||(node.kind=="local"||node.kind=="scoped_local")||node.kind=="field_decl") collect(node.second);
+            if(node.kind=="call"&&(node.value=="arg_i64"||node.value=="arg_i64_valid"||
+                node.value=="string_to_i64"||node.value=="string_i64_valid")) decimal_used=true;
+        }
         std::vector<std::string> sorted(array_types.begin(),array_types.end());std::sort(sorted.begin(),sorted.end());
         for(size_t i=0;i<sorted.size();++i) arrays[sorted[i]]="k_array_"+std::to_string(i);
         arrays_used=!arrays.empty();
@@ -448,7 +454,7 @@ public:
         std::string runtime;for(const auto &entry:c_helpers) if(helpers.contains(entry.name)) runtime+=entry.body;
         if(helpers.contains("k_print_f64")) runtime+="\nstatic void k_print_f64(double x) {printf(\"%.17g\\n\", x); }\n";
         if(runtime.empty()) runtime="\n";
-        auto output=((tcp_used||process_used)?std::string("#define _GNU_SOURCE 1\n"):std::string())+(platform_used?std::string("#define _POSIX_C_SOURCE 200809L\n"):std::string())+c_runtime+(u.aesop_syntax?std::string("\n#include <math.h>\n"):std::string())+runtime+(arrays_used?std::string("\nstatic size_t k_array_index(int64_t i,size_t n) {if(i<0 || (uint64_t)i>=n) {fputs(\"Awl array bounds trap\\n\",stderr);abort();}return (size_t)i;}\n"):std::string())+(strings_used?c_strings:std::string())+(builders_used?c_builders:std::string())+(vectors_used?c_vectors:std::string())+(!generic_used.empty()?std::string(c_generic)+generic_wrappers():std::string())+(!containers_used.empty()?std::string(c_maps)+container_wrappers():std::string())+(arguments_used?c_arguments:std::string())+(platform_used?c_platform:std::string())+(wall_clock_used?c_wall_clock:std::string())+(files_used?c_files:std::string())+(streams_used?c_streams:std::string())+(tcp_used?c_tcp:std::string())+(process_used?c_process:std::string())+body;
+        auto output=((tcp_used||process_used)?std::string("#define _GNU_SOURCE 1\n"):std::string())+(platform_used?std::string("#define _POSIX_C_SOURCE 200809L\n"):std::string())+c_runtime+(u.aesop_syntax?std::string("\n#include <math.h>\n"):std::string())+runtime+(arrays_used?std::string("\nstatic size_t k_array_index(int64_t i,size_t n) {if(i<0 || (uint64_t)i>=n) {fputs(\"Awl array bounds trap\\n\",stderr);abort();}return (size_t)i;}\n"):std::string())+(strings_used?c_strings:std::string())+(decimal_used?c_decimal:std::string())+(builders_used?c_builders:std::string())+(vectors_used?c_vectors:std::string())+(!generic_used.empty()?std::string(c_generic)+generic_wrappers():std::string())+(!containers_used.empty()?std::string(c_maps)+container_wrappers():std::string())+(arguments_used?c_arguments:std::string())+(platform_used?c_platform:std::string())+(wall_clock_used?c_wall_clock:std::string())+(files_used?c_files:std::string())+(streams_used?c_streams:std::string())+(tcp_used?c_tcp:std::string())+(process_used?c_process:std::string())+body;
         if(output.size()>67108864) throw Failure{{"E501","C emission budget exceeded",UINT32_MAX}};
         return output;
     }

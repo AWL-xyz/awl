@@ -8,11 +8,13 @@ Examples use the current Aesop source syntax. After [building the toolkit](../RE
 - [`collections/`](collections/), [`containers/`](containers/), [`loops/`](loops/), [`structs/`](structs/), [`enums/`](enums/)
 - [`exports/`](exports/), [`modules/`](modules/), [`resource-structs/`](resource-structs/)
 - [`numeric/`](numeric/), [`parsing/`](parsing/), [`native/`](native/)
+- [`testing/`](testing/) a project and test program that share a local module, runnable with `awl test`
 
 ## Packages
 
 - [`packages-demo/`](packages-demo/) installs and uses `env`, `fsp` and `json`
 - [`time-demo/`](time-demo/) installs and uses [`time`](../docs/TIME.md)
+- [`csv-demo/`](csv-demo/) parses quoted CSV from stdin, totals an integer column, and tests round-trip encoding
 
 ## applications
 
