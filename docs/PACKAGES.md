@@ -13,7 +13,7 @@ myapp/
       env.aw             entry, exports{ ... }
 ```
 
-A `NAME.awpkg` manifest is at most 16 KiB and uses `key: value` lines. Blank lines and `#` comments are allowed. `format: 1`, `kind: package`, and `name: NAME` are required; keys cannot repeat. `entry:` is a plain `.aw` filename beside the manifest and defaults to `NAME.aw`. `version:` and `syntax:` are informational.
+A `NAME.awpkg` manifest is at most 16 KiB and uses `key: value` lines. Blank lines and `#` comments are allowed. `format: 1`, `kind: package`, and `name: NAME` are required; keys cannot repeat. `entry:` is a plain `.aw` filename beside the manifest and defaults to `NAME.aw`. The entry cannot use Windows-reserved characters or device names. `version:` and `syntax:` are informational.
 
 ## Installing and importing a Package
 
@@ -36,7 +36,7 @@ func main {
 
 `awl add` is offline and does not need a backend. It copies the named manifest and `.aw` sources into `packages/NAME/` beside the project entry file. For an entry at `src/main.aw`, this means `src/packages/NAME/`. It does not overwrite an existing installation or write through a `packages` symlink. The source folder should be dedicated to the Package: `awl add` includes `.aw` files in that folder and its subdirectories, except hidden paths and `build` and `packages` directories. Other assets are not copied. The install rejects visible symlinks and is limited to 512 traversed entries, eight levels of subdirectories, 64 source files, and 1 MiB of source data.
 
-`awl add` validates manifest and file layout, not Awl types or the import graph; run `awl check` after adding the `use`. An ordinary install error cleans up the new Package directory; an interrupted copy may need manual removal. Use trusted local Packages. You can commit the vendored sources with your project, or still copy the Package folder manually.
+`awl add` validates manifest and file layout, not Awl types or the import graph; run `awl check` after adding the `use`. On a write error it rolls back its new files and directories, leaving existing Packages alone. An interrupted copy may need manual removal. Use trusted local Packages. You can commit the vendored sources with your project, or still copy the Package folder manually.
 
 `use NAME;` resolves `packages/NAME/NAME.awpkg` from the entry source's directory. `use NAME as other;` sets an alias, required when the name is not a valid identifier. Package names are 1–64 letters, digits, underscores or hyphens, excluding reserved device names. A bare name never falls back to a file, and a missing or malformed Package is `E300`. Project-local files still use `use path/file.aw as alias;`.
 

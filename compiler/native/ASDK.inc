@@ -157,13 +157,20 @@ fs::path add_package(const Project &project,const fs::path &input) {
     }
     if(!has_entry) throw std::runtime_error("missing or wrong-case Package entry: "+manifest.entry);
 
-    if(package_status.type()==fs::file_type::not_found) fs::create_directory(packages);
-    if(!fs::is_directory(fs::symlink_status(packages))) throw std::runtime_error("packages must be a real directory");
-    if(!fs::create_directory(destination)) throw std::runtime_error("Package '"+name+"' already exists; refusing to overwrite it");
     struct Pending {
-        const fs::path &dir;bool complete=false;
-        ~Pending() {if(!complete) {std::error_code ec;fs::remove_all(dir,ec);}}
-    } pending{destination};
+        const fs::path &packages,&destination;
+        bool made_packages=false,made_destination=false,complete=false;
+        ~Pending() {
+            if(complete) return;
+            std::error_code ec;
+            if(made_destination) fs::remove_all(destination,ec);
+            if(made_packages) fs::remove(packages,ec); // Only remove this parent if it is still empty.
+        }
+    } pending{packages,destination};
+    if(package_status.type()==fs::file_type::not_found) pending.made_packages=fs::create_directory(packages);
+    if(!fs::is_directory(fs::symlink_status(packages))) throw std::runtime_error("packages must be a real directory");
+    pending.made_destination=fs::create_directory(destination);
+    if(!pending.made_destination) throw std::runtime_error("Package '"+name+"' already exists; refusing to overwrite it");
     for(const auto &[relative,bytes]:sources) {
         const auto file=destination/relative;
         fs::create_directories(file.parent_path());create_new(file,bytes);

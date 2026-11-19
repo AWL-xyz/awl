@@ -19,16 +19,28 @@ inline constexpr std::size_t source_limit=1024*1024;
 inline bool ascii_alnum(char c) {
     return (c>='a'&&c<='z')||(c>='A'&&c<='Z')||(c>='0'&&c<='9');
 }
+inline bool reserved_device_name(std::string_view filename) {
+    // Win32 device names stay reserved even when followed by an extension.
+    auto stem=filename.substr(0,filename.find('.'));
+    while(stem.ends_with(' ')) stem.remove_suffix(1);
+    std::string upper(stem);
+    for(char &c:upper) if(c>='a'&&c<='z') c-='a'-'A';
+    if(upper=="CON"||upper=="PRN"||upper=="AUX"||upper=="NUL"||upper=="CONIN$"||upper=="CONOUT$") return true;
+    if(!upper.starts_with("COM")&&!upper.starts_with("LPT")) return false;
+    const auto suffix=std::string_view(upper).substr(3);
+    return (suffix.size()==1&&suffix[0]>='1'&&suffix[0]<='9')||
+        suffix=="\xc2\xb9"||suffix=="\xc2\xb2"||suffix=="\xc2\xb3";
+}
 inline bool valid_name(std::string_view name) {
     if(name.empty()||name.size()>64) return false;
-    std::string upper;
-    for(char c:name) {
-        if(!ascii_alnum(c)&&c!='_'&&c!='-') return false;
-        upper.push_back(c>='a'&&c<='z'?c-('a'-'A'):c);
-    }
-    if(upper=="CON"||upper=="PRN"||upper=="AUX"||upper=="NUL") return false;
-    const auto prefix=upper.substr(0,3);
-    return !(upper.size()==4&&(prefix=="COM"||prefix=="LPT")&&upper[3]>='1'&&upper[3]<='9');
+    for(char c:name) if(!ascii_alnum(c)&&c!='_'&&c!='-') return false;
+    return !reserved_device_name(name);
+}
+inline bool valid_entry(std::string_view entry) {
+    if(entry.size()>128||entry.starts_with('.')||!entry.ends_with(".aw")||
+       entry.find_first_of("/\\:<>\"|?*")!=std::string_view::npos) return false;
+    for(unsigned char c:entry) if(c<32) return false;
+    return !reserved_device_name(entry);
 }
 inline std::string path_text(const fs::path &file) {
     const auto utf8=file.generic_u8string();
@@ -78,9 +90,8 @@ inline Manifest read_manifest(const fs::path &file,const std::string &name) {
     }
     if(!format||!kind||!named)
         throw std::runtime_error("Package manifest must declare format: 1, kind: package and name: "+name);
-    const auto &entry=result.entry;
-    if(entry.size()>128||entry.starts_with('.')||entry.find_first_of("/\\:")!=std::string::npos||!entry.ends_with(".aw"))
-        throw std::runtime_error("Package entry must be a plain .aw file name");
+    if(!valid_entry(result.entry))
+        throw std::runtime_error("Package entry must be a plain .aw file name without reserved characters or device names");
     return result;
 }
 }

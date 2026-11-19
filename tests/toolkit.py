@@ -4,7 +4,9 @@ import argparse
 import json
 import os
 from pathlib import Path
+import resource
 import shutil
+import signal
 import subprocess
 import tempfile
 import unittest
@@ -35,10 +37,11 @@ class ToolkitTests(unittest.TestCase):
         self.temp.mkdir()
         self.env = {**os.environ, 'TMPDIR': str(self.temp), 'CC': self.cc}
 
-    def invoke(self, *args, code=0, cwd=None, exe=None, stdin=None):
+    def invoke(self, *args, code=0, cwd=None, exe=None, stdin=None, preexec_fn=None):
         result = subprocess.run([exe or self.awl, *args], cwd=cwd or self.project,
                                 env=self.env, input=stdin, capture_output=True,
-                                text=True, encoding='utf-8', timeout=30)
+                                text=True, encoding='utf-8', timeout=30,
+                                preexec_fn=preexec_fn)
         self.assertEqual(result.returncode, code, (args, result.stdout, result.stderr))
         return result
 
@@ -128,12 +131,15 @@ class ToolkitTests(unittest.TestCase):
             (valid + 'entry: ../Local.aw\n', 'plain .aw file name'),
             (valid + 'entry: local.aw\n', 'missing or wrong-case Package entry'),
             (valid + 'entry: C:Local.aw\n', 'plain .aw file name'),
+            (valid + 'entry: file?.aw\n', 'plain .aw file name'),
+            (valid + 'entry: nul.extra.aw\n', 'plain .aw file name'),
+            (valid + 'entry: LPT¹.aw\n', 'plain .aw file name'),
             (valid + '#\x00\n', 'NUL byte'),
             (valid + '#' * 16384, 'file exceeds the size budget'),
         ]
         for contents, message in attempts:
             with self.subTest(message=message):
-                manifest.write_text(contents)
+                manifest.write_text(contents, encoding='utf-8')
                 self.assertIn(message, self.invoke('add', manifest, code=2).stderr)
                 self.assertFalse((self.project / 'packages').exists())
         manifest.write_text(valid)
@@ -144,6 +150,38 @@ class ToolkitTests(unittest.TestCase):
         os.mkfifo(source)
         self.assertIn('regular non-symlink file', self.invoke('add', manifest, code=2).stderr)
         self.assertFalse((self.project / 'packages').exists())
+
+    def test_add_package_rolls_back_after_partial_write(self):
+        self.init()
+        package = self.work / 'rollback source'
+        package.mkdir()
+        self.invoke('init', 'Local', '--pkg', cwd=package)
+        manifest = package / 'Local.awpkg'
+        library = package / 'Local.aw'
+        library.write_bytes(library.read_bytes() + b' ' * 2048)
+        packages = self.project / 'packages'
+
+        def limit_file_size():
+            # Linux delivers SIGXFSZ after a short write at the file size limit.
+            # Let write() return an error so the installer can clean up.
+            signal.signal(signal.SIGXFSZ, signal.SIG_IGN)
+            resource.setrlimit(resource.RLIMIT_FSIZE, (1024, 1024))
+
+        result = self.invoke('add', manifest, code=2, preexec_fn=limit_file_size)
+        self.assertIn('cannot write', result.stderr)
+        self.assertFalse(packages.exists())
+
+        packages.mkdir()
+        previous = packages / 'Previous'
+        previous.mkdir()
+        sentinel = previous / 'Previous.aw'
+        sentinel.write_text('previous source')
+        result = self.invoke('add', manifest, code=2, preexec_fn=limit_file_size)
+        self.assertIn('cannot write', result.stderr)
+        self.assertEqual(list(packages.iterdir()), [previous])
+        self.assertEqual(sentinel.read_text(), 'previous source')
+        self.invoke('add', manifest)
+        self.assertEqual((packages / 'Local' / library.name).read_bytes(), library.read_bytes())
 
     def test_add_package_does_not_follow_symlinks(self):
         source = self.init()
