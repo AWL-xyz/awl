@@ -4,6 +4,31 @@ Awl is intended to compete with rust as a native systems language, outperforming
 
 performance claims need measured equivalent work, consumed results and reproducible optimized builds, safety checks aren't disabled to manufacture wins, all wins and losses belong in the report
 
+## Current source: sorting UTF-8 lines
+
+The [shipped sort utility](../examples/apps/sort/) uses `buffer.findbyte` to locate LF with a checked range search instead of reading one byte at a time. It reuses the input buffer to assemble the sorted output, then writes it in batches and retries short writes. The stable merge sort, UTF-8 validation, duplicate handling, and 1 MiB / 32,768-line limits are unchanged.
+
+[The benchmark](../benchmarks/sort.py) runs the old and new applications with identical redirected input and checks every output byte. These are medians of 11 shuffled warm whole-process samples on Linux x86-64, GCC 12.2 `-O3`, with the host's two CPUs available and build time excluded:
+
+| workload | before (`68713be`) | after | speedup |
+| :--- | ---: | ---: | ---: |
+| 10,000 log-like lines | 10.957 ms | 5.840 ms | 1.88× |
+| Same input, `--unique` | 8.636 ms | 5.676 ms | 1.52× |
+| Single 1 MiB line with no LF | 7.874 ms | 6.452 ms | 1.22× |
+
+With the harness and child pinned to one CPU, the same cases measured 3.32×, 2.70×, and 1.18×, respectively. Pipe scheduling matters for an app that used to flush every row. These numbers describe the whole utility on this host, not a sort-algorithm speedup or a Rust/C++ comparison. Raw samples, input hashes, and binary hashes are in [the default-affinity report](../benchmarks/sort.json) and [the one-CPU report](../benchmarks/sort-single-cpu.json).
+
+Reproduce from the repository root without switching branches:
+
+```sh
+baseline=$(mktemp -d)
+git archive 68713be compiler examples/apps/sort | tar -x -C "$baseline"
+(cd "$baseline" && python3 compiler/build_native.py --standalone --strip)
+python3 compiler/build_native.py --standalone --strip
+python3 benchmarks/sort.py --before-acc "$baseline/compiler/native/bin/acc" \
+    --before-source "$baseline/examples/apps/sort/main.aw" --report /tmp/awl-sort.json
+```
+
 ## Current source: replacing text in UTF-8 records
 
 `string.replace` previously made and retained a growing text allocation for each match. It now counts non-overlapping occurrences, checks the exact result size, and copies into one final allocation. If there is no change or the result is empty, it doesn't allocate a result. The same UTF-8 rules and text heap bounds still apply; only the unnecessary intermediate allocations went away.

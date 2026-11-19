@@ -68,6 +68,17 @@ static int64_t k_buffer_new(int64_t size) {
     return 0;
 }
 static int64_t k_buffer_size(int64_t id) { return (int64_t)k_buffer(id)->size; }
+static unsigned char *k_buffer_range(int64_t id,int64_t offset,int64_t count) {
+    KBuffer *b=k_buffer(id);
+    if(offset<0 || count<0 || (uint64_t)offset>b->size || (uint64_t)count>b->size-(size_t)offset) k_resource_trap();
+    return b->data+(size_t)offset;
+}
+static int64_t k_buffer_find_byte(int64_t id,int64_t offset,int64_t count,uint8_t needle) {
+    const unsigned char *data=k_buffer_range(id,offset,count);
+    if(!count) return -1;
+    const unsigned char *found=memchr(data,needle,(size_t)count);
+    return found?offset+(int64_t)(found-data):-1;
+}
 static uint8_t k_buffer_get(int64_t id, int64_t index) {
     KBuffer *b=k_buffer(id);
     if (index<0 || (uint64_t)index>=b->size) k_resource_trap();
@@ -482,14 +493,11 @@ static void k_window_close(int64_t id) {
 }
 
 #ifdef Awl_STRINGS_RUNTIME
-static unsigned char *k_buffer_text_range(int64_t buffer,int64_t offset,int64_t count) {
-    KBuffer *b=k_buffer(buffer);if(offset<0 || count<0 || (uint64_t)offset>b->size || (uint64_t)count>b->size-(size_t)offset) k_resource_trap();return b->data+(size_t)offset;
-}
 static bool k_buffer_text_valid(int64_t buffer,int64_t offset,int64_t count) {
-    unsigned char *data=k_buffer_text_range(buffer,offset,count);size_t scalars=0;return k_utf8_scan(data,(size_t)count,&scalars);
+    unsigned char *data=k_buffer_range(buffer,offset,count);size_t scalars=0;return k_utf8_scan(data,(size_t)count,&scalars);
 }
 static KString k_buffer_text(int64_t buffer,int64_t offset,int64_t count) {
-    unsigned char *data=k_buffer_text_range(buffer,offset,count);size_t scalars=0;if(!k_utf8_scan(data,(size_t)count,&scalars)) k_resource_trap();
+    unsigned char *data=k_buffer_range(buffer,offset,count);size_t scalars=0;if(!k_utf8_scan(data,(size_t)count,&scalars)) k_resource_trap();
     unsigned char *copy=k_string_allocate((size_t)count);memcpy(copy,data,(size_t)count);return (KString){copy,(size_t)count,scalars};
 }
 static int64_t k_buffer_write_text(int64_t buffer,int64_t offset,KString text) {

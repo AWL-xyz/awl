@@ -30,6 +30,8 @@ jobs:
         run: python3 tests/checked_arithmetic.py --acc compiler/native/bin/acc
       - name: UTF-8 text replacement with generated-program sanitizers
         run: python3 tests/text_replace.py --sanitize
+      - name: Checked byte search and the shipped line sorter
+        run: python3 tests/byte_search_sort.py --sanitize
       - name: Local time Package with generated-program sanitizers
         run: python3 tests/aesop_time.py --acc compiler/native/bin/acc --sanitize --report tests/aesop-time.json
       - name: Offline editor interpreter and bundled examples

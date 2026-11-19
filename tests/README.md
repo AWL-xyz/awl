@@ -12,6 +12,7 @@ python3 tests/aesop.py --acc compiler/native/bin/acc --report tests/aesop-checks
 python3 tests/aesop.py --sanitize-programs --report tests/aesop-program-sanitizers.json
 python3 tests/checked_arithmetic.py --acc compiler/native/bin/acc
 python3 tests/text_replace.py --sanitize
+python3 tests/byte_search_sort.py --sanitize
 python3 tests/aesop_time.py --acc compiler/native/bin/acc --sanitize --report tests/aesop-time.json
 python3 tests/awl_editor.py --acc compiler/native/bin/acc --report tests/aesop-editor.json
 python3 compiler/test_native.py --sanitize --report tests/aesop-native.json.gz
@@ -21,6 +22,7 @@ python3 compiler/test_native.py --sanitize --report tests/aesop-native.json.gz
 - `aesop.py` checks declarations, generated native execution, CLI starters, ABI v2, conversion/type tests and rejection cases
 - `checked_arithmetic.py` checks emitted `i64` and `u64` math against Python with UBSan, covering checked intrinsics and the portable C11 fallback at `-O0` and `-O3`
 - `text_replace.py` checks the emitted UTF-8 replacement runtime against Python, including embedded NULs, dense matches, and allocation-limit traps
+- `byte_search_sort.py` checks emitted byte searches against Python, rejects invalid ranges and handles, and tests sort output with forced short writes, write errors, UTF-8 edge cases, and input limits
 - `aesop_time.py` checks the local time Package, generated C, wall-clock agreement, deadlines, bounded sleeps and shipped demo
 - `awl_editor.py` checks the offline editor interpreter and checks every bundled example with `acc`
 - `test_native.py` runs the native lexer, frontend, independent verifier, ownership, vector, enum, process and inference phases with ASan/UBSan

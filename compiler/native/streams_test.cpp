@@ -12,9 +12,9 @@ static void verify(Unit &u,bool good) {
     serialize(u);expect(before==u.json,"verifier modified arena");expect(failed!=good,"incorrect verifier outcome");
 }
 int main() {try {
-    const std::string text="@p first: 1; func main[i64] { @p b: buffer.new(8); stdin.read(b,0,8); stdout.write(b,0,8); stderr.write(b,0,8); stdout.flush(); stderr.flush(); env.size(\"key\"); env.read(\"key\",b,0,8); buffer.free(b); return 0; };";
+    const std::string text="@p first: 1; func main[i64] { @p b: buffer.new(8); stdin.read(b,0,8); buffer.findbyte(b,0,8,10u8); stdout.write(b,0,8); stderr.write(b,0,8); stdout.flush(); stderr.flush(); env.size(\"key\"); env.read(\"key\",b,0,8); buffer.free(b); return 0; };";
     auto seed=parse_source(text.data(),text.size());expect(seed->diagnostics.empty(),"seed parse");Checker(*seed).run();verify(*seed,true);unsigned cases=1;
-    for(const auto &name:{"stdin_read","stdout_write","stderr_write","stdout_flush","stderr_flush","env_size","env_read"}) {
+    for(const auto &name:{"stdin_read","buffer_find_byte","stdout_write","stderr_write","stdout_flush","stderr_flush","env_size","env_read"}) {
         const auto id=find(*seed,"call",name);
         auto run=[&](const std::function<void(Unit &)> &edit){Unit u=*seed;edit(u);verify(u,false);++cases;};
         run([&](Unit &u){u.arena[id].type="bool";});
@@ -26,5 +26,5 @@ int main() {try {
         }
         run([&](Unit &u){u.arena[find(u,"global","first")].children[0]=id;});
     }
-    std::cout<<cases<<" stream/environment independent verifier cases pass\n";return 0;
+    std::cout<<cases<<" buffer/stream/environment independent verifier cases pass\n";return 0;
 } catch(const Failure &f) {std::cerr<<f.diagnostic.code<<": "<<f.diagnostic.message<<'\n';return 1;}catch(const std::exception &e) {std::cerr<<e.what()<<'\n';return 1;}}

@@ -1,3 +1,8 @@
+# unreleased checked buffer search and sort utility
+
+- `buffer.findbyte` finds a byte within a checked range without allocating or interpreting it as text. Platform argument diagnostics show public names like `buffer.findbyte`.
+- The shipped line sorter scans for LF in bulk and reuses its input buffer for output, including retrying successful short writes. Its stable order, `--unique` behavior, and input limits are unchanged. See the [before/after benchmark](docs/PERFORMANCE.md#current-source-sorting-utf-8-lines).
+
 # unreleased local Package installation
 
 - `awl add FILE.awpkg` vendors local manifest and source files into the current project without a backend or network. Existing installations are preserved; compiler imports and installer share one bounded manifest reader. There is no registry, lockfile, or dependency solver yet.

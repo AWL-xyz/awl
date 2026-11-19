@@ -327,7 +327,7 @@ class Checker {
                 ty=resolved->second.second;
             } else if(platform_signatures.contains(node.value)) {
                 const auto &sig=platform_signatures.at(node.value);
-                if(args!=sig.parameters) error(id,"invalid platform arguments for "+node.value+": expected "+types(sig.parameters));
+                if(args!=sig.parameters) error(id,"invalid platform arguments for "+builtin_surface_call(node.value)+": expected "+types(sig.parameters));
                 ty=sig.result;
             } else if(const auto *fields=structure_fields(node.value)) {
                 const auto expected=field_types(*fields);

@@ -17,7 +17,8 @@ Examples use the current Aesop source syntax. After [building the toolkit](../RE
 ## applications
 
 - [`apps/colorlab/`](apps/colorlab/) framebuffer application
-- [`apps/pipe/`](apps/pipe/), [`apps/save/`](apps/save/), [`apps/serve/`](apps/serve/), [`apps/sort/`](apps/sort/), [`apps/valueserve/`](apps/valueserve/) bounded native utilities
+- [`apps/sort/`](apps/sort/) bounded UTF-8 line sorting, with checked byte search and batched output
+- [`apps/pipe/`](apps/pipe/), [`apps/save/`](apps/save/), [`apps/serve/`](apps/serve/), [`apps/valueserve/`](apps/valueserve/) other bounded native utilities
 - [`../apps/taskrun/`](../apps/taskrun/) subprocess supervisor
 - [`../apps/logwindow/`](../apps/logwindow/) bounded UTF-8 log processing
 - [`../apps/board/`](../apps/board/) persistent taskboard with native service and shared WebAssembly filter
