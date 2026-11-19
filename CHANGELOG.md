@@ -1,3 +1,7 @@
+# unreleased project testing
+
+- `awl test [TARGET]` runs `.test.aw` files next to a project's entry source (or one explicit `.aw` program). It reports per-file results, defaults to a 30-second program timeout, and keeps no executables. Tests use ordinary Awl imports and `main`; no new syntax or manifest keys are required. See [the testing example](examples/testing/).
+
 # unreleased checked buffer search and sort utility
 
 - `buffer.findbyte` finds a byte within a checked range without allocating or interpreting it as text. Platform argument diagnostics show public names like `buffer.findbyte`.

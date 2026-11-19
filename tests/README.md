@@ -18,7 +18,7 @@ python3 tests/awl_editor.py --acc compiler/native/bin/acc --report tests/aesop-e
 python3 compiler/test_native.py --sanitize --report tests/aesop-native.json.gz
 ```
 
-- `toolkit.py` checks init/add/check/build/run on Linux x86-64 without a bundled SDK, including local Package copying, manifest errors, argument forwarding, timeouts, and output preservation
+- `toolkit.py` checks init/add/check/build/run/test on Linux x86-64 without a bundled SDK, including local Package copying, manifest errors, argument forwarding, output preservation, and test discovery, failures, EOF, timeouts and interrupted-suite cleanup
 - `aesop.py` checks declarations, generated native execution, CLI starters, ABI v2, conversion/type tests and rejection cases
 - `checked_arithmetic.py` checks emitted `i64` and `u64` math against Python with UBSan, covering checked intrinsics and the portable C11 fallback at `-O0` and `-O3`
 - `text_replace.py` checks the emitted UTF-8 replacement runtime against Python, including embedded NULs, dense matches, and allocation-limit traps

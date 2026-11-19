@@ -5,10 +5,12 @@ import json
 import os
 from pathlib import Path
 import resource
+import shlex
 import shutil
 import signal
 import subprocess
 import tempfile
+import time
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -229,6 +231,172 @@ class ToolkitTests(unittest.TestCase):
         self.assertEqual(Path(json.loads(rejected.stderr)['diagnostics'][0]['file']), lib)
         self.assert_no_temps()
 
+    def test_project_tests_share_import_root_and_receive_eof(self):
+        self.init()
+        src = self.project / 'src'
+        src.mkdir()
+        # The project entry itself is not part of the suite, even with this name.
+        (self.project / 'Demo.awproj').write_text('format: 1\nentry: src/main.test.aw\n')
+        (src / 'main.test.aw').write_text('func main { return 99; };')
+        (src / 'Measure.aw').write_text('exports { @r func length { return 7; }; };')
+        (self.project / 'fixture.txt').write_bytes(b'fixture')
+        package = self.work / 'library'
+        package.mkdir()
+        self.invoke('init', 'Greeting', '--pkg', cwd=package)
+        self.invoke('add', package / 'Greeting.awpkg')
+
+        (src / 'Z.test.aw').write_text('func main { print("last"); return 0; };')
+        (src / '.ignored.test.aw').write_text('not parsed')
+        (src / 'ignored.TEST.aw').write_text('not parsed')
+        name = 'A with spaces λ.test.aw'
+        (src / name).write_text('''use Measure.aw as measure;
+            use Greeting;
+            func main {
+                @p f: file.open("fixture.txt",0);
+                if f < 0 { return 3; };
+                @p length: file.size(f);
+                if file.close(f) != 0 or length != measure.length() { return 4; };
+                @p b: buffer.new(1);
+                if b == 0 { return 5; };
+                defer buffer.free(b);
+                if stdin.read(b,0,1) != 0 or arg.count() != 0 { return 6; };
+                print(Greeting.hello("Awl"));
+                return 0;
+            };''', encoding='utf-8')
+        host = self.work / 'cc with input check'
+        host.write_text('#!/bin/sh\nif IFS= read -r line; then exit 99; fi\n'
+                        f'exec {shlex.quote(self.cc)} "$@"\n')
+        host.chmod(0o700)
+        for directory, args in [(self.project, ()), (self.work, ('Demo',))]:
+            with self.subTest(cwd=directory):
+                result = self.invoke('TeSt', *args, '--cc', host, cwd=directory, stdin='unread\n')
+                self.assertEqual(result.stderr, '')
+                self.assertEqual(result.stdout.splitlines(), [
+                    f'Testing {name}', 'Hello, Awl!', f'PASS {name}',
+                    'Testing Z.test.aw', 'last', 'PASS Z.test.aw', 'Test result: 2 passed, 0 failed'])
+        self.assertFalse((self.project / 'build').exists())
+        self.assert_no_temps()
+
+    def test_shipped_testing_example(self):
+        result = self.invoke('test', 'testing', '--cc', self.cc, cwd=ROOT / 'examples')
+        self.assertEqual(result.stdout.splitlines(), ['Testing Totals.test.aw', 'PASS Totals.test.aw',
+                         'Test result: 1 passed, 0 failed'])
+        self.assertEqual(result.stderr, '')
+        self.assert_no_temps()
+
+    def test_explicit_test_file_needs_no_project(self):
+        (self.work / 'fixture.txt').write_text('relative to caller')
+        source = self.project / 'one.aw'
+        source.write_text('''func main {
+            @p f: file.open("fixture.txt",0);
+            if f < 0 { return 1; };
+            return file.close(f);
+        };''')
+        result = self.invoke('test', source, '--cc', self.cc, cwd=self.work)
+        self.assertEqual(result.stdout.splitlines(), ['Testing one.aw', 'PASS one.aw', 'Test result: 1 passed, 0 failed'])
+        self.assertEqual(result.stderr, '')
+        self.assert_no_temps()
+
+    def test_tests_report_failures_and_continue(self):
+        self.init()
+        sources = {'A.test.aw': 'func main { return 124; };',
+                   'B.test.aw': 'func main[i64] { return false; };',
+                   'C.test.aw': 'func main { return 130; };',
+                   'Z.test.aw': 'func main { return 0; };'}
+        for name, text in sources.items():
+            (self.project / name).write_text(text)
+        result = self.invoke('test', '--cc', self.cc, '--diagnostic-format', 'json', code=1)
+        self.assertEqual(result.stdout.splitlines(), [
+            'Testing A.test.aw', 'FAIL A.test.aw (status 124)',
+            'Testing B.test.aw', 'FAIL B.test.aw (status 1)',
+            'Testing C.test.aw', 'FAIL C.test.aw (status 130)',
+            'Testing Z.test.aw', 'PASS Z.test.aw', 'Test result: 1 passed, 3 failed'])
+        report = json.loads(result.stderr)
+        self.assertEqual(Path(report['file']), self.project / 'B.test.aw')
+        self.assertTrue(report['diagnostics'])
+        self.assert_no_temps()
+
+    def test_test_discovery_errors_do_not_run_anything(self):
+        self.init()
+        self.assertIn('awl test', self.invoke('--help').stdout)
+        empty = self.invoke('test', code=2)
+        self.assertIn('no .test.aw files', empty.stderr)
+        self.assertEqual(empty.stdout, '')
+
+        good = self.project / 'A.test.aw'
+        good.write_text('func main { print("must not run"); return 0; };')
+        unsafe = self.project / 'Z.test.aw'
+        for form in ('symlink', 'directory', 'FIFO'):
+            with self.subTest(form=form):
+                if form == 'symlink':
+                    unsafe.symlink_to(good)
+                elif form == 'directory':
+                    unsafe.mkdir()
+                else:
+                    os.mkfifo(unsafe)
+                rejected = self.invoke('test', '--cc', self.cc, code=2)
+                self.assertIn('test must be a regular non-symlink file', rejected.stderr)
+                self.assertIn(unsafe.name, rejected.stderr)
+                self.assertEqual(rejected.stdout, '')
+                if form == 'directory':
+                    unsafe.rmdir()
+                else:
+                    unsafe.unlink()
+        for index in range(64):
+            (self.project / f'file{index}.test.aw').touch()
+        overflow = self.invoke('test', '--cc', self.cc, code=2)
+        self.assertIn('test discovery exceeds 64', overflow.stderr)
+        self.assertEqual(overflow.stdout, '')
+        self.assert_no_temps()
+
+    def test_test_timeout_does_not_stop_the_suite(self):
+        self.init()
+        slow = self.project / 'A.test.aw'
+        slow.write_text('func main { clock.sleep(5000); return 0; };')
+        (self.project / 'Z.test.aw').write_text('func main { return 0; };')
+        result = self.invoke('test', '--cc', self.cc, '--run-timeout', '1', code=1)
+        self.assertIn('program wall-time limit exceeded', result.stderr)
+        self.assertEqual(result.stdout.splitlines(), ['Testing A.test.aw', 'TIMEOUT A.test.aw',
+                         'Testing Z.test.aw', 'PASS Z.test.aw', 'Test result: 1 passed, 1 failed'])
+        backend = self.work / 'sleeping backend'
+        backend.write_text('#!/bin/sh\nexec /bin/sleep 5\n')
+        backend.chmod(0o700)
+        result = self.invoke('test', slow, '--cc', backend, '--build-timeout', '1', code=1)
+        self.assertIn('backend wall-time limit exceeded', result.stderr)
+        self.assertEqual(result.stdout.splitlines(), ['Testing A.test.aw', 'TIMEOUT A.test.aw',
+                         'Test result: 0 passed, 1 failed'])
+        self.assert_no_temps()
+
+    def test_test_cancellation_stops_suite_and_cleans_up(self):
+        self.init()
+        (self.project / 'A.test.aw').write_text('''func main {
+            @p marker: file.open("ready",1);
+            if marker < 0 { return 2; };
+            if file.close(marker) != 0 { return 3; };
+            clock.sleep(15000);
+            return 0;
+        };''')
+        (self.project / 'Z.test.aw').write_text('func main { return 0; };')
+        with subprocess.Popen([self.awl, 'test', '--cc', self.cc], cwd=self.project, env=self.env,
+                              stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                              encoding='utf-8') as process:
+            try:
+                ready = self.project / 'ready'
+                deadline = time.monotonic() + 10
+                while not ready.exists() and process.poll() is None and time.monotonic() < deadline:
+                    time.sleep(0.01)
+                self.assertTrue(ready.exists(), 'first test did not start')
+                process.send_signal(signal.SIGTERM)
+                stdout, stderr = process.communicate(timeout=10)
+            finally:
+                if process.poll() is None:
+                    process.kill()
+                    process.communicate(timeout=5)
+        self.assertEqual(process.returncode, 128 + signal.SIGTERM, (stdout, stderr))
+        self.assertEqual(stdout.splitlines(), ['Testing A.test.aw', 'INTERRUPTED A.test.aw'])
+        self.assertIn('run interrupted', stderr)
+        self.assert_no_temps()
+
     def test_run_forwards_arguments_and_exit_code(self):
         source = self.project / 'with spaces λ.aw'
         source.write_text('''func main {
@@ -262,6 +430,7 @@ class ToolkitTests(unittest.TestCase):
         for args in [('check', '--cc', self.cc), ('build', '--run-timeout', '1'),
                      ('run', '-o', 'out'), ('run', '--cc', '--'), ('run', '--cc', ''),
                      ('run', '--run-timeout', '86401'), ('run', '--build-timeout', '0'),
+                     ('test', '--', 'arg'), ('test', '-o', 'out'), ('test', '--run-timeout', '86401'),
                      ('check', '--syntax', 'legacy'), ('check', '--', 'arg')]:
             with self.subTest(args=args):
                 self.invoke(*args, code=2)

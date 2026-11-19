@@ -23,7 +23,7 @@
 | compiler | **Awl Compiler Collection (ACC)**, native C++20 frontend with checked IR, an independent verifier and a C11 backend |
 | source files | `.aw` |
 | manifests | `.awproj` for projects, `.awpkg` for local Packages |
-| public toolkit | `awl init`, `awl add` (local Packages), `awl check`, `awl build`, `awl run` |
+| public toolkit | `awl init`, `awl add` (local Packages), `awl check`, `awl build`, `awl run`, `awl test` |
 | development version | `0.26.0-dev`, a development identifier, not a compatibility guarantee |
 | release readiness | experimental source candidate, not production-ready |
 
@@ -83,7 +83,7 @@ awl build --cc "$(command -v cc)"
 
 ### toolkit workflow
 
-`check`, `build`, and `run` all accept the same targets: omit the target for the sole `.awproj` in the current directory, pass `Demo` to look for `Demo.awproj` in immediate child directories, or pass a `.aw` file directly. `awl run` passes arguments after `--` to the program and doesn't keep an executable.
+`check`, `build`, `run`, and `test` all accept the same targets: omit the target for the sole `.awproj` in the current directory, pass `Demo` to look for `Demo.awproj` in immediate child directories, or pass a `.aw` file directly. `awl run` passes arguments after `--` to the program and doesn't keep an executable. `awl test` runs `.test.aw` files beside a project's entry, reports failures, and keeps no executables. Try the [testing example](examples/testing/).
 
 For example, from the repository root, run the shipped sort utility with redirected input:
 

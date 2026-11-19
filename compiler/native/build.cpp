@@ -144,7 +144,7 @@ bool reap_descendants(pid_t group) {
 }
 struct ProcessResult {int status=2;bool timed_out=false;bool cleanup_failed=false;int cancellation=0;};
 ProcessResult execute(std::vector<std::string> args,const std::vector<std::string> *environment,
-                      bool backend,unsigned wall_seconds,unsigned memory_mib) {
+                      bool backend,unsigned wall_seconds,unsigned memory_mib,bool stdin_eof) {
     if(requested_signal) return {128+requested_signal,false,false,requested_signal};
     std::vector<char*> av,ev;for(auto &s:args) av.push_back(s.data());av.push_back(nullptr);
     if(environment) {for(const auto &s:*environment) ev.push_back(const_cast<char*>(s.c_str()));ev.push_back(nullptr);}
@@ -156,6 +156,14 @@ ProcessResult execute(std::vector<std::string> args,const std::vector<std::strin
         sigset_t empty;sigemptyset(&empty);
         if(sigprocmask(SIG_SETMASK,&empty,nullptr)!=0||setpgid(0,0)!=0) child_failure();
         if(prctl(PR_SET_PDEATHSIG,SIGKILL)!=0||getppid()!=parent) child_failure();
+        if(stdin_eof) {
+            const int input=open("/dev/null",O_RDONLY);
+            if(input<0) child_failure();
+            if(input!=STDIN_FILENO) {
+                if(dup2(input,STDIN_FILENO)<0) child_failure();
+                close(input);
+            }
+        }
         if(!tighten(RLIMIT_CORE,0)) child_failure();
         if(backend) {
             if(!tighten(RLIMIT_AS,static_cast<rlim_t>(memory_mib)*1024*1024)||
@@ -251,9 +259,9 @@ void inspect_output(const fs::path &path,mode_t mode,bool host) {
 #include "build_windows.inc"
 #endif
 namespace Awl_driver {
-int build(const char *c_source,size_t length,const char *argv0,const std::string &source_path,const std::string &output,const Options &options,bool run) {
+Result build(const char *c_source,size_t length,const char *argv0,const std::string &source_path,const std::string &output,const Options &options,bool run) {
 #if !defined(__linux__) || !defined(__x86_64__)
-    if(!options.host_cc.empty()) {std::cerr<<"acc: --cc is supported only on Linux x86-64\n";return 2;}
+    if(!options.host_cc.empty()) {std::cerr<<"acc: --cc is supported only on Linux x86-64\n";return {2};}
 #endif
 #if defined(__linux__) && defined(__x86_64__)
     try {
@@ -292,31 +300,35 @@ int build(const char *c_source,size_t length,const char *argv0,const std::string
                 "ZIG_LIB_DIR="+lib.string(),"ZIG_GLOBAL_CACHE_DIR="+cache.string(),"ZIG_LOCAL_CACHE_DIR="+(temp.path/"local-cache").string()};
             command={zig.string(),"cc","-std=c11","-target","x86_64-linux-musl","-mcpu=baseline","-static",optimization,"-g0","-s",cfile.string(),"-o",staging.path.string()};
         }
-        const auto status=execute(std::move(command),host?nullptr:&environment,true,options.build_timeout_seconds,options.build_memory_mib);
-        if(status.cancellation) {std::cerr<<"acc: build interrupted\n";return 128+status.cancellation;}
-        if(status.timed_out) {std::cerr<<"acc: backend wall-time limit exceeded\n";return 124;}
+        const auto status=execute(std::move(command),host?nullptr:&environment,true,options.build_timeout_seconds,options.build_memory_mib,options.stdin_eof);
+        if(const int signal=status.cancellation?status.cancellation:requested_signal) {
+            std::cerr<<"acc: build interrupted\n";return {128+signal,Termination::Interrupted};
+        }
+        if(status.timed_out) {std::cerr<<"acc: backend wall-time limit exceeded\n";return {124,Termination::TimedOut};}
         if(status.cleanup_failed) throw std::runtime_error("cannot reap backend descendants");
-        if(status.status) {std::cerr<<"acc: "<<(host?"host C compiler failed":"bundled code generation/linking failed")<<" ("<<status.status<<")\n";return 2;}
+        if(status.status) {std::cerr<<"acc: "<<(host?"host C compiler failed":"bundled code generation/linking failed")<<" ("<<status.status<<")\n";return {2};}
         const auto mask=umask(0);umask(mask);
         inspect_output(staging.path,run?0700:static_cast<mode_t>(0777&~mask),host);
-        if(requested_signal) {std::cerr<<"acc: build interrupted before publication\n";return 128+requested_signal;}
+        if(requested_signal) {std::cerr<<"acc: build interrupted before publication\n";return {128+requested_signal,Termination::Interrupted};}
         fs::rename(staging.path,destination);staging.path.clear();
         if(run) {
             std::vector<std::string> args={destination.string()};
             args.insert(args.end(),options.program_arguments.begin(),options.program_arguments.end());
-            const auto program=execute(std::move(args),nullptr,false,options.run_timeout_seconds,0);
-            if(program.cancellation) std::cerr<<"acc: run interrupted\n";
-            else if(program.timed_out) std::cerr<<"acc: program wall-time limit exceeded\n";
-            else if(program.cleanup_failed) throw std::runtime_error("cannot reap program descendants");
-            return program.status;
+            const auto program=execute(std::move(args),nullptr,false,options.run_timeout_seconds,0,options.stdin_eof);
+            if(const int signal=program.cancellation?program.cancellation:requested_signal) {
+                std::cerr<<"acc: run interrupted\n";return {128+signal,Termination::Interrupted};
+            }
+            if(program.timed_out) {std::cerr<<"acc: program wall-time limit exceeded\n";return {124,Termination::TimedOut};}
+            if(program.cleanup_failed) throw std::runtime_error("cannot reap program descendants");
+            return {program.status};
         }
-        std::cout<<destination.string()<<'\n';std::cout.flush();return std::cout?0:2;
-    } catch(const std::exception &e) {std::cerr<<"acc: "<<e.what()<<'\n';return 2;}
+        std::cout<<destination.string()<<'\n';std::cout.flush();return {std::cout?0:2};
+    } catch(const std::exception &e) {std::cerr<<"acc: "<<e.what()<<'\n';return {2};}
 #elif defined(_WIN32) && (defined(__x86_64__) || defined(_M_X64))
     (void)argv0;return Awl_windows::build(c_source,length,source_path,output,options,run);
 #else
     (void)c_source;(void)length;(void)argv0;(void)source_path;(void)output;(void)options;(void)run;
-    std::cerr<<"acc: bundled build/run not implemented for this host; preview supports Linux/Windows x86-64 only\n";return 2;
+    std::cerr<<"acc: bundled build/run not implemented for this host; preview supports Linux/Windows x86-64 only\n";return {2};
 #endif
 }
 }

@@ -20,6 +20,7 @@ std::string trim(const std::string &s) {
 }
 bool project_name(const std::string &s) {return Awl_package::valid_name(s)&&Awl_package::ascii_alnum(s.front());}
 std::string command_key(std::string s) {for(char &c:s) if(c>='A'&&c<='Z') c+=32;return s;}
+constexpr unsigned test_timeout_seconds=30;
 void help() {
     std::cout<<"Awl Software Development Kit [Beta]\n"
         <<"Usage:\n"
@@ -29,23 +30,25 @@ void help() {
         <<"  awl add FILE.awpkg          Copy a local Package into the current project (no network)\n"
         <<"  awl check [TARGET]          Check syntax and types without a backend\n"
         <<"  awl build [TARGET]          Build a native executable\n"
-        <<"  awl run [TARGET] [options] [-- ARG ...]  Build and run a temporary executable\n\n"
+        <<"  awl run [TARGET] [options] [-- ARG ...]  Build and run a temporary executable\n"
+        <<"  awl test [TARGET]           Run .test.aw files beside the project entry, or one .aw file\n\n"
         <<"TARGET: omit for the sole .awproj here, use NAME for an immediate child\n"
         <<"project, or pass a .aw source path (imports supported).\n\n"
-        <<"Check/build/run options:\n"
+        <<"Check/build/run/test options:\n"
         <<"  --syntax aesop               Aesop is the only supported syntax\n"
         <<"  --diagnostic-format text|json Source diagnostic format (default text)\n"
-        <<"Build/run options:\n"
+        <<"Build/run/test options:\n"
         <<"  --cc ABSOLUTE_PATH           Use a host C compiler (Linux x86-64 only)\n"
         <<"  -O 0|1|2|3                   Optimization level (default 2)\n"
         <<"  --build-timeout 1..3600       Backend timeout in seconds (default 120)\n"
         <<"  --build-memory-mib 512..16384 Backend memory bound (default 4096)\n"
         <<"Build only: -o FILE             Executable destination (relative to terminal cwd)\n"
-        <<"Run only: --run-timeout 0..86400  Program timeout in seconds (default unlimited)\n\n"
+        <<"Run/test: --run-timeout 0..86400  Per-program timeout in seconds (0 = unlimited)\n"
+        <<"                                Default: unlimited for run, "<<test_timeout_seconds<<" seconds for test\n\n"
         <<"Project output: <project>/build/<manifest-name> (.exe on Windows).\n"
         <<"Single-file output: <cwd>/<source-stem> (.exe on Windows).\n"
         <<"Init never overwrites existing files. NAME: 1..64 letters/digits/_/-, starts alphanumeric.\n"
-        <<"Build/run use the bundled backend unless --cc is specified.\n";
+        <<"Build/run/test use the bundled backend unless --cc is specified.\n";
 }
 // Exclusive creation, no shell and no truncation of pre-existing files/symlinks.
 void create_new(const fs::path &p,const std::string &bytes) {
@@ -180,7 +183,56 @@ fs::path add_package(const Project &project,const fs::path &input) {
     pending.complete=true;
     return destination;
 }
-int run(int argc,char **argv,int (*compiler)(int,char**)) {
+std::vector<fs::path> discover_tests(const fs::path &entry) {
+    std::vector<fs::path> tests;size_t seen=0;
+    for(const auto &file:fs::directory_iterator(entry.parent_path())) {
+        if(++seen>4096) throw std::runtime_error("test discovery exceeds 4096 directory entries");
+        const auto name=utf8(file.path().filename());
+        if(!name.ends_with(".test.aw")||name.starts_with('.')||file.path()==entry) continue;
+        if(!fs::is_regular_file(file.symlink_status()))
+            throw std::runtime_error("test must be a regular non-symlink file: "+utf8(file.path()));
+        if(tests.size()==64) throw std::runtime_error("test discovery exceeds 64 .test.aw files");
+        tests.push_back(file.path());
+    }
+    if(tests.empty()) throw std::runtime_error("no .test.aw files beside the project entry; add one or pass a .aw test file directly");
+    std::sort(tests.begin(),tests.end(),[](const auto &a,const auto &b){return utf8(a.filename())<utf8(b.filename());});
+    return tests;
+}
+Awl_driver::Result invoke_compiler(std::vector<std::string> &args,bool stdin_eof=false) {
+    std::vector<char*> raw;raw.reserve(args.size()+1);
+    for(auto &a:args) raw.push_back(a.data());
+    raw.push_back(nullptr);
+    return Awl_compiler_main(static_cast<int>(args.size()),raw.data(),stdin_eof);
+}
+int run_tests(const char *argv0,const std::vector<fs::path> &tests,const fs::path &cwd,
+              const std::string &syntax,const std::vector<std::string> &flags) {
+    // Test sources are already absolute. Named and local project invocations
+    // use the same working directory for relative fixtures.
+    fs::current_path(cwd);
+    size_t passed=0,failed=0;
+    for(const auto &test:tests) {
+        const auto name=utf8(test.filename());
+        std::cout<<"Testing "<<name<<'\n'<<std::flush;
+        if(!std::cout) return 2;
+        std::vector<std::string> args={argv0,"run",utf8(test),"--syntax",syntax};
+        args.insert(args.end(),flags.begin(),flags.end());
+        const auto result=invoke_compiler(args,true);
+        if(result.termination==Awl_driver::Termination::Interrupted) {
+            std::cout<<"INTERRUPTED "<<name<<'\n'<<std::flush;
+            return result.code;
+        }
+        if(!result.code) {++passed;std::cout<<"PASS "<<name<<'\n';}
+        else {
+            ++failed;
+            if(result.termination==Awl_driver::Termination::TimedOut) std::cout<<"TIMEOUT "<<name<<'\n';
+            else std::cout<<"FAIL "<<name<<" (status "<<result.code<<")\n";
+        }
+    }
+    std::cout<<"Test result: "<<passed<<" passed, "<<failed<<" failed\n"<<std::flush;
+    if(!std::cout) return 2;
+    return failed?1:0;
+}
+int run(int argc,char **argv) {
     try {
         if(argc==1||(argc==2&&(command_key(argv[1])=="--help"||std::string(argv[1])=="-h"))) {help();return std::cout?0:2;}
         if(argc==2&&command_key(argv[1])=="--version") {std::cout<<"Awl Software Development Kit [Beta] 0.26.0-dev\n";return std::cout?0:2;}
@@ -217,7 +269,8 @@ int run(int argc,char **argv,int (*compiler)(int,char**)) {
             std::cout<<"Added Package "<<utf8(installed.filename())<<" at "<<utf8(installed)<<'\n';
             return std::cout?0:2;
         }
-        const bool build=command=="build",run=command=="run",building=build||run;
+        const bool build=command=="build",run=command=="run",test=command=="test";
+        const bool running=run||test,building=build||running;
         if(command!="check"&&!building) throw std::runtime_error("unknown command '"+command+"'; use awl --help");
         int i=2;std::string target,explicit_output;
         if(i<argc&&argv[i][0]!='-') target=argv[i++];
@@ -228,8 +281,8 @@ int run(int argc,char **argv,int (*compiler)(int,char**)) {
             if(!seen.insert(option).second) throw std::runtime_error("duplicate option: "+option);
             const bool common=option=="--syntax"||option=="--diagnostic-format";
             const bool backend=option=="--cc"||option=="-O"||option=="--build-timeout"||option=="--build-memory-mib";
-            if(!(common||(building&&backend)||(build&&option=="-o")||(run&&option=="--run-timeout"))) throw std::runtime_error("unknown "+command+" option: "+option);
-            if(++i>=argc||(run&&std::string(argv[i])=="--")) throw std::runtime_error("missing value for "+option);
+            if(!(common||(building&&backend)||(build&&option=="-o")||(running&&option=="--run-timeout"))) throw std::runtime_error("unknown "+command+" option: "+option);
+            if(++i>=argc||(running&&std::string(argv[i])=="--")) throw std::runtime_error("missing value for "+option);
             const std::string value=argv[i];unsigned parsed=0;
             if(option=="--syntax"&&value!="aesop") throw std::runtime_error("syntax must be aesop");
             if(option=="--diagnostic-format"&&value!="text"&&value!="json") throw std::runtime_error("diagnostic format must be text or json");
@@ -241,10 +294,18 @@ int run(int argc,char **argv,int (*compiler)(int,char**)) {
             if(option=="-o") {if(value.empty()) throw std::runtime_error("empty output path");explicit_output=value;}
             else if(option!="--syntax") {flags.push_back(option);flags.push_back(value);}
         }
-        fs::path source,manifest;std::string syntax="aesop";
+        Project project;
         const bool single=!target.empty()&&path(target).extension()==".aw";
-        if(single) {source=fs::canonical(path(target));if(!fs::is_regular_file(source)) throw std::runtime_error("source is not a regular .aw file");}
-        else {const auto project=read_project(discover(cwd,target));source=project.entry;manifest=project.manifest;syntax=project.syntax;}
+        if(single) {
+            project.entry=fs::canonical(path(target));
+            if(!fs::is_regular_file(project.entry)) throw std::runtime_error("source is not a regular .aw file");
+        } else project=read_project(discover(cwd,target));
+        const auto &source=project.entry,&manifest=project.manifest;
+        if(test) {
+            if(!seen.contains("--run-timeout")) {flags.push_back("--run-timeout");flags.push_back(std::to_string(test_timeout_seconds));}
+            const auto tests=single?std::vector<fs::path>{source}:discover_tests(source);
+            return run_tests(argv[0],tests,single?cwd:manifest.parent_path(),project.syntax,flags);
+        }
         if(build&&!explicit_output.empty()) {
             // Protect the selected manifest (even through a hardlink) and .awproj destinations.
             const auto dest=fs::absolute(path(explicit_output));
@@ -260,10 +321,9 @@ int run(int argc,char **argv,int (*compiler)(int,char**)) {
             if(fs::is_symlink(parent)||(fs::exists(parent)&&!fs::is_directory(parent))) throw std::runtime_error("project build output directory must be a real directory, not a symlink");
             fs::create_directories(parent);flags.push_back("-o");flags.push_back(utf8(output));
         }
-        std::vector<std::string> args={argv[0],command,utf8(source),"--syntax",syntax};args.insert(args.end(),flags.begin(),flags.end());
+        std::vector<std::string> args={argv[0],command,utf8(source),"--syntax",project.syntax};args.insert(args.end(),flags.begin(),flags.end());
         args.insert(args.end(),argv+i,argv+argc);
-        std::vector<char*> raw;for(auto &a:args) raw.push_back(a.data());raw.push_back(nullptr);
-        return compiler(static_cast<int>(args.size()),raw.data());
+        return invoke_compiler(args).code;
     } catch(const std::exception &e) {std::cerr<<"Awl: "<<e.what()<<'\n';return 2;}
 }
 }
