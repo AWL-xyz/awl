@@ -43,6 +43,15 @@ r=run([{name:'main.aw',text:'func main { @p stamp: clock.wall(); print(stamp >= 
 expect(r.code===0&&r.out[0]==='true','wall-clock intrinsic has a checked i64 result');
 r=run([{name:'main.aw',text:'func main { print(i64.convert(1.5)); print(i8.convert(1000.0)); print(u64.convert(-1.5)); print(f64.convert(1.5)); print(isnum(1.5)); print(isnum("x")); print(i64.match(1)); print(text.match("x")); return 0; };'}],'main.aw');
 expect(r.code===0&&JSON.stringify(r.out)===JSON.stringify(['1','127','0','1.5','true','false','true','true']),'numeric conversions, isnum and type match');
+r=run([{name:'main.aw',text:String.raw`func read :: s:text { return string.toi64(s); };
+func main {
+  print(read("+00090")); print(read("-9223372036854775808"));
+  print(string.i64valid("9223372036854775808")); print(string.i64valid("2\n"));
+  print(string.i64valid("-")); print(string.i64valid("１")); return 0;
+};`}],'main.aw');
+expect(r.code===0&&JSON.stringify(r.out)===JSON.stringify(['90','-9223372036854775808','false','false','false','false']),'strict signed decimal text and inferred result');
+let decimalTrap=false;try{run([{name:'main.aw',text:'func main { return string.toi64("+x"); };'}],'main.aw');}catch(e){decimalTrap=e.trap&&e.message.includes('invalid signed integer');}
+expect(decimalTrap,'invalid decimal text traps');
 r=run([{name:'main.aw',text:'func main { @p w: window.open(2,2); print(window.width(w)); window.title(w,"x"); print(window.present(w)); window.close(w); return 0; };'}],'main.aw');
 expect(r.code===0&&r.out[0]==='2'&&r.out[1]==='true','namespace window API');
 let mixed=false;try{run([{name:'main.aw',text:'func main { @p a: 2; @p b: 1.5; print(a * b); return 0; };'}],'main.aw');}catch(e){mixed=true;}expect(mixed,'strict mixed numeric arithmetic');

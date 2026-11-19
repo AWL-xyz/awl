@@ -1,0 +1,283 @@
+{
+  "scope": "Before/after Awl only: scalar slices and repeated signed-decimal argv conversion",
+  "method": "Warm whole-process wall time, shuffled pairs; compilation and Python oracle excluded",
+  "host": "Linux-6.1.158+-x86_64-with-glibc2.36",
+  "cpu": "Intel(R) Xeon(R) Processor @ 2.60GHz",
+  "affinity": [
+    0
+  ],
+  "cc": "cc (Debian 12.2.0-14+deb12u1) 12.2.0",
+  "flags": [
+    "-std=c11",
+    "-O3",
+    "-march=x86-64",
+    "-lm"
+  ],
+  "compiler_sha256": {
+    "before": "53e8c1afb725f4edab824a8efbfa14fe3ac26d017462c74fe6e3b235effdb491",
+    "after": "27c49e618d3d7f91a23b6ade749209a23b0e471637d2ca4b98d73b79649f631f"
+  },
+  "harness_sha256": "b8241c806a92fe0c64697ec7fa57eb9e8f1316944176d6d6a7d4463f626613bb",
+  "workload_sha256": {
+    "slice": "66a9f0ddfb43825a18390d7aad7e1453d32b13921e6a8b403e0c0ff57b5f97c8",
+    "decimal": "87511912724944c39ccbc5a479031e2ae0d8ce90b7f74445eccd48adda0de363"
+  },
+  "results": {
+    "ASCII interior slice": {
+      "scalars": 34816,
+      "bytes": 34816,
+      "start": 17408,
+      "width": 48,
+      "jitter": 256,
+      "iterations": 4096,
+      "expected_checksum": 946864,
+      "argv_sha256": "b4296a966f8fa60fad21200bb9db31f54aabab211aad7edeafc1bbbaf86b1226",
+      "timing": {
+        "before": {
+          "median_ms": 33.520719,
+          "samples_ms": [
+            52.905635,
+            33.703585,
+            34.121324,
+            33.35611,
+            33.520719,
+            33.276036,
+            34.658246,
+            33.603412,
+            33.110032,
+            33.222806,
+            33.417945
+          ]
+        },
+        "after": {
+          "median_ms": 2.552662,
+          "samples_ms": [
+            2.372658,
+            2.571703,
+            2.380436,
+            2.552662,
+            2.691114,
+            2.527707,
+            2.681377,
+            3.053609,
+            2.917642,
+            2.393946,
+            2.290714
+          ]
+        }
+      }
+    },
+    "mixed UTF-8 tail slice": {
+      "scalars": 12288,
+      "bytes": 26624,
+      "start": 12088,
+      "width": 32,
+      "jitter": 97,
+      "iterations": 4096,
+      "expected_checksum": 1509825,
+      "argv_sha256": "cf9f31ce81614b40e8fab88e2dfb1fba1103b32bbebfffd629b67346edd4c624",
+      "timing": {
+        "before": {
+          "median_ms": 60.130889,
+          "samples_ms": [
+            59.827379,
+            59.771559,
+            59.949953,
+            60.42103,
+            59.999986,
+            60.255189,
+            63.644316,
+            61.464282,
+            60.130889,
+            60.007256,
+            61.835275
+          ]
+        },
+        "after": {
+          "median_ms": 3.529589,
+          "samples_ms": [
+            3.516845,
+            3.529589,
+            3.419467,
+            3.559292,
+            3.581515,
+            3.442954,
+            4.385031,
+            3.650945,
+            3.668101,
+            3.430731,
+            3.5099
+          ]
+        }
+      }
+    },
+    "mixed UTF-8 wide slice": {
+      "scalars": 12288,
+      "bytes": 26624,
+      "start": 8,
+      "width": 12160,
+      "jitter": 63,
+      "iterations": 4096,
+      "expected_checksum": 109143820,
+      "argv_sha256": "8b8d62131b673d1162194389eb8b6f23198364b5dc61d3ec75a7dcb6e661188a",
+      "timing": {
+        "before": {
+          "median_ms": 60.150573,
+          "samples_ms": [
+            60.150573,
+            60.031871,
+            59.828795,
+            60.106235,
+            70.07124,
+            60.474668,
+            59.871555,
+            60.240791,
+            60.051936,
+            60.543795,
+            60.278431
+          ]
+        },
+        "after": {
+          "median_ms": 3.248154,
+          "samples_ms": [
+            3.344658,
+            3.248154,
+            3.052612,
+            3.886706,
+            3.866935,
+            3.285823,
+            3.308977,
+            3.11254,
+            3.226901,
+            3.18409,
+            3.214225
+          ]
+        }
+      }
+    },
+    "mixed UTF-8 front slice": {
+      "scalars": 12288,
+      "bytes": 26624,
+      "start": 1,
+      "width": 16,
+      "jitter": 31,
+      "iterations": 200000,
+      "expected_checksum": 66238682,
+      "argv_sha256": "a1e9ebe0c301fc09d33e88e7b91a507b57a8d8bbd31230590998f32e4b825f56",
+      "timing": {
+        "before": {
+          "median_ms": 8.617623,
+          "samples_ms": [
+            9.715873,
+            8.446599,
+            8.667187,
+            8.479934,
+            8.553371,
+            9.79276,
+            8.690298,
+            8.247372,
+            8.617623,
+            8.292768,
+            8.903923
+          ]
+        },
+        "after": {
+          "median_ms": 9.290417,
+          "samples_ms": [
+            9.225213,
+            9.290417,
+            9.080361,
+            9.385992,
+            9.197816,
+            9.369282,
+            9.010043,
+            9.635843,
+            9.343913,
+            9.108763,
+            10.153207
+          ]
+        }
+      }
+    },
+    "19-digit arguments": {
+      "inputs": 64,
+      "iterations": 4000000,
+      "expected_checksum": 20437500,
+      "argv_sha256": "583d0234ae51e7cc4f78372ae15ab897c7a3c877c167f2192ab42a859e7e2ebe",
+      "timing": {
+        "before": {
+          "median_ms": 135.311681,
+          "samples_ms": [
+            134.753942,
+            134.680723,
+            136.326039,
+            179.467622,
+            135.311681,
+            136.269093,
+            135.304887,
+            137.096043,
+            134.848154,
+            134.802367,
+            136.421398
+          ]
+        },
+        "after": {
+          "median_ms": 84.812973,
+          "samples_ms": [
+            84.451867,
+            84.812973,
+            84.647496,
+            87.536928,
+            87.401298,
+            85.137313,
+            84.862076,
+            84.557831,
+            84.497973,
+            85.416927,
+            84.738154
+          ]
+        }
+      }
+    },
+    "1\u20133 digit arguments": {
+      "inputs": 8,
+      "iterations": 4000000,
+      "expected_checksum": 18000000,
+      "argv_sha256": "0217bfb2b0779485ffbdbc68a0a2d4a382cb89cfb25aff63c3a25638b8f8dc06",
+      "timing": {
+        "before": {
+          "median_ms": 29.793115,
+          "samples_ms": [
+            29.800977,
+            29.832353,
+            32.068927,
+            29.794126,
+            29.821096,
+            29.710779,
+            29.735379,
+            29.695903,
+            29.646854,
+            29.774503,
+            29.793115
+          ]
+        },
+        "after": {
+          "median_ms": 23.579071,
+          "samples_ms": [
+            23.579071,
+            23.577789,
+            23.669009,
+            23.629009,
+            23.642391,
+            23.597043,
+            23.53705,
+            23.495148,
+            23.655295,
+            23.544301,
+            23.527122
+          ]
+        }
+      }
+    }
+  }
+}

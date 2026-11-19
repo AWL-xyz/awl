@@ -16,6 +16,8 @@
 
 # unreleased text runtime
 
+- `string.slice` and `string.codepoint` use direct ASCII indexing and can seek mixed UTF-8 from either end without allocating or changing bounds checks.
+- `string.i64valid` and `string.toi64` parse strict signed decimal text, including slices. They share the faster single-pass parser used by `arg.i64valid` and `arg.i64`. See [measured workloads and tradeoffs](docs/PERFORMANCE.md#current-source-utf-8-slicing-and-decimal-arguments).
 - `string.replace` no longer retains intermediate copies; a changed, nonempty result is allocated once. Exact UTF-8 matching, empty-needle traps, and text heap limits are unchanged. See the [before/after benchmark](docs/PERFORMANCE.md#current-source-replacing-text-in-utf-8-records).
 
 # unreleased toolkit workflow and checked arithmetic

@@ -47,7 +47,7 @@ type tests are static predicates, they do not introduce a dynamic `any` type, th
 | processes | `process.capture(argv,view,out,err,deadline)` |
 | platform | `platform.kind()` |
 | streams | `stdin.read(b,i,n)`, `stdout.write(b,i,n)`, `stdout.flush()`, `stderr.write(b,i,n)`, `stderr.flush()` |
-| strings | `string.length(s)`, `string.bytes(s)`, `string.slice(s,i,n)`, `string.codepoint(s,i)`, `string.byteat(s,i)`, `string.fromcodepoint(c)`, `string.fromi64(v)`, `string.fromu64(v)`, `string.compare(a,b)`, `string.find(a,b)`, `string.contains(a,b)`, `string.startswith(a,b)`, `string.endswith(a,b)`, `string.replace(a,b,c)` |
+| strings | `string.length(s)`, `string.bytes(s)`, `string.slice(s,i,n)`, `string.codepoint(s,i)`, `string.byteat(s,i)`, `string.fromcodepoint(c)`, `string.fromi64(v)`, `string.fromu64(v)`, `string.i64valid(s)`, `string.toi64(s)`, `string.compare(a,b)`, `string.find(a,b)`, `string.contains(a,b)`, `string.startswith(a,b)`, `string.endswith(a,b)`, `string.replace(a,b,c)` |
 | TCP | `tcp.listenloopback(port,backlog)`, `tcp.accept(h,timeout)`, `tcp.read(h,b,i,n,timeout)`, `tcp.write(h,b,i,n,timeout)`, `tcp.close(h)`, `tcp.port(h)`, `tcp.valid(h)` |
 | typed vectors | `vector.new<T>(capacity)`, `vector.length(v)`, `vector.get(v,i)`, `vector.push(v,x)`, `vector.free(v)`, `vector.view(v,i,n)`, `vector.slice(v,i,n)` |
 | views | `view.valid(v)`, `view.length(v)`, `view.get(v,i)`, `view.slice(v,i,n)` |
@@ -59,6 +59,19 @@ type tests are static predicates, they do not introduce a dynamic `any` type, th
 the complete signature table is `compiler/native/platform-signatures.inc`, the compiler's independent verifier checks every signature and rejects forged result metadata
 
 `buffer.findbyte(b, offset, count, needle)` searches `count` bytes starting at `offset` for a `u8` value. It returns the first match's **absolute** byte index as `i64`, or `-1` if absent. An empty search at the end of the buffer is valid. Invalid or freed handles and out-of-bounds ranges trap, even for an empty search. It allocates nothing and does not check UTF-8; for example, use `buffer.findbyte(b, 0, used, 10u8)` to find the first LF in the bytes read.
+
+`string.slice(s, start, count)` takes zero-based Unicode scalar offsets, not byte offsets or grapheme-cluster indexes. An empty slice at `string.length(s)` is valid; negative or out-of-range arguments trap. Slices share immutable storage and do not allocate. ASCII slices and full or empty slices take constant time. For mixed text, both `string.slice` and `string.codepoint(s, index)` can seek from the end instead of always walking from the beginning.
+
+`string.i64valid(s)` returns `true` exactly when the whole text is a signed 64-bit decimal: an optional ASCII `+` or `-` followed by one or more ASCII digits, with a value from −2⁶³ to 2⁶³−1. Leading zeros are allowed; spaces, underscores, Unicode digits, embedded NULs, and trailing bytes are not. `string.toi64(s)` returns that value or traps if invalid. Both work on slices and allocate nothing. `arg.i64` and `arg.i64valid` use the same decimal rules for a command-line argument.
+
+```text
+func main {
+    @p field: string.slice("qty=+00012;", 4, 6);
+    if not string.i64valid(field) { return 1; };
+    print(string.toi64(field));
+    return 0;
+};
+```
 
 `string.replace(text, needle, replacement)` replaces exact, non-overlapping UTF-8 matches from left to right without rescanning inserted text. An empty needle traps; an empty replacement deletes matches. Matching does not normalize Unicode. The runtime allocates at most one immutable result, with no growing intermediate copies. Returned text still counts against the existing process-lifetime text budget.
 

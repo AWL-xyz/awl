@@ -4,6 +4,32 @@ Awl is intended to compete with rust as a native systems language, outperforming
 
 performance claims need measured equivalent work, consumed results and reproducible optimized builds, safety checks aren't disabled to manufacture wins, all wins and losses belong in the report
 
+## Current source: UTF-8 slicing and decimal arguments
+
+A valid UTF-8 string whose byte and scalar counts are equal is ASCII, so `string.slice` and `string.codepoint` can index it directly. For mixed text, slicing finds the boundaries by skipping the largest of the prefix, slice and suffix; scalar lookup starts at the nearer end. Bounds checks, the 24-byte string ABI and allocation-free slicing are unchanged. The decimal parser now reads either a NUL-terminated argument or an explicitly bounded text slice in one pass, checks the magnitude before it can exceed `u64`, and checks the signed range once at the end.
+
+[The benchmark](../benchmarks/text_runtime.py) builds the same Awl inputs with both compilers and verifies each run's checksum against Python. Medians are from 11 shuffled warm whole-process samples, pinned to CPU 0, Linux x86-64, GCC 12.2 `-O3`, excluding compilation:
+
+| workload | before (`1db2f62`) | after |
+| :--- | ---: | ---: |
+| ASCII interior slice | 33.521 ms | 2.553 ms |
+| Mixed UTF-8 tail slice | 60.131 ms | 3.530 ms |
+| Mixed UTF-8 wide slice | 60.151 ms | 3.248 ms |
+| Mixed UTF-8 front slice | 8.618 ms | 9.290 ms |
+| 19-digit arguments | 135.312 ms | 84.813 ms |
+| 1–3 digit arguments | 29.793 ms | 23.579 ms |
+
+These stress tests show the benefit of avoiding long scans. Short slices near the front were about 8% slower on this run, where the new direction choice did not save any scanning. The decimal measurements repeatedly parse existing argv items; they are not end-to-end CSV or cross-language timings. See [the raw samples, input and compiler hashes](../benchmarks/text-runtime.json).
+
+```sh
+baseline=$(mktemp -d)
+git archive 1db2f62 compiler | tar -x -C "$baseline"
+(cd "$baseline" && python3 compiler/build_native.py --standalone --strip)
+python3 compiler/build_native.py --standalone --strip
+taskset -c 0 python3 benchmarks/text_runtime.py --before "$baseline/compiler/native/bin/acc" \
+    --samples 11 --report /tmp/awl-text-runtime.json
+```
+
 ## Current source: sorting UTF-8 lines
 
 The [shipped sort utility](../examples/apps/sort/) uses `buffer.findbyte` to locate LF with a checked range search instead of reading one byte at a time. It reuses the input buffer to assemble the sorted output, then writes it in batches and retries short writes. The stable merge sort, UTF-8 validation, duplicate handling, and 1 MiB / 32,768-line limits are unchanged.

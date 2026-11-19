@@ -1286,6 +1286,16 @@ function kernRun(src, out, vis, lib) {
   const fmtF = x => Number.isInteger(x) ? x.toFixed(1) : String(x);
   const fmt = v => isInt(v) ? v.v.toString() : isF(v) ? fmtF(v.v) : typeof v === 'boolean' ? String(v) : v;
   const cps = s => Array.from(s);
+  const decimalI64 = (a, n, method) => {
+    if (a.length !== 1) throw err(method + ' takes one text value', n);
+    const s = need(a[0], 'string', n, method);
+    const start = (s[0] === '-' || s[0] === '+') ? 1 : 0;
+    if (s.length === start) return null;
+    const digits = s.slice(start).replace(/^0+/, '');
+    if (digits.length > 19 || /[^0-9]/.test(digits)) return null;
+    const v = BigInt(digits || '0') * (s[0] === '-' ? -1n : 1n);
+    return v < INT.i64[0] || v > INT.i64[1] ? null : v;
+  };
   const W = {
     window_open: a => { const w = Number(a[0].v), h = Number(a[1].v); if (vis.w || w < 1 || h < 1 || w > 1024 || h > 1024) return i64(0); vis.w = w; vis.h = h; vis.buf = new Uint8ClampedArray(w * h * 4); for (let i = 3; i < vis.buf.length; i += 4) vis.buf[i] = 255; return i64(1); },
     window_width: () => i64(vis.w), window_height: () => i64(vis.h),
@@ -1317,7 +1327,10 @@ function kernRun(src, out, vis, lib) {
   const NAMESPACES = {
     window: { open:B.window_open, width:B.window_width, height:B.window_height, pixel:B.window_set_pixel, present:B.window_present, poll:B.window_poll, key:B.window_key, mousex:B.window_mouse_x, mousey:B.window_mouse_y, title:B.window_set_title, close:B.window_close },
     clock: { millis:B.clock_millis, wall:B.wall_clock_millis, sleep:B.sleep_millis },
-    string: { length:B.string_length, bytes:B.string_bytes, slice:B.string_slice, codepoint:B.string_codepoint, fromcodepoint:B.string_from_codepoint, fromi64:B.string_from_i64, fromu64:B.string_from_u64, compare:B.string_compare }
+    string: { length:B.string_length, bytes:B.string_bytes, slice:B.string_slice, codepoint:B.string_codepoint, fromcodepoint:B.string_from_codepoint, fromi64:B.string_from_i64, fromu64:B.string_from_u64, compare:B.string_compare,
+      i64valid:(a,n) => decimalI64(a,n,'string.i64valid') !== null,
+      toi64:(a,n) => { const v = decimalI64(a,n,'string.toi64'); if (v === null) throw trap('invalid signed integer', n); return i64(v); }
+    }
   };
   const convertValue = (ty, v, n) => {
     if (ty === 'f64') { if (isInt(v)) return f64(Number(v.v)); if (isF(v)) return f64(v.v); throw err('f64.convert needs a number', n); }
@@ -1399,7 +1412,7 @@ function kernRun(src, out, vis, lib) {
     if (inferring.has(fn)) throw err('circular return-type inference, add an explicit [type] annotation', fn);
     inferring.add(fn);
     const helpers = new Map(), returns = new Set();
-    const builtinTypes = { print:'unit', isnum:'bool', 'string.length':'i64', 'string.bytes':'i64', 'string.slice':'string', 'string.codepoint':'u32', 'string.fromi64':'string', 'string.fromu64':'string', 'string.fromcodepoint':'string', 'string.compare':'i64', 'array.length':'i64', 'vector.length':'i64', 'window.open':'i64', 'window.width':'i64', 'window.height':'i64', 'window.present':'bool', 'window.close':'unit', 'window.pixel':'unit', 'window.title':'bool', 'window.poll':'i64', 'window.key':'i64', 'window.mousex':'i64', 'window.mousey':'i64', 'clock.millis':'i64', 'clock.wall':'i64', 'clock.sleep':'unit' };
+    const builtinTypes = { print:'unit', isnum:'bool', 'string.length':'i64', 'string.bytes':'i64', 'string.slice':'string', 'string.codepoint':'u32', 'string.fromi64':'string', 'string.fromu64':'string', 'string.i64valid':'bool', 'string.toi64':'i64', 'string.fromcodepoint':'string', 'string.compare':'i64', 'array.length':'i64', 'vector.length':'i64', 'window.open':'i64', 'window.width':'i64', 'window.height':'i64', 'window.present':'bool', 'window.close':'unit', 'window.pixel':'unit', 'window.title':'bool', 'window.poll':'i64', 'window.key':'i64', 'window.mousex':'i64', 'window.mousey':'i64', 'clock.millis':'i64', 'clock.wall':'i64', 'clock.sleep':'unit' };
     const unsupported = n => { throw err('this editor subset cannot infer this expression, add [type] or use ACC', n); };
     function expressionType(e, env) {
       if (e.k === 'num') return e.t;
