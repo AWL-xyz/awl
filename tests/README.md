@@ -6,10 +6,12 @@ these are the source-current gates used by CI, all commands assume the repositor
 python3 compiler/build_native.py --standalone --strip
 python3 compiler/generate_runtime.py --check
 python3 compiler/generate_platform.py --check
+python3 compiler/generate_strings.py --check
 python3 tests/toolkit.py --acc compiler/native/bin/acc
 python3 tests/aesop.py --acc compiler/native/bin/acc --report tests/aesop-checks.json
 python3 tests/aesop.py --sanitize-programs --report tests/aesop-program-sanitizers.json
 python3 tests/checked_arithmetic.py --acc compiler/native/bin/acc
+python3 tests/text_replace.py --sanitize
 python3 tests/aesop_time.py --acc compiler/native/bin/acc --sanitize --report tests/aesop-time.json
 python3 tests/awl_editor.py --acc compiler/native/bin/acc --report tests/aesop-editor.json
 python3 compiler/test_native.py --sanitize --report tests/aesop-native.json.gz
@@ -18,6 +20,7 @@ python3 compiler/test_native.py --sanitize --report tests/aesop-native.json.gz
 - `toolkit.py` checks init/check/build/run on Linux x86-64 with an explicit host C compiler and no SDK, including imports, argument forwarding, timeouts and output preservation
 - `aesop.py` checks declarations, generated native execution, CLI starters, ABI v2, conversion/type tests and rejection cases
 - `checked_arithmetic.py` checks emitted `i64` and `u64` math against Python with UBSan, covering checked intrinsics and the portable C11 fallback at `-O0` and `-O3`
+- `text_replace.py` checks the emitted UTF-8 replacement runtime against Python, including embedded NULs, dense matches, and allocation-limit traps
 - `aesop_time.py` checks the local time Package, generated C, wall-clock agreement, deadlines, bounded sleeps and shipped demo
 - `awl_editor.py` checks the offline editor interpreter and checks every bundled example with `acc`
 - `test_native.py` runs the native lexer, frontend, independent verifier, ownership, vector, enum, process and inference phases with ASan/UBSan

@@ -4,6 +4,27 @@ Awl is intended to compete with rust as a native systems language, outperforming
 
 performance claims need measured equivalent work, consumed results and reproducible optimized builds, safety checks aren't disabled to manufacture wins, all wins and losses belong in the report
 
+## Current source: replacing text in UTF-8 records
+
+`string.replace` previously made and retained a growing text allocation for each match. It now counts non-overlapping occurrences, checks the exact result size, and copies into one final allocation. If there is no change or the result is empty, it doesn't allocate a result. The same UTF-8 rules and text heap bounds still apply; only the unnecessary intermediate allocations went away.
+
+[The reproducible workload](../benchmarks/text_replace.py) runs the same generated program before and after the change. It reads synthetic UTF-8 log records from stdin, replaces a field value, and writes the resulting text. Python checks the entire output including its byte and scalar lengths. Times below are nine shuffled warm whole-process samples on Linux x86-64, GCC 12.2 `-O3` (build time excluded):
+
+| workload | before | after |
+| :--- | ---: | ---: |
+| 512 replacements | 8.055 ms | 2.231 ms |
+| same input with no matches | 2.296 ms | 2.232 ms |
+
+That is about **3.6× as fast** on the matching workload. A separate input with 8,192 matches is **not timed**: the old runtime hit the text heap limit, while the new runtime completed and matched the oracle. This comparison is against the previous Awl implementation only, not against Rust or C++. See the [raw measurements and toolchain hashes](../benchmarks/text-replace.json).
+
+```sh
+python3 compiler/build_native.py --standalone --strip
+python3 tests/text_replace.py --sanitize
+python3 benchmarks/text_replace.py --before /path/to/previous/acc --report /tmp/awl-text-replace.json
+```
+
+The recorded baseline is `b0b0d37`; build both ACC binaries with the same options. Substring search still does candidate byte comparisons, so this is an improvement in result construction, not a guarantee of linear-time substring matching for every pattern.
+
 ## Current source: checked 64-bit arithmetic
 
 ACC emits feature-tested overflow intrinsics for `i64` and `u64` addition, subtraction and multiplication. A supporting C compiler can use the CPU's overflow or carry flag rather than separate range checks. Overflow still traps at every optimization level, including signed-minimum negation. The guarded C11 implementation remains the fallback when the intrinsics are unavailable. Compile emitted C with `-DAWL_PORTABLE_ARITHMETIC` to select that fallback explicitly without disabling checks. Division, remainder and other widths are unchanged.

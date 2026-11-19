@@ -58,6 +58,8 @@ type tests are static predicates, they do not introduce a dynamic `any` type, th
 
 the complete signature table is `compiler/native/platform-signatures.inc`, the compiler's independent verifier checks every signature and rejects forged result metadata
 
+`string.replace(text, needle, replacement)` replaces exact, non-overlapping UTF-8 matches from left to right without rescanning inserted text. An empty needle traps; an empty replacement deletes matches. Matching does not normalize Unicode. The runtime allocates at most one immutable result, with no growing intermediate copies. Returned text still counts against the existing process-lifetime text budget.
+
 ## evidence
 
 source-current native and sanitizer checks live in `tests/aesop.py`, `tests/aesop_time.py` and `compiler/test_native.py`, the bundled editor subset is checked by `tests/awl_editor.py`

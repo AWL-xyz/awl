@@ -1,3 +1,7 @@
+# unreleased text runtime
+
+- `string.replace` no longer retains intermediate copies; a changed, nonempty result is allocated once. Exact UTF-8 matching, empty-needle traps, and text heap limits are unchanged. See the [before/after benchmark](docs/PERFORMANCE.md#current-source-replacing-text-in-utf-8-records).
+
 # unreleased toolkit workflow and checked arithmetic
 
 - Emitted `i64` and `u64` add/subtract/multiply use overflow intrinsics when the C compiler supports them, with the previous guarded C11 fallback. Checks and traps stay enabled. A reproducible signed arithmetic microbenchmark measures about 5.3% lower runtime than the previous Awl compiler on one Linux x86-64 host; see [performance evidence](docs/PERFORMANCE.md#current-source-checked-64-bit-arithmetic).

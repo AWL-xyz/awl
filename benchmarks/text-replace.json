@@ -1,0 +1,98 @@
+{
+  "scope": "Awl before/after only; UTF-8 log replacements with exact in/out validation",
+  "method": "Warm whole-process wall time, shuffled pairs; build and Python oracle excluded",
+  "host": "Linux-6.1.158+-x86_64-with-glibc2.36",
+  "cpu": "Intel(R) Xeon(R) Processor @ 2.60GHz",
+  "affinity": [
+    0
+  ],
+  "cc": "cc (Debian 12.2.0-14+deb12u1) 12.2.0",
+  "flags": [
+    "-std=c11",
+    "-O3",
+    "-march=x86-64",
+    "-lm"
+  ],
+  "compiler_sha256": {
+    "before": "e5e2b696f331c391722514e3671c87931c9c5616518f35805671917323b6fe3b",
+    "after": "109d6c979c721c6acefc0c34e12368e82878943b86d873c1e02e79a3f08599d5"
+  },
+  "harness_sha256": "5e31fb0be611f5020e313d27909d3fd80e792d7a48dad078db35a19a7e6afe81",
+  "source_sha256": "c1d35591f626f0f105974a236bb2f2e97bdb33a7258e247a5affe3ba82f5617a",
+  "results": {
+    "512 replacements": {
+      "input_text_bytes": 32256,
+      "matches": 512,
+      "timing": {
+        "before": {
+          "median_ms": 8.054638,
+          "samples_ms": [
+            9.084789,
+            9.385416,
+            8.73039,
+            9.307535,
+            8.054638,
+            7.883287,
+            7.780516,
+            7.586172,
+            7.49802
+          ]
+        },
+        "after": {
+          "median_ms": 2.230707,
+          "samples_ms": [
+            2.286478,
+            2.29754,
+            2.212428,
+            2.509666,
+            2.25458,
+            2.212286,
+            2.182364,
+            2.194184,
+            2.230707
+          ]
+        }
+      }
+    },
+    "no matches": {
+      "input_text_bytes": 32256,
+      "matches": 0,
+      "timing": {
+        "before": {
+          "median_ms": 2.296256,
+          "samples_ms": [
+            2.232667,
+            2.310444,
+            2.224866,
+            2.224931,
+            2.610354,
+            2.551948,
+            2.359254,
+            2.296256,
+            2.217063
+          ]
+        },
+        "after": {
+          "median_ms": 2.231641,
+          "samples_ms": [
+            2.231641,
+            2.287134,
+            2.116947,
+            2.162066,
+            2.236705,
+            2.612802,
+            2.153165,
+            2.432246,
+            2.185103
+          ]
+        }
+      }
+    }
+  },
+  "larger_workload_not_timed": {
+    "input_text_bytes": 516096,
+    "matches": 8192,
+    "before": "string limit trap",
+    "after": "verified"
+  }
+}

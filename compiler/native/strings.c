@@ -6,6 +6,7 @@
 typedef struct { const unsigned char *data; uint64_t bytes,scalars; } KString;
 _Static_assert(sizeof(KString)==24 && _Alignof(KString)==8,"Awl string ABI requires 24-byte size and 8-byte alignment");
 typedef struct KStringAllocation {struct KStringAllocation *next;size_t bytes;} KStringAllocation;
+#define K_STRING_HEAP_LIMIT ((size_t)64*1024*1024)
 static KStringAllocation *k_string_allocations;
 static size_t k_string_heap_bytes,k_string_heap_count;
 static int k_string_cleanup_registered;
@@ -20,7 +21,7 @@ static void k_string_cleanup(void) {
     k_string_heap_bytes=0;k_string_heap_count=0;
 }
 static unsigned char *k_string_allocate(size_t size) {
-    if(size>64u*1024u*1024u-k_string_heap_bytes||k_string_heap_count>=65536) k_string_trap();
+    if(size>K_STRING_HEAP_LIMIT-k_string_heap_bytes||k_string_heap_count>=65536) k_string_trap();
     if(!k_string_cleanup_registered) {
         if(atexit(k_string_cleanup)) k_string_trap();
         k_string_cleanup_registered=1;
@@ -98,7 +99,7 @@ static KString k_string_from_u64(uint64_t value) {
 static KString k_string_concat(KString a,KString b) {
     if(!a.bytes) return b;
     if(!b.bytes) return a;
-    if(a.bytes>64u*1024u*1024u||b.bytes>64u*1024u*1024u-a.bytes) k_string_trap();
+    if(a.bytes>K_STRING_HEAP_LIMIT||b.bytes>K_STRING_HEAP_LIMIT-a.bytes) k_string_trap();
     size_t n=a.bytes+b.bytes;
     unsigned char *p=k_string_allocate(n);
     memcpy(p,a.data,a.bytes);memcpy(p+a.bytes,b.data,b.bytes);
@@ -138,18 +139,44 @@ static int64_t k_string_find(KString s,KString needle) {
 static bool k_string_contains(KString s,KString needle) { return k_string_find(s,needle)>=0; }
 static bool k_string_starts_with(KString s,KString prefix) { return prefix.bytes<=s.bytes&&(!prefix.bytes||!memcmp(s.data,prefix.data,prefix.bytes)); }
 static bool k_string_ends_with(KString s,KString suffix) { return suffix.bytes<=s.bytes&&(!suffix.bytes||!memcmp(s.data+s.bytes-suffix.bytes,suffix.data,suffix.bytes)); }
+/* An exact match of nonempty, valid UTF-8 starts on a scalar boundary:
+ * the first byte of the needle cannot be a UTF-8 continuation byte. */
+static size_t k_string_next_match(KString s,KString needle,size_t start) {
+    if(needle.bytes>s.bytes-start) return (size_t)s.bytes;
+    const size_t limit=(size_t)(s.bytes-needle.bytes)+1;
+    while(start<limit) {
+        const unsigned char *hit=memchr(s.data+start,needle.data[0],limit-start);
+        if(!hit) break;
+        const size_t at=(size_t)(hit-s.data);
+        if(needle.bytes==1||!memcmp(hit+1,needle.data+1,(size_t)needle.bytes-1)) return at;
+        start=at+1;
+    }
+    return (size_t)s.bytes;
+}
 static KString k_string_replace(KString s,KString from,KString to) {
     if(!from.bytes) k_string_trap();
-    KString out={s.data,0,0};bool first=true;size_t p=0,start=0;
-    while(p+from.bytes<=s.bytes) {
-        if(!memcmp(s.data+p,from.data,from.bytes)) {
-            KString part={s.data+start,p-start,0};for(size_t i=start;i<p;i+=k_string_width(s.data[i])) ++part.scalars;
-            out=first?part:k_string_concat(out,part);first=false;out=k_string_concat(out,to);p+=from.bytes;start=p;
-        } else p+=k_string_width(s.data[p]);
+    if(k_string_equal(from,to)) return s;
+    const size_t first=k_string_next_match(s,from,0);
+    if(first==s.bytes) return s;
+    // Count nonoverlapping matches, then allocate only the final result. The
+    // old concatenation loop retained a growing copy for every replacement.
+    size_t matches=0;
+    for(size_t at=first;at<s.bytes;at=k_string_next_match(s,from,at+(size_t)from.bytes)) ++matches;
+    const size_t kept=(size_t)s.bytes-matches*(size_t)from.bytes;
+    if(to.bytes && matches>(K_STRING_HEAP_LIMIT-kept)/to.bytes) k_string_trap();
+    const size_t bytes=kept+matches*(size_t)to.bytes;
+    if(!bytes) return to;
+    unsigned char *out=k_string_allocate(bytes);
+    size_t cursor=0,written=0;
+    for(size_t at=first;at<s.bytes;at=k_string_next_match(s,from,cursor)) {
+        const size_t span=at-cursor;
+        if(span) {memcpy(out+written,s.data+cursor,span);written+=span;}
+        if(to.bytes) {memcpy(out+written,to.data,(size_t)to.bytes);written+=(size_t)to.bytes;}
+        cursor=at+(size_t)from.bytes;
     }
-    if(first) return s;
-    KString tail={s.data+start,s.bytes-start,0};for(size_t i=start;i<s.bytes;i+=k_string_width(s.data[i])) ++tail.scalars;
-    return k_string_concat(out,tail);
+    if(cursor<s.bytes) memcpy(out+written,s.data+cursor,(size_t)s.bytes-cursor);
+    const uint64_t scalars=s.scalars-matches*from.scalars+matches*to.scalars;
+    return (KString){out,bytes,scalars};
 }
 static KString k_string_from_bool(bool v) { return v?(KString){(const unsigned char *)"true",4,4}:(KString){(const unsigned char *)"false",5,5}; }
 static void k_print_string(KString s) {
