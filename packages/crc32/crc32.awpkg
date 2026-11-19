@@ -1,0 +1,6 @@
+format: 1
+kind: package
+name: crc32
+version: 0.1.0
+entry: crc32.aw
+syntax: aesop

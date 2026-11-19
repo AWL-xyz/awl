@@ -52,6 +52,28 @@ func main {
 expect(r.code===0&&JSON.stringify(r.out)===JSON.stringify(['90','-9223372036854775808','false','false','false','false']),'strict signed decimal text and inferred result');
 let decimalTrap=false;try{run([{name:'main.aw',text:'func main { return string.toi64("+x"); };'}],'main.aw');}catch(e){decimalTrap=e.trap&&e.message.includes('invalid signed integer');}
 expect(decimalTrap,'invalid decimal text traps');
+r=run([{name:'main.aw',text:`@p high: bits.shl(1u64, 63);
+func invert :: x:u64 { return bits.not(x); };
+func count :: x:u64 { return bits.popcount(invert(x)); };
+func main {
+  print(bits.and(high, 18446744073709551615u64));
+  print(bits.or(high, 1u64)); print(bits.xor(high, high));
+  print(bits.shl(255u8, 7)); print(bits.shr(high, 63));
+  print(bits.rotl(high, 1)); print(bits.rotr(1u64, 1)); print(bits.rotl(15u16, 0));
+  print(count(high)); return 0;
+};`}],'main.aw');
+expect(r.code===0&&JSON.stringify(r.out)===JSON.stringify(['9223372036854775808','9223372036854775809','0','128','1','1','9223372036854775808','15','63']),'exact unsigned words and inferred bit operation results');
+for (const expression of ['bits.shl(1u8, -1)', 'bits.rotr(1u64, 64)']) {
+  let trapped=false;try{run([{name:'main.aw',text:`func main { print(${expression}); return 0; };`}],'main.aw');}catch(e){trapped=e.trap&&e.message.includes('bit count outside word width');}
+  expect(trapped,'invalid bit count traps: '+expression);
+}
+for (const expression of ['bits.not(1)', 'bits.xor(1u8, 1u64)', 'bits.shr(1u8, 1u8)']) {
+  let rejected=false;try{run([{name:'main.aw',text:`func main { print(${expression}); return 0; };`}],'main.aw');}catch(e){rejected=!e.trap&&e.message.includes('needs');}
+  expect(rejected,'invalid bit argument type: '+expression);
+}
+r=run([{name:'main.aw',text:'use Mask.aw as bits; func main { print(bits.xor(3, 4)); return 0; };'},
+       {name:'Mask.aw',text:'exports{ @r func xor[i64] :: a:i64, b:i64 { return a + b; }; };'}],'main.aw');
+expect(r.code===0&&r.out[0]==='7','module aliases take precedence over the bits namespace');
 r=run([{name:'main.aw',text:'func main { @p w: window.open(2,2); print(window.width(w)); window.title(w,"x"); print(window.present(w)); window.close(w); return 0; };'}],'main.aw');
 expect(r.code===0&&r.out[0]==='2'&&r.out[1]==='true','namespace window API');
 let mixed=false;try{run([{name:'main.aw',text:'func main { @p a: 2; @p b: 1.5; print(a * b); return 0; };'}],'main.aw');}catch(e){mixed=true;}expect(mixed,'strict mixed numeric arithmetic');

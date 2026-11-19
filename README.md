@@ -23,7 +23,7 @@
 | compiler | **Awl Compiler Collection (ACC)**, native C++20 frontend with checked IR, an independent verifier and a C11 backend |
 | source files | `.aw` |
 | manifests | `.awproj` for projects, `.awpkg` for local Packages |
-| public toolkit | `awl new`, `awl init`, `awl add` (local Packages), `awl check`, `awl build`, `awl run`, `awl test` |
+| public toolkit | `awl new`, `awl init`, `awl add` (local Packages), `awl fmt`, `awl check`, `awl build`, `awl run`, `awl test` |
 | development version | `0.26.0-dev`, a development identifier, not a compatibility guarantee |
 | release readiness | experimental source candidate, not production-ready |
 
@@ -56,6 +56,7 @@ func main[i64] {
 - `@p count: 3;` declares a binding, `count: count - 1;` assigns it
 - braced functions/control flow and mandatory semicolons are part of Aesop, enums and matches retain their documented `end;` forms
 - `vector.length(value)` queries vector length
+- [`bits.xor(a, b)`, `bits.shl(word, count)`, and related calls](docs/API.md#unsigned-bit-operations) work on exact-width unsigned integers
 
 `@b` explicitly borrows a resource parameter, an unmarked parameter does not acquire borrow permission, scoped resources must still follow the ownership rules, resource results require an explicit result/ownership annotation
 
@@ -85,6 +86,8 @@ awl build Demo --cc "$(command -v cc)"
 
 ### toolkit workflow
 
+`awl fmt Demo/main.aw` previews indentation and line-ending cleanup. Use `awl fmt --check Demo/main.aw` to check formatting in CI or `awl fmt --write Demo/main.aw` for atomic replacement on Unix. The formatter checks source syntax without loading imports or invoking a backend.
+
 `check`, `build`, `run`, and `test` all accept the same targets: omit the target for the sole `.awproj` in the current directory, pass `Demo` to look for `Demo.awproj` in immediate child directories, or pass a `.aw` file directly. `awl run` passes arguments after `--` to the program and doesn't keep an executable. `awl test` runs `.test.aw` files beside a project's entry and keeps no executables. Use `--filter`, `--list`, `--check`, or `--fail-fast` to narrow or inspect a suite. Try the [testing example](examples/testing/).
 
 For example, from the repository root, run the shipped sort utility with redirected input:
@@ -112,6 +115,7 @@ Project-local file imports still use `use path/File.aw as alias;`.
 | Package | source implementation |
 | :--- | :--- |
 | `csv` | [UTF-8 CSV parsing and encoding](docs/CSV.md), with a [runnable summary demo](examples/csv-demo/) |
+| `crc32` | [Streaming byte checksums](docs/CRC32.md), with a [binary stdin demo](examples/crc32-demo/) |
 | `env` | dotenv parsing and environment-file helpers |
 | `json` | JSON parsing and query helpers |
 | `fsp` | filesystem path helpers |

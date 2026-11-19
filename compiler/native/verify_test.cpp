@@ -365,6 +365,15 @@ int main() {
             [](Unit &v){v.arena[find_kind(v,"call","string_i64_valid")].children.clear();},
             [](Unit &v){v.arena[find_kind(v,"call","string_to_i64")].children[0]=find_kind(v,"int");}
         }) {Unit bad=*decimal_seed;change(bad);verify_expected(bad,false);++targeted;}
+        auto bits_seed=checked_source("@p mask u8: bits.shl(1u8, 7); func main { print(bits.xor(mask, 1u8)); return bits.popcount(mask); };");
+        verify_expected(*bits_seed,true);
+        for(const auto &change:std::vector<std::function<void(Unit&)>>{
+            [](Unit &v){v.arena[find_kind(v,"call","bits_shl_u8")].value="bits_shl_u16";},
+            [](Unit &v){auto &count=v.arena[v.arena[find_kind(v,"call","bits_shl_u8")].children[1]];count.kind="uint";count.type=count.literal="u8";},
+            [](Unit &v){v.arena[find_kind(v,"call","bits_xor_u8")].children.pop_back();},
+            [](Unit &v){v.arena[find_kind(v,"call","bits_xor_u8")].value="bits_xor";},
+            [](Unit &v){v.arena[find_kind(v,"call","bits_popcount_u8")].type="u8";}
+        }) {Unit bad=*bits_seed;change(bad);verify_expected(bad,false);++targeted;}
         auto file_seed=checked_source("func main[i64] { @p f i64: file.open(\"input\", 0); defer file.close(f); print(file.valid(f)); print(file.size(f)); return 0; };");verify_expected(*file_seed,true);
         for(const auto &change:std::vector<std::function<void(Unit&)>>{
             [](Unit &v){v.arena[find_kind(v,"call","file_close")].type="unit";},

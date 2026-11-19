@@ -179,7 +179,7 @@ class Verifier {
     }
     std::string expression(Id id,Scope &env,bool borrow=false,const std::unordered_set<std::string> *transfer_scope=nullptr,bool adopt=false) {
         const auto &n=at(id); const auto &k=n.kind;
-        if(initializing_global) need(k=="global_ref"||k=="float"||k=="int"||k=="uint"||k=="bool"||k=="string"||k=="unary"||k=="binary"||k=="convert"||k=="type_test"||k=="format"||k=="concat"||(k=="call"&&math_signatures.contains(n.value)),"impure/non-scalar module initializer");
+        if(initializing_global) need(k=="global_ref"||k=="float"||k=="int"||k=="uint"||k=="bool"||k=="string"||k=="unary"||k=="binary"||k=="convert"||k=="type_test"||k=="format"||k=="concat"||(k=="call"&&(math_signatures.contains(n.value)||bit_specialization(n.value))),"impure/non-scalar module initializer");
         std::string ty;
         if(k=="array_repeat") {
             shape(id,k,1);need(u.project_syntax,"repeated array requires project syntax");
@@ -227,6 +227,8 @@ class Verifier {
             need(ident(n.value),"invalid callee name");
             const auto resolved=container_signature(n.value);
             need(!(map_call(n.value)||set_call(n.value)),"unresolved map/set operation");
+            need(!bit_methods.contains(n.value),"unresolved bit operation");
+            if(bit_specialization(n.value)) need(u.aesop_syntax,"bit operation outside Aesop syntax");
             if(k=="call"&&functions.contains(n.value)&&functions.at(n.value).owns_result) need(adopt,"unadopted owned call result");
             std::vector<std::string> args;
             static const std::unordered_set<std::string> allowed={"spool_valid","spool_reserve","spool_truncate","spool_clear","spool_capacity","spool_bytes","spool_length","spool_append","spool_codepoint","spool_i64","spool_u64","spool_print","spool_snapshot","int_vector_valid","int_vector_length","int_vector_capacity","int_vector_reserve","int_vector_push","int_vector_pop","int_vector_get","int_vector_set","int_vector_clear","int_vector_insert","int_vector_remove"};
@@ -418,7 +420,7 @@ public:
         if(u.aesop_syntax) for(const auto &e:generic_elements) {layouts["vector<"+e+">"]={8,8,0};layouts["view<"+e+">"]={32,8,0};}
         for(auto id:u.roots) {
             const auto &d=at(id); need(d.kind=="struct"||d.kind=="union"||d.kind=="function"||(u.aesop_syntax&&d.kind=="global"),"invalid declaration kind");
-            need(!(u.aesop_syntax&&(generic_call(d.value)||view_call(d.value)||d.value=="pi"||d.value=="tau"||math_signatures.contains(d.value)))&&ident(d.value)&&d.value!="print"&&d.value!="array_length"&&d.value!="isnum"&&!platform_signatures.contains(d.value)&&names.insert(d.value).second,"invalid/duplicate declaration name");
+            need(!(u.aesop_syntax&&(generic_call(d.value)||view_call(d.value)||bit_methods.contains(d.value)||d.value=="pi"||d.value=="tau"||math_signatures.contains(d.value)))&&ident(d.value)&&d.value!="print"&&d.value!="array_length"&&d.value!="isnum"&&!platform_signatures.contains(d.value)&&names.insert(d.value).second,"invalid/duplicate declaration name");
             if(u.aesop_syntax) {if((d.kind=="union"||d.kind=="struct")&&!u.origins.empty()) need(d.value.starts_with("km_"+std::to_string(file_of(d))+"_"),"enum or struct/module provenance mismatch");}
             if(d.kind=="struct") records[d.value]=id; else if(d.kind=="union") sums[d.value]=id;
         }

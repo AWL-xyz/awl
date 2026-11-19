@@ -9,25 +9,31 @@ python3 compiler/generate_platform.py --check
 python3 compiler/generate_strings.py --check
 python3 compiler/generate_arguments.py --check
 python3 tests/toolkit.py --acc compiler/native/bin/acc
+python3 tests/formatter.py --acc compiler/native/bin/acc
 python3 tests/aesop.py --acc compiler/native/bin/acc --report tests/aesop-checks.json
 python3 tests/aesop.py --sanitize-programs --report tests/aesop-program-sanitizers.json
 python3 tests/checked_arithmetic.py --acc compiler/native/bin/acc
+python3 tests/bit_operations.py --sanitize
 python3 tests/text_runtime.py --sanitize
 python3 tests/text_replace.py --sanitize
 python3 tests/byte_search_sort.py --sanitize
 python3 tests/csv_package.py --sanitize
+python3 tests/crc32_package.py --sanitize
 python3 tests/aesop_time.py --acc compiler/native/bin/acc --sanitize --report tests/aesop-time.json
 python3 tests/awl_editor.py --acc compiler/native/bin/acc --report tests/aesop-editor.json
 python3 compiler/test_native.py --sanitize --report tests/aesop-native.json.gz
 ```
 
 - `toolkit.py` checks new/init/add/check/build/run/test on Linux x86-64 without a bundled SDK, including scaffold rollback, local Package copying, manifest errors, output protection, filtering, list/check-only modes, fail-fast, EOF, timeouts, and interrupted-suite cleanup
+- `formatter.py` checks syntax-only formatting, identical C emission, idempotence on shipped sources, bounded input/output, and atomic-write rollback and permission checks
 - `aesop.py` checks declarations, generated native execution, CLI starters, ABI v2, conversion/type tests and rejection cases
 - `checked_arithmetic.py` checks emitted `i64` and `u64` math against Python with UBSan, covering checked intrinsics and the portable C11 fallback at `-O0` and `-O3`
+- `bit_operations.py` checks all nine unsigned bit operations on all four widths against Python, runtime count traps at `-O0` and `-O3`, invalid arguments, and selective C emission
 - `text_runtime.py` checks emitted scalar slicing and indexing against Python, covers embedded NULs and bounds traps, and checks strict signed decimal text and argv parsing against an integer oracle
 - `text_replace.py` checks the emitted UTF-8 replacement runtime against Python, including embedded NULs, dense matches, and allocation-limit traps
 - `byte_search_sort.py` checks emitted byte searches against Python, rejects invalid ranges and handles, and tests sort output with forced short writes, write errors, UTF-8 edge cases, and input limits
 - `csv_package.py` checks offline vendoring, seeded CSV tables against Python, malformed inputs, byte/field/row limits, the stdin demo and its `awl test` suite
+- `crc32_package.py` checks local vendoring, binary ranges and split updates against zlib, checked bounds, and CLI streaming and I/O errors
 - `aesop_time.py` checks the local time Package, generated C, wall-clock agreement, deadlines, bounded sleeps and shipped demo
 - `awl_editor.py` checks the offline editor interpreter and checks every bundled example with `acc`
 - `test_native.py` runs the native lexer, frontend, independent verifier, ownership, vector, enum, process and inference phases with ASan/UBSan

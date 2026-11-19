@@ -1,5 +1,7 @@
 # Awl 0.5: exact-width integers and checked conversions
 
+This is a historical account of 0.5. For current Aesop syntax, conversions, and unsigned bit operations, see the [built-in API](API.md).
+
 **Implemented in 0.5, partial M1.** This document records that increment;
 [NATIVE-COMPILER.md](archive/NATIVE-COMPILER.md) describes the subsequent 0.6 host migration. The fixed-width integer family is now complete at
 8, 16, 32 and 64 bits. This is not completion of the whole language: references,

@@ -90,3 +90,28 @@ def integer_runtime(required=None):
             add(f'k_convert_{src}_{dst}',f'static {CT[dst]} k_convert_{src}_{dst}({CT[src]} a) {{ {guard}return ({CT[dst]})a; }}')
     return '\n'.join(lines)+'\n'
 
+
+def bit_runtime():
+    """Exact-width unsigned operations; shift only a widened unsigned word."""
+    for ty, (signed, width) in INTEGERS.items():
+        if signed:
+            continue
+        ct = CT[ty]
+        for method, op in [('and', '&'), ('or', '|'), ('xor', '^')]:
+            name = f'k_bits_{method}_{ty}'
+            yield name, f'static {ct} {name}({ct} a, {ct} b) {{ return ({ct})(a {op} b); }}\n'
+        name = f'k_bits_not_{ty}'
+        yield name, f'static {ct} {name}({ct} a) {{ return ({ct})(~(uint64_t)a); }}\n'
+        guard = f'if ((uint64_t)n >= {width}) k_trap();'
+        for method, op in [('shl', '<<'), ('shr', '>>'), ('rotl', '<<'), ('rotr', '>>')]:
+            name = f'k_bits_{method}_{ty}'
+            if method.startswith('rot'):
+                other = '>>' if op == '<<' else '<<'
+                body = f'if (n == 0) return a; return ({ct})(((uint64_t)a {op} n) | ((uint64_t)a {other} ({width}-n)));'
+            else:
+                body = f'return ({ct})((uint64_t)a {op} n);'
+            yield name, f'static {ct} {name}({ct} a, int64_t n) {{ {guard} {body} }}\n'
+        name = f'k_bits_popcount_{ty}'
+        yield name, (f'static int64_t {name}({ct} a) {{ uint64_t word=a; int64_t count=0; '
+                     'while (word) { word &= word-1; ++count; } return count; }\n')
+

@@ -272,7 +272,7 @@ const KEYWORDS = new Set(['func','use','exports','enum','if','elseif','else','wh
 const CONSTS = new Set(['true','false','pi','tau']);
 const TYPES = new Set(['i8','i16','i32','i64','u8','u16','u32','u64','f64','bool','unit','string','text','spool','vector','view']);
 const BUILTIN_EXACT = new Set(['print','isnum','convert','match','sin','cos','sqrt','atan2']);
-const BUILTIN_PREFIX = /^(spool|vector|view|intvector|window|buffer|file|arg|string|clock|tcp|env|process|platform|stdin|stdout|stderr|array|map|set|i8|i16|i32|i64|u8|u16|u32|u64|f64|bool|text|unit)$/;
+const BUILTIN_PREFIX = /^(bits|spool|vector|view|intvector|window|buffer|file|arg|string|clock|tcp|env|process|platform|stdin|stdout|stderr|array|map|set|i8|i16|i32|i64|u8|u16|u32|u64|f64|bool|text|unit)$/;
 
 /* ---------- example sources ---------- */
 const LIB_AW = `@p version: 128.59;
@@ -1296,6 +1296,31 @@ function kernRun(src, out, vis, lib) {
     const v = BigInt(digits || '0') * (s[0] === '-' ? -1n : 1n);
     return v < INT.i64[0] || v > INT.i64[1] ? null : v;
   };
+  const wordBits = { u8:8, u16:16, u32:32, u64:64 };
+  const bitMethods = ['and', 'or', 'xor', 'not', 'shl', 'shr', 'rotl', 'rotr', 'popcount'];
+  const bitCall = (method, a, n) => {
+    const name = 'bits.' + method, unary = method === 'not' || method === 'popcount';
+    if (a.length !== (unary ? 1 : 2)) throw err(name + ' has the wrong number of arguments', n);
+    const type = kind(a[0]), width = wordBits[type];
+    if (typeof width !== 'number') throw err(name + ' needs a u8, u16, u32 or u64 first argument', n);
+    const x = a[0].v, word = v => ({ t:type, v:BigInt.asUintN(width, v) });
+    if (method === 'not') return word(~x);
+    if (method === 'popcount') {
+      let count = 0n;
+      for (let value = x; value; value &= value - 1n) ++count;
+      return i64(count);
+    }
+    if (method === 'and' || method === 'or' || method === 'xor') {
+      const y = need(a[1], type, n, name).v;
+      return word(method === 'and' ? x & y : method === 'or' ? x | y : x ^ y);
+    }
+    const shift = need(a[1], 'i64', n, name).v, bits = BigInt(width);
+    if (shift < 0n || shift >= bits) throw trap('bit count outside word width', n);
+    if (method === 'shl') return word(x << shift);
+    if (method === 'shr') return word(x >> shift);
+    if (!shift) return a[0];
+    return word(method === 'rotl' ? (x << shift) | (x >> (bits - shift)) : (x >> shift) | (x << (bits - shift)));
+  };
   const W = {
     window_open: a => { const w = Number(a[0].v), h = Number(a[1].v); if (vis.w || w < 1 || h < 1 || w > 1024 || h > 1024) return i64(0); vis.w = w; vis.h = h; vis.buf = new Uint8ClampedArray(w * h * 4); for (let i = 3; i < vis.buf.length; i += 4) vis.buf[i] = 255; return i64(1); },
     window_width: () => i64(vis.w), window_height: () => i64(vis.h),
@@ -1325,6 +1350,7 @@ function kernRun(src, out, vis, lib) {
     string_compare: a => i64(a[0] === a[1] ? 0 : a[0] < a[1] ? -1 : 1)
   };
   const NAMESPACES = {
+    bits: Object.fromEntries(bitMethods.map(method => [method, (a,n) => bitCall(method,a,n)])),
     window: { open:B.window_open, width:B.window_width, height:B.window_height, pixel:B.window_set_pixel, present:B.window_present, poll:B.window_poll, key:B.window_key, mousex:B.window_mouse_x, mousey:B.window_mouse_y, title:B.window_set_title, close:B.window_close },
     clock: { millis:B.clock_millis, wall:B.wall_clock_millis, sleep:B.sleep_millis },
     string: { length:B.string_length, bytes:B.string_bytes, slice:B.string_slice, codepoint:B.string_codepoint, fromcodepoint:B.string_from_codepoint, fromi64:B.string_from_i64, fromu64:B.string_from_u64, compare:B.string_compare,
@@ -1444,6 +1470,8 @@ function kernRun(src, out, vis, lib) {
           const key = f.e.name + '.' + f.name;
           if (f.name === 'convert' && (INT[f.e.name] || f.e.name === 'f64')) return f.e.name;
           if (f.name === 'match' && typeNamespace(f.e.name)) return 'bool';
+          if (f.e.name === 'bits' && bitMethods.includes(f.name) && !mod.al.bits && e.args.length)
+            return f.name === 'popcount' ? 'i64' : expressionType(e.args[0], env);
           if (builtinTypes[key]) return builtinTypes[key];
           const other = mod.al[f.e.name];
           if (other && other.prog.fns[f.name] && other.prog.fns[f.name].exp) return inferEditorResult(other.prog.fns[f.name], other);
@@ -1489,7 +1517,10 @@ function kernRun(src, out, vis, lib) {
   }
   function call(n, sc) {
     const f = n.f, a = n.args.map(x => ev(x, sc));
-    if (f.k === 'mem' && f.e.k === 'var' && NAMESPACES[f.e.name] && NAMESPACES[f.e.name][f.name]) return NAMESPACES[f.e.name][f.name](a, n);
+    if (f.k === 'mem' && f.e.k === 'var' && !cur.al[f.e.name]) {
+      const namespace = NAMESPACES[f.e.name];
+      if (Object.hasOwn(NAMESPACES, f.e.name) && Object.hasOwn(namespace, f.name)) return namespace[f.name](a, n);
+    }
     if (f.k === 'mem' && f.e.k === 'var' && (f.name === 'convert' || f.name === 'match') && typeNamespace(f.e.name)) {
       if (a.length !== 1) throw err(f.e.name + '.' + f.name + ' takes one value', n);
       if (f.name === 'match') return kind(a[0]) === (f.e.name === 'text' ? 'string' : f.e.name);

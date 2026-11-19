@@ -33,7 +33,7 @@ class Project {
         for(;r!=root.end();++r,++p) if(p==path.end()||*r!=*p) return false;
         return true;
     }
-    bool builtin(const std::string &name) const {return (aesop&&(generic_call(name)||view_call(name)||map_call(name)||set_call(name)||map_specialization(name)||set_specialization(name)||bool(new_container_type(name))))||name=="print"||name=="array_length"||name=="isnum"||platform_signatures.contains(name)||(aesop&&(name=="pi"||name=="tau"||math_signatures.contains(name)));}
+    bool builtin(const std::string &name) const {return (aesop&&(generic_call(name)||view_call(name)||bit_methods.contains(name)||map_call(name)||set_call(name)||map_specialization(name)||set_specialization(name)||bool(new_container_type(name))))||name=="print"||name=="array_length"||name=="isnum"||platform_signatures.contains(name)||(aesop&&(name=="pi"||name=="tau"||math_signatures.contains(name)));}
     size_t load(const Path &requested,unsigned depth,size_t importer=SIZE_MAX,uint32_t token=0) {
         std::error_code ec;
         if(aesop) {

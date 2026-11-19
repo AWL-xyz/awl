@@ -8,6 +8,8 @@ see [built-in API and conversions](API.md) for grouped `namespace.method(...)` c
 
 mixed integer and `f64` arithmetic is strict, use `f64.convert(...)` or an integer `convert(...)` explicitly, there is no implicit widening or narrowing
 
+Use the [`bits` namespace](API.md#unsigned-bit-operations) for fixed-width unsigned bit operations. These are calls, not new operator syntax.
+
 ## function declarations
 
 ```text

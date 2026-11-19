@@ -194,7 +194,7 @@ class Checker {
         if(node.kind=="unit") {if(node.type!="unit") error(id,"invalid unit expression");return "unit";}
         if(node.kind=="name"&&!env.contains(node.value)) {const auto target=global_name(node.value);if(!target.empty()) {node.kind="global_ref";node.value=target;}}
         const auto kind=node.kind;
-        if(initializing_global&&kind!="name"&&kind!="global_ref"&&kind!="float"&&kind!="int"&&kind!="uint"&&kind!="bool"&&kind!="string"&&kind!="unary"&&kind!="binary"&&kind!="convert"&&kind!="format"&&kind!="concat"&&kind!="type_test"&&!(kind=="call"&&math_signatures.contains(node.value))) error(id,"module initializers currently permit scalar literals, earlier module variables and pure arithmetic/math only","E230");
+        if(initializing_global&&kind!="name"&&kind!="global_ref"&&kind!="float"&&kind!="int"&&kind!="uint"&&kind!="bool"&&kind!="string"&&kind!="unary"&&kind!="binary"&&kind!="convert"&&kind!="format"&&kind!="concat"&&kind!="type_test"&&!(kind=="call"&&(math_signatures.contains(node.value)||bit_methods.contains(node.value)||bit_specialization(node.value)))) error(id,"module initializers currently permit scalar literals, earlier module variables and pure arithmetic/math only","E230");
         if(kind=="array_repeat") {
             const auto count=array_type("[i64;"+node.value+"]");
             if(!u.project_syntax||node.children.size()!=1||!count) error(id,"invalid repeated array");
@@ -307,6 +307,13 @@ class Checker {
             if(view_call(node.value)) {
                 if(args.empty()||!view_type(args[0])) error(id,"view operation requires a typed view as its first argument");
                 node.value+="_"+*view_type(args[0]);
+            }
+            if(!u.aesop_syntax&&(bit_methods.contains(node.value)||bit_specialization(node.value)))
+                error(id,"bit operations require Aesop syntax");
+            if(bit_methods.contains(node.value)) {
+                if(args.empty()||!bit_word(args[0]))
+                    error(id,builtin_surface_call(node.value)+" requires a u8, u16, u32 or u64 first argument");
+                node.value+="_"+args[0];
             }
             for(const auto &symbol:taken) if(lent.contains(symbol)) error(id,"one call cannot borrow and consume the same owner","E222");
             if(node.value=="print") {
@@ -563,7 +570,7 @@ public:
         for(auto id:u.roots) {
             const auto &d=n(id);
             if(d.kind=="import") error(id,"imports require native filesystem project loading","E300");
-            if((u.aesop_syntax&&(generic_call(d.value)||view_call(d.value)||d.value=="pi"||d.value=="tau"||math_signatures.contains(d.value)))||d.value=="print"||d.value=="array_length"||d.value=="isnum"||platform_signatures.contains(d.value)||!names.insert(d.value).second) error(id,"duplicate/reserved declaration "+d.value,"E210");
+            if((u.aesop_syntax&&(generic_call(d.value)||view_call(d.value)||bit_methods.contains(d.value)||d.value=="pi"||d.value=="tau"||math_signatures.contains(d.value)))||d.value=="print"||d.value=="array_length"||d.value=="isnum"||platform_signatures.contains(d.value)||!names.insert(d.value).second) error(id,"duplicate/reserved declaration "+d.value,"E210");
             if(d.kind=="function") functions[d.value]=id; else if(u.aesop_syntax&&d.kind=="global") globals[d.value]=id;else aggregates[d.value]=id;
         }
         for(auto id:u.roots) if(n(id).kind=="struct"||n(id).kind=="union") layout(n(id).value,1);
