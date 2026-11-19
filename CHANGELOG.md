@@ -1,3 +1,25 @@
+# unreleased checked buffer search and sort utility
+
+- `buffer.findbyte` finds a byte within a checked range without allocating or interpreting it as text. Platform argument diagnostics show public names like `buffer.findbyte`.
+- The shipped line sorter scans for LF in bulk and reuses its input buffer for output, including retrying successful short writes. Its stable order, `--unique` behavior, and input limits are unchanged. See the [before/after benchmark](docs/PERFORMANCE.md#current-source-sorting-utf-8-lines).
+
+# unreleased local Package installation
+
+- `awl add FILE.awpkg` vendors local manifest and source files into the current project without a backend or network. Existing installations are preserved; compiler imports and installer share one bounded manifest reader. There is no registry, lockfile, or dependency solver yet.
+- A build refuses to use a loaded `.awpkg` file as its executable destination, even through a hard link.
+
+# unreleased text runtime
+
+- `string.replace` no longer retains intermediate copies; a changed, nonempty result is allocated once. Exact UTF-8 matching, empty-needle traps, and text heap limits are unchanged. See the [before/after benchmark](docs/PERFORMANCE.md#current-source-replacing-text-in-utf-8-records).
+
+# unreleased toolkit workflow and checked arithmetic
+
+- Emitted `i64` and `u64` add/subtract/multiply use overflow intrinsics when the C compiler supports them, with the previous guarded C11 fallback. Checks and traps stay enabled. A reproducible signed arithmetic microbenchmark measures about 5.3% lower runtime than the previous Awl compiler on one Linux x86-64 host; see [performance evidence](docs/PERFORMANCE.md#current-source-checked-64-bit-arithmetic).
+
+- `awl check` and `awl run` share `awl build`'s project and source selection. `run` forwards arguments after `--`, propagates the program status, and removes the temporary executable.
+- On Linux x86-64, `awl build` and `awl run` can explicitly use a host C compiler with `--cc /absolute/path/to/cc`. The bundled backend remains the default; there is no implicit host fallback.
+- Source-only CI exercises the project workflow, imports, a working stdin utility, exit status, timeouts and protected outputs. This is not a new SDK release or Windows host qualification.
+
 # unreleased mutable borrows and diagnostics
 
 ## Aesop source revision, not a published SDK release

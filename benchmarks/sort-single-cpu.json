@@ -1,0 +1,164 @@
+{
+  "scope": "Awl sort before/after; same bounded UTF-8 inputs, exact output oracle",
+  "method": "Shuffled warm whole-process wall time through redirected pipes; build and validation excluded",
+  "host": "Linux-6.1.158+-x86_64-with-glibc2.36",
+  "cpu": "Intel(R) Xeon(R) Processor @ 2.60GHz",
+  "affinity": [
+    0
+  ],
+  "cc": "cc (Debian 12.2.0-14+deb12u1) 12.2.0",
+  "flags": [
+    "-std=c11",
+    "-O3",
+    "-march=x86-64",
+    "-lm"
+  ],
+  "harness_sha256": "06d4418db0ab1ffe71f8fcf4bf1815456b07c17412a02d711c77b7b5920610b5",
+  "builds": {
+    "before": {
+      "acc_sha256": "1269ba2ef40845d945be18be8605dc3200e6c36c14f9b31ee748f474a0ee3ae0",
+      "generated_c_sha256": "d0ffd28b26deae4a01785f2e1d509b5416d4648e42a87317001ea4e5b16eb559",
+      "binary_sha256": "d5eb9bdb25712746ecf921bdd9c89419036cb803026a6828447a4cc4d17a49c2",
+      "source_sha256": {
+        "main.aw": "87c49433fc9b87a99148fd5f33f904fba4626a7add6bf62296abf29467e9159b",
+        "Sort.aw": "48fff07e4197089b600e436c9ef711c85fa8ed1be4406b0ab02e7b2ca3bc5b73"
+      }
+    },
+    "after": {
+      "acc_sha256": "212de555fbcecdaaf85ac1c13105d754163917e48bd36a230fa687599fd94065",
+      "generated_c_sha256": "84ffcd4644cbae905cc7ea1fc7c2b5f8efc191d14752d54e3315650e4bfdf3fd",
+      "binary_sha256": "2d08b4211a5029c8c5012cc3978a6c8fbc6f02d5cae79d1af592c3c3d57b84fb",
+      "source_sha256": {
+        "main.aw": "79d2887926fb226ffa2352ceded7b9876b5b4d64145f219762e27493c92af324",
+        "Sort.aw": "48fff07e4197089b600e436c9ef711c85fa8ed1be4406b0ab02e7b2ca3bc5b73"
+      }
+    }
+  },
+  "results": {
+    "10000 lines": {
+      "input_bytes": 359999,
+      "input_sha256": "ba0a451bf7da56cf8fd50f04aa65081b7a661c6b092f159d9ba644965f29199e",
+      "output_bytes": 360000,
+      "expected_sha256": "2fe24f1d988240f55dd85cd9e354fd4c8e6561730e939368e7336dd949ff5db0",
+      "argv": [],
+      "timing": {
+        "before": {
+          "median_ms": 20.082514,
+          "samples_ms": [
+            22.338754,
+            27.120426,
+            26.352523,
+            26.434409,
+            22.093094,
+            17.996363,
+            18.143731,
+            19.288492,
+            19.840249,
+            19.795229,
+            20.082514
+          ]
+        },
+        "after": {
+          "median_ms": 6.049898,
+          "samples_ms": [
+            5.866434,
+            7.987488,
+            6.968133,
+            7.781884,
+            7.474035,
+            5.318321,
+            5.641367,
+            5.970026,
+            6.049109,
+            6.059491,
+            6.049898
+          ]
+        }
+      }
+    },
+    "10000 lines, unique": {
+      "input_bytes": 359999,
+      "input_sha256": "ba0a451bf7da56cf8fd50f04aa65081b7a661c6b092f159d9ba644965f29199e",
+      "output_bytes": 228312,
+      "expected_sha256": "d4431277d31a65e672ba2f65a73f5d545752fac43d28769c68adbe526749e8ae",
+      "argv": [
+        "--unique"
+      ],
+      "timing": {
+        "before": {
+          "median_ms": 16.845942,
+          "samples_ms": [
+            17.976631,
+            16.753955,
+            18.060982,
+            15.064917,
+            16.582234,
+            16.455099,
+            18.691645,
+            16.216775,
+            18.000324,
+            18.108408,
+            16.845942
+          ]
+        },
+        "after": {
+          "median_ms": 6.230052,
+          "samples_ms": [
+            6.210187,
+            6.372109,
+            6.231426,
+            5.910162,
+            5.436642,
+            6.289042,
+            6.167986,
+            6.230052,
+            6.220586,
+            6.277654,
+            6.247835
+          ]
+        }
+      }
+    },
+    "1 MiB line": {
+      "input_bytes": 1048576,
+      "input_sha256": "9bc1b2a288b26af7257a36277ae3816a7d4f16e89c1e7e77d0a5c48bad62b360",
+      "output_bytes": 1048577,
+      "expected_sha256": "cfafd78fce6a2c78175a782dbdc1c7ad985727dd425d0e2130214b73eff478b7",
+      "argv": [],
+      "timing": {
+        "before": {
+          "median_ms": 5.911409,
+          "samples_ms": [
+            5.643436,
+            5.95524,
+            6.098887,
+            5.561594,
+            5.911409,
+            5.920982,
+            5.816305,
+            5.171867,
+            5.920311,
+            5.866069,
+            5.913632
+          ]
+        },
+        "after": {
+          "median_ms": 4.989331,
+          "samples_ms": [
+            4.792707,
+            5.077078,
+            4.989331,
+            5.060656,
+            5.02991,
+            5.033049,
+            4.711059,
+            4.4741,
+            5.363729,
+            4.950155,
+            4.982592
+          ]
+        }
+      }
+    }
+  }
+}

@@ -40,7 +40,7 @@ type tests are static predicates, they do not introduce a dynamic `any` type, th
 | :--- | :--- |
 | arrays | `array.length(a)` |
 | arguments | `arg.count()`, `arg.text(i)`, `arg.i64(i)`, `arg.textvalid(i)`, `arg.i64valid(i)` |
-| buffers | `buffer.new(n)`, `buffer.size(b)`, `buffer.get(b,i)`, `buffer.set(b,i,v)`, `buffer.free(b)`, `buffer.text(b,i,n)`, `buffer.textvalid(b,i,n)`, `buffer.writetext(b,i,s)` |
+| buffers | `buffer.new(n)`, `buffer.size(b)`, `buffer.get(b,i)`, `buffer.set(b,i,v)`, `buffer.findbyte(b,i,n,v)`, `buffer.free(b)`, `buffer.text(b,i,n)`, `buffer.textvalid(b,i,n)`, `buffer.writetext(b,i,s)` |
 | clocks | `clock.millis()`, `clock.wall()`, `clock.sleep(ms)` |
 | environment | `env.size(name)`, `env.read(name,b,i,n)` |
 | files | `file.open(path,mode)`, `file.read(f,b,i,n)`, `file.write(f,b,i,n)`, `file.close(f)`, `file.size(f)`, `file.seek(f,i)`, `file.flush(f)`, `file.valid(f)`, `file.replace(dir,tmp,target)` |
@@ -57,6 +57,10 @@ type tests are static predicates, they do not introduce a dynamic `any` type, th
 | windows | `window.open(w,h)`, `window.title(h,s)`, `window.pixel(h,x,y,rgb)`, `window.present(h)`, `window.width(h)`, `window.height(h)`, `window.poll(h)`, `window.key(h)`, `window.mousex(h)`, `window.mousey(h)`, `window.close(h)` |
 
 the complete signature table is `compiler/native/platform-signatures.inc`, the compiler's independent verifier checks every signature and rejects forged result metadata
+
+`buffer.findbyte(b, offset, count, needle)` searches `count` bytes starting at `offset` for a `u8` value. It returns the first match's **absolute** byte index as `i64`, or `-1` if absent. An empty search at the end of the buffer is valid. Invalid or freed handles and out-of-bounds ranges trap, even for an empty search. It allocates nothing and does not check UTF-8; for example, use `buffer.findbyte(b, 0, used, 10u8)` to find the first LF in the bytes read.
+
+`string.replace(text, needle, replacement)` replaces exact, non-overlapping UTF-8 matches from left to right without rescanning inserted text. An empty needle traps; an empty replacement deletes matches. Matching does not normalize Unicode. The runtime allocates at most one immutable result, with no growing intermediate copies. Returned text still counts against the existing process-lifetime text budget.
 
 ## evidence
 

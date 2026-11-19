@@ -1,4 +1,5 @@
 #include "parse.h"
+#include "package.h"
 #include <algorithm>
 #include <chrono>
 #include <charconv>
@@ -9,6 +10,7 @@
 #include <memory>
 #include <optional>
 #include <queue>
+#include <set>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -45,7 +47,7 @@ struct Unit {
     List global_order;
     std::vector<uint32_t> module_order{0};
     std::vector<std::vector<uint32_t>> module_dependencies{{}};
-    std::vector<std::string> files;
+    std::vector<std::string> files,package_manifests;
     std::vector<uint32_t> file_lengths;
     std::vector<Origin> origins;
     std::unordered_map<std::string,std::string> display_names;
@@ -467,7 +469,7 @@ class Parser {
         if(path.size()>4095||path.find('\0')!=std::string::npos||path.find('\\')!=std::string::npos) error(t,"use path must be bounded UTF8 without NUL and use '/' separators","E300");
         if(!path.ends_with(".aw")) {
             // bare name: installed package under <project>/packages/NAME, resolved by the project loader with no fallback to local files
-            if(path.find('/')!=std::string::npos||path.find('.')!=std::string::npos||path.size()>64||path.empty()) error(t,"package names are 1..64 letters/digits/_/-; project files require a .aw path","E300");
+            if(!Awl_package::valid_name(path)) error(t,"invalid Package name (1..64 letters/digits/_/-, no reserved device names); project files require a .aw path","E300");
             std::string name=path;if(peek()=="as") {pop();name=u.text(ident());} else if(!identifier(path)) error(t,"package name requires an explicit identifier alias with as","E300");
             u.import_aliases.insert(name);take(";");return add("import",t,{},"pair","pkg:"+path,name);
         }
@@ -715,6 +717,10 @@ std::string render(Unit &u,const std::string &filename,bool json) {
     return out;
 }
 
+}
+void Awl_package::append_manifest_inputs(const void *opaque,std::vector<std::string> &paths) {
+    const auto &manifests=static_cast<const Unit*>(opaque)->package_manifests;
+    paths.insert(paths.end(),manifests.begin(),manifests.end());
 }
 extern "C" {
 uint32_t Awl_parse_abi_version(void) { return 2; }

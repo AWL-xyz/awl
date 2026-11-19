@@ -34,8 +34,9 @@ int Awl_main(int argc,char **argv) {
 int Awl_compiler_main(int argc,char **argv) {
     if(argc==2&&std::string(argv[1])=="--version") {std::cout<<"Awl Compiler Collection (ACC) 0.26.0-dev development candidate\n";return 0;}
     if(argc<3) {
-        std::cerr<<"Usage: acc check|emit-ast|emit-checked-ast|emit-c|build|run source.aw [-o FILE] [-O 0|1|2|3] [--diagnostic-format text|json] [--syntax aesop]\n"
-                 <<"Build/run require the complete Linux or Windows x86-64 Awl bundle. Limits: --build-timeout 1..3600 (default 120s), --build-memory-mib 512..16384 (default 4096), --run-timeout 0..86400 (run only; default unlimited).\n";return 2;
+        std::cerr<<"Usage: acc check|emit-ast|emit-checked-ast|emit-c|build|run source.aw [options]\n"
+                 <<"Build/run use the bundled backend by default. On Linux x86-64, --cc ABSOLUTE_PATH selects a host C compiler.\n"
+                 <<"Run: [--run-timeout 0..86400] [-- ARG ...]. See awl --help for common options.\n";return 2;
     }
     const std::string command=argv[1],path=argv[2]; bool json=false;std::string output;Awl_driver::Options options;
     const bool building=command=="build"||command=="run";
@@ -44,11 +45,16 @@ int Awl_compiler_main(int argc,char **argv) {
     }
     for(int i=3;i<argc;++i) {
         const std::string option=argv[i];
-        if(i+1>=argc) {std::cerr<<"acc: missing option value\n";return 2;}
+        if(option=="--"&&command=="run") {
+            options.program_arguments.assign(argv+i+1,argv+argc);
+            break;
+        }
+        if(i+1>=argc) {std::cerr<<"acc: missing value for "<<option<<'\n';return 2;}
         const std::string value=argv[++i];
         if(option=="--syntax"&&value=="aesop") {}
         else if(option=="--diagnostic-format"&&(value=="text"||value=="json")) json=value=="json";
         else if(option=="-o"&&command=="build") output=value;
+        else if(option=="--cc"&&building&&!value.empty()) options.host_cc=value;
         else if(option=="-O"&&building&&value.size()==1&&value[0]>='0'&&value[0]<='3') options.optimization=value[0]-'0';
         else if(option=="--build-timeout"&&building&&number(value,1,3600,options.build_timeout_seconds)) {}
         else if(option=="--build-memory-mib"&&building&&number(value,512,16384,options.build_memory_mib)) {}
@@ -75,12 +81,15 @@ int Awl_compiler_main(int argc,char **argv) {
         if(!report) {std::cerr<<"acc: diagnostic rendering failed\n";return 2;}
         std::cerr.write(report,static_cast<std::streamsize>(size)); return verification_failed?2:1;
     }
-    for(uint32_t i=0;i<Awl_source_file_count(unit);++i) {
-        const auto *file=Awl_source_file_path(unit,i);
-        if(!file) {std::cerr<<"acc: source enumeration failed\n";return 2;}
-        options.protected_sources.emplace_back(file);
+    if(building) {
+        for(uint32_t i=0;i<Awl_source_file_count(unit);++i) {
+            const auto *file=Awl_source_file_path(unit,i);
+            if(!file) {std::cerr<<"acc: source enumeration failed\n";return 2;}
+            options.protected_inputs.emplace_back(file);
+        }
+        Awl_package::append_manifest_inputs(unit,options.protected_inputs);
+        return Awl_driver::build(c_output,c_size,argv[0],path,output,options,command=="run");
     }
-    if(building) return Awl_driver::build(c_output,c_size,argv[0],path,output,options,command=="run");
     if(command=="check") std::cout<<path<<": checked (native frontend)\n";
     else if(command=="emit-c") std::cout.write(c_output,static_cast<std::streamsize>(c_size));
     else {

@@ -1,6 +1,6 @@
 # examples
 
-examples use the current Aesop source syntax, contributor builds use `acc check PATH` and `acc emit-c PATH`, `acc build` needs a complete matching SDK resource layout
+Examples use the current Aesop source syntax. After [building the toolkit](../README.md#quick-start-from-source), use `awl check PATH` to check an example and `awl run PATH --cc "$(command -v cc)"` to run it on Linux x86-64 without a bundled SDK. Omit `--cc` if you have a complete matching SDK. Examples that need arguments take them after `--`.
 
 ## language tour
 
@@ -17,7 +17,8 @@ examples use the current Aesop source syntax, contributor builds use `acc check 
 ## applications
 
 - [`apps/colorlab/`](apps/colorlab/) framebuffer application
-- [`apps/pipe/`](apps/pipe/), [`apps/save/`](apps/save/), [`apps/serve/`](apps/serve/), [`apps/sort/`](apps/sort/), [`apps/valueserve/`](apps/valueserve/) bounded native utilities
+- [`apps/sort/`](apps/sort/) bounded UTF-8 line sorting, with checked byte search and batched output
+- [`apps/pipe/`](apps/pipe/), [`apps/save/`](apps/save/), [`apps/serve/`](apps/serve/), [`apps/valueserve/`](apps/valueserve/) other bounded native utilities
 - [`../apps/taskrun/`](../apps/taskrun/) subprocess supervisor
 - [`../apps/logwindow/`](../apps/logwindow/) bounded UTF-8 log processing
 - [`../apps/board/`](../apps/board/) persistent taskboard with native service and shared WebAssembly filter

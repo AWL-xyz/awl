@@ -38,26 +38,36 @@ func main[i64] {
     @s rows vector<text>: vector.new<text>(0);
     if not vector.valid(rows) { return 9; };
     @p start: 0;
-    @p index: 0;
-    while index < total {
-        if buffer.get(buffer, index) == 10u8 {
-            if not add(rows, buffer, start, index - start) { return error(buffer, "ksort: allocation failure or more than 32768 lines\n"); };
-            start: index + 1;
-        };
-        index: index + 1;
-    };
-    if start < total {
-        if not add(rows, buffer, start, total - start) { return error(buffer, "ksort: allocation failure or more than 32768 lines\n"); };
+    while start < total {
+        @p endline: buffer.findbyte(buffer, start, total - start, 10u8);
+        if endline < 0 { endline: total; };
+        if not add(rows, buffer, start, endline - start) { return error(buffer, "ksort: allocation failure or more than 32768 lines\n"); };
+        start: endline + 1;
     };
     if not sort.stable(rows) { return 9; };
-    index: 0;
+    -- Each row is an independent text copy. Reuse the input buffer: even with
+    -- the final LF added, the output is at most one byte larger than the input.
+    @p size: 0;
+    @p count: vector.length(rows);
+    @p index: 0;
     @p previous: "";
-    while index < vector.length(rows) {
+    while index < count {
         @p value: vector.get(rows, index);
-        if not unique or index == 0 or value != previous { print(value); };
+        if not unique or index == 0 or value != previous {
+            @p bytes: buffer.writetext(buffer, size, value);
+            if bytes < 0 { return 3; };
+            size: size + bytes;
+            buffer.set(buffer, size, 10u8);
+            size: size + 1;
+        };
         previous: value;
         index: index + 1;
     };
-    if stdout.flush() != 0 { return 3; };
+    @p sent: 0;
+    while sent < size {
+        @p n: stdout.write(buffer, sent, size - sent);
+        if n <= 0 { return 3; };
+        sent: sent + n;
+    };
     return 0;
 };

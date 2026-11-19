@@ -132,8 +132,7 @@ int build(const char *c_source,size_t length,const std::string &source_path,cons
         Temporary temp;auto local=env(L"LOCALAPPDATA");fs::path cache=local.empty()?temp.path/L"global-cache":fs::path(local)/L"Awl/zig-0.15.2";fs::create_directories(cache);
         auto cfile=temp.path/L"program.c";{std::ofstream file(cfile,std::ios::binary);file.write(c_source,static_cast<std::streamsize>(length));file.close();if(!file) throw std::runtime_error("cannot write generated C");}
         fs::path destination=run?temp.path/L"program.exe":fs::absolute(output.empty()?fs::path(wide(source_path)).stem().wstring()+L".exe":wide(output));
-        std::vector<std::string> sources=options.protected_sources;sources.push_back(source_path);
-        for(const auto &p:sources){const auto source=fs::canonical(fs::path(wide(p)));if(fs::weakly_canonical(destination)==source||(fs::exists(destination)&&fs::equivalent(destination,source))) throw std::runtime_error("refusing to overwrite source with executable");}
+        protect_build_inputs(destination,source_path,options);
         Staging staging(destination.parent_path());
         std::vector<std::wstring> vars={L"HOME="+temp.path.wstring(),L"PATH=C:\\no-host-tools",L"TEMP="+temp.path.wstring(),L"TMP="+temp.path.wstring(),L"ZIG_LIB_DIR="+lib.wstring(),L"ZIG_GLOBAL_CACHE_DIR="+cache.wstring(),L"ZIG_LOCAL_CACHE_DIR="+(temp.path/L"local-cache").wstring()};
         for(auto name:{L"SystemRoot",L"WINDIR"}){auto value=env(name);if(!value.empty()) vars.push_back(std::wstring(name)+L"="+value);}
@@ -142,7 +141,13 @@ int build(const char *c_source,size_t length,const std::string &source_path,cons
         if(status){std::cerr<<"kcc: bundled backend failed/interrupted or wall-time limit exceeded ("<<status<<")\n";return status==124||status==130?status:2;}
         inspect(staging.path);if(cancelled) return 130;
         if(!MoveFileExW(staging.path.c_str(),destination.c_str(),MOVEFILE_REPLACE_EXISTING|MOVEFILE_WRITE_THROUGH)) fail("cannot publish executable");staging.path.clear();
-        if(run){status=execute({destination.wstring()},nullptr,options.run_timeout_seconds,0);if(status==124)std::cerr<<"kcc: program wall-time limit exceeded\n";return status;}
+        if(run) {
+            std::vector<std::wstring> args={destination.wstring()};
+            for(const auto &arg:options.program_arguments) args.push_back(wide(arg));
+            status=execute(args,nullptr,options.run_timeout_seconds,0);
+            if(status==124) std::cerr<<"acc: program wall-time limit exceeded\n";
+            return status;
+        }
         auto utf8=destination.u8string();std::cout.write(reinterpret_cast<const char*>(utf8.data()),utf8.size());std::cout<<'\n';std::cout.flush();return std::cout?0:2;
     }catch(const std::exception &e){std::cerr<<"kcc: "<<e.what()<<'\n';return 2;}
 }

@@ -1,0 +1,102 @@
+{
+  "scope": "Checked signed i64 multiply/subtract/remainder/accumulate loop; not a language-wide ranking",
+  "method": "Warm whole-process wall time, shuffled per sample; build and Python oracle excluded",
+  "host": "Linux-6.1.158+-x86_64-with-glibc2.36",
+  "cpu": "Intel(R) Xeon(R) Processor @ 2.60GHz",
+  "affinity": [
+    0
+  ],
+  "inputs": {
+    "rounds": 5000000,
+    "factor": -8191,
+    "seed": 31
+  },
+  "expected_stdout": "238249983\n-86380\n",
+  "toolchains": {
+    "C": "cc (Debian 12.2.0-14+deb12u1) 12.2.0",
+    "C++": "c++ (Debian 12.2.0-14+deb12u1) 12.2.0",
+    "Rust": null
+  },
+  "flags": {
+    "C": [
+      "-std=c11",
+      "-O3",
+      "-march=x86-64",
+      "-lm"
+    ],
+    "Awl portable override": "-DAWL_PORTABLE_ARITHMETIC",
+    "C++": [
+      "-std=c++20",
+      "-O3",
+      "-march=x86-64"
+    ],
+    "Rust": null
+  },
+  "acc_sha256": "e5e2b696f331c391722514e3671c87931c9c5616518f35805671917323b6fe3b",
+  "before_acc_sha256": "1da8eceb032d1cdb57fe6cfc1528652ae80b34b7e303e3dba07d17c8d58bb250",
+  "harness_sha256": "184946b87303a83924a440e26d92d7f715a28efb07219a0636cffaf5ccd92b88",
+  "workload_sha256": {
+    "main.aw": "43f5b3de85f9766c57aa3eaf84393f3218a001c1e2dbab22e0a30154ce446cf3",
+    "main.cpp": "f31c1f56fef5c1be4380b113e9ce1897e8d8ad84fe2a3c6dafd0058595a7341f",
+    "main.rs": "a32615f0778ae343418e293dcfad73a2e5de821f82dd63c5a6270112229091ee"
+  },
+  "results": {
+    "awl-before": {
+      "median_ms": 28.399409,
+      "samples_ms": [
+        28.198792,
+        28.192024,
+        28.466987,
+        28.414853,
+        28.399409,
+        29.059333,
+        27.987452,
+        28.096842,
+        29.094805
+      ]
+    },
+    "awl-default": {
+      "median_ms": 26.894894,
+      "samples_ms": [
+        26.885362,
+        26.855058,
+        26.977026,
+        26.93739,
+        26.80191,
+        27.225226,
+        29.484809,
+        26.876784,
+        26.894894
+      ]
+    },
+    "awl-portable": {
+      "median_ms": 28.222571,
+      "samples_ms": [
+        28.337236,
+        28.147432,
+        28.222571,
+        28.218078,
+        28.187191,
+        31.930324,
+        28.772513,
+        28.06782,
+        28.437194
+      ]
+    },
+    "cpp-checked": {
+      "median_ms": 26.901438,
+      "samples_ms": [
+        26.844935,
+        26.968096,
+        26.930123,
+        26.901438,
+        26.844365,
+        27.534612,
+        26.933437,
+        26.793743,
+        26.807123
+      ]
+    }
+  },
+  "rust_status": "not run (rustc not found)"
+}

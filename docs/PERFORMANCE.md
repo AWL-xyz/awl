@@ -4,7 +4,79 @@ Awl is intended to compete with rust as a native systems language, outperforming
 
 performance claims need measured equivalent work, consumed results and reproducible optimized builds, safety checks aren't disabled to manufacture wins, all wins and losses belong in the report
 
-## measurement provenance
+## Current source: sorting UTF-8 lines
+
+The [shipped sort utility](../examples/apps/sort/) uses `buffer.findbyte` to locate LF with a checked range search instead of reading one byte at a time. It reuses the input buffer to assemble the sorted output, then writes it in batches and retries short writes. The stable merge sort, UTF-8 validation, duplicate handling, and 1 MiB / 32,768-line limits are unchanged.
+
+[The benchmark](../benchmarks/sort.py) runs the old and new applications with identical redirected input and checks every output byte. These are medians of 11 shuffled warm whole-process samples on Linux x86-64, GCC 12.2 `-O3`, with the host's two CPUs available and build time excluded:
+
+| workload | before (`68713be`) | after | speedup |
+| :--- | ---: | ---: | ---: |
+| 10,000 log-like lines | 10.957 ms | 5.840 ms | 1.88× |
+| Same input, `--unique` | 8.636 ms | 5.676 ms | 1.52× |
+| Single 1 MiB line with no LF | 7.874 ms | 6.452 ms | 1.22× |
+
+With the harness and child pinned to one CPU, the same cases measured 3.32×, 2.70×, and 1.18×, respectively. Pipe scheduling matters for an app that used to flush every row. These numbers describe the whole utility on this host, not a sort-algorithm speedup or a Rust/C++ comparison. Raw samples, input hashes, and binary hashes are in [the default-affinity report](../benchmarks/sort.json) and [the one-CPU report](../benchmarks/sort-single-cpu.json).
+
+Reproduce from the repository root without switching branches:
+
+```sh
+baseline=$(mktemp -d)
+git archive 68713be compiler examples/apps/sort | tar -x -C "$baseline"
+(cd "$baseline" && python3 compiler/build_native.py --standalone --strip)
+python3 compiler/build_native.py --standalone --strip
+python3 benchmarks/sort.py --before-acc "$baseline/compiler/native/bin/acc" \
+    --before-source "$baseline/examples/apps/sort/main.aw" --report /tmp/awl-sort.json
+```
+
+## Current source: replacing text in UTF-8 records
+
+`string.replace` previously made and retained a growing text allocation for each match. It now counts non-overlapping occurrences, checks the exact result size, and copies into one final allocation. If there is no change or the result is empty, it doesn't allocate a result. The same UTF-8 rules and text heap bounds still apply; only the unnecessary intermediate allocations went away.
+
+[The reproducible workload](../benchmarks/text_replace.py) runs the same generated program before and after the change. It reads synthetic UTF-8 log records from stdin, replaces a field value, and writes the resulting text. Python checks the entire output including its byte and scalar lengths. Times below are nine shuffled warm whole-process samples on Linux x86-64, GCC 12.2 `-O3` (build time excluded):
+
+| workload | before | after |
+| :--- | ---: | ---: |
+| 512 replacements | 8.055 ms | 2.231 ms |
+| same input with no matches | 2.296 ms | 2.232 ms |
+
+That is about **3.6× as fast** on the matching workload. A separate input with 8,192 matches is **not timed**: the old runtime hit the text heap limit, while the new runtime completed and matched the oracle. This comparison is against the previous Awl implementation only, not against Rust or C++. See the [raw measurements and toolchain hashes](../benchmarks/text-replace.json).
+
+```sh
+python3 compiler/build_native.py --standalone --strip
+python3 tests/text_replace.py --sanitize
+python3 benchmarks/text_replace.py --before /path/to/previous/acc --report /tmp/awl-text-replace.json
+```
+
+The recorded baseline is `b0b0d37`; build both ACC binaries with the same options. Substring search still does candidate byte comparisons, so this is an improvement in result construction, not a guarantee of linear-time substring matching for every pattern.
+
+## Current source: checked 64-bit arithmetic
+
+ACC emits feature-tested overflow intrinsics for `i64` and `u64` addition, subtraction and multiplication. A supporting C compiler can use the CPU's overflow or carry flag rather than separate range checks. Overflow still traps at every optimization level, including signed-minimum negation. The guarded C11 implementation remains the fallback when the intrinsics are unavailable. Compile emitted C with `-DAWL_PORTABLE_ARITHMETIC` to select that fallback explicitly without disabling checks. Division, remainder and other widths are unchanged.
+
+[`benchmarks/checked_arithmetic.py`](../benchmarks/checked_arithmetic.py) compiles the [same signed arithmetic loop](../benchmarks/workloads/checked-arithmetic/) in Awl, C++ and (when `rustc` is installed) Rust, with equivalent checks in the timed loop. On one Linux x86-64 host with GCC 12.2, the median warm whole-process time for five million iterations was:
+
+| implementation | median |
+| :--- | ---: |
+| Awl before (`20abab5`) | 28.40 ms |
+| Awl with overflow intrinsics | 26.89 ms |
+| Awl with the portable fallback forced | 28.22 ms |
+| C++ with explicit overflow checks | 26.90 ms |
+| Rust with overflow checks enabled | not measured (`rustc` not installed) |
+
+That's about **5.3% less wall time** than the original Awl build and effectively tied with checked C++ on this workload. These are nine shuffled samples after warmup, with compilation excluded and both output values checked against a Python oracle on every run. See the [raw report](../benchmarks/checked-arithmetic.json). This is a microbenchmark, not a claim about application performance or relative Rust speed.
+
+Reproduce from the repository root:
+
+```sh
+python3 compiler/build_native.py --standalone --strip
+python3 tests/checked_arithmetic.py
+python3 benchmarks/checked_arithmetic.py --report /tmp/awl-checked-arithmetic.json
+```
+
+Pass `--before /path/to/acc` to add a pre-optimization Aesop compiler to the comparison. The same harness includes checked Rust automatically if `rustc` is on `PATH`. The correctness gate covers signed/unsigned boundary and seeded cases at `-O0` and `-O3`, both default and forced portable, under UBSan.
+
+## Historical measurement provenance
 
 this table records the completed pre-rebrand performance experiment, original binaries, reports, source harnesses and photos are immutable in `history/pre-rename-evidence.tar.xz`, the current Awl SDK has fresh correctness/distribution qualification, these timings are not newly measured distribution benchmarks, renaming earns no workload point
 

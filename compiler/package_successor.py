@@ -60,15 +60,16 @@ extract the entire Awl directory and add its bin directory to PATH, keep libexec
 ```sh
 awl
 awl init Demo
+awl check
 awl build
-awl build examples/collections/main.aw -o collections
+awl run examples/collections/main.aw
 ```
 
 no end-user Python, host compiler, SDK or additional backend download is needed
 
 Aesop is the only syntax, function results may be inferred, `func size :: @b values[i64] { ... };` and `func main[i64] { ... };` are both supported
 
-public beta commands remain init/build only, acc is the compiler driver, run/install/Packages/registry are not public beta commands
+public beta commands are init, add, check, build and run, acc is the compiler driver, add only vendors local .awpkg files (no registry or network install)
 
 editor/awl-editor.html is the single-file Aesop subset editor, not the native compiler, web/Awl-json-workbench.html runs freshly compiled WebAssembly with a bounded browser host
 
@@ -89,6 +90,7 @@ see docs for syntax, runtime limits and workload assessment, native Windows acce
     (prefix/'validation'/'README.md').write_text('historical rename-* and default-* reports in this directory bind the previous0.25 compiler, not the current binary, the source-current editor evidence is validation/aesop-editor.json, exact successor acceptance is recorded in the workspace tests/ directory\n')
     if (ROOT/'tests/aesop-editor.json').is_file():shutil.copy2(ROOT/'tests/aesop-editor.json',prefix/'validation/aesop-editor.json')
     manifest=json.loads((prefix/'manifest.json').read_text())
+    manifest['toolkit']['commands']=['init','add','check','build','run']
     scrub_private(prefix)
     manifest.pop('legacy_requires_explicit_syntax',None)
     old_examples=prefix/'examples-next'
