@@ -14,6 +14,7 @@ Examples use the current Aesop source syntax. After [building the toolkit](../RE
 
 - [`packages-demo/`](packages-demo/) installs and uses `env`, `fsp` and `json`
 - [`time-demo/`](time-demo/) installs and uses [`time`](../docs/TIME.md)
+- [`csv-demo/`](csv-demo/) parses quoted CSV from stdin, totals an integer column, and tests round-trip encoding
 
 ## applications
 

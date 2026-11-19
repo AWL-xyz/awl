@@ -111,6 +111,7 @@ Project-local file imports still use `use path/File.aw as alias;`.
 
 | Package | source implementation |
 | :--- | :--- |
+| `csv` | [UTF-8 CSV parsing and encoding](docs/CSV.md), with a [runnable summary demo](examples/csv-demo/) |
 | `env` | dotenv parsing and environment-file helpers |
 | `json` | JSON parsing and query helpers |
 | `fsp` | filesystem path helpers |

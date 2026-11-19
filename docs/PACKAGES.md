@@ -49,12 +49,13 @@ In a separate library directory, run `awl init NAME --pkg` (or `awl init --pkg N
 |package|status|API|
 |---|---|---|
 |`json`|working|`json.parse(source, tokens, result)`, `json.locate(pointer, tokens, result)`, same code as `examples/parsing/Json.aw` (16384 byte limit)|
+|`csv`|working|`csv.parse(source, fields, rows)` and `csv.encode(fields, rows, sink)` for bounded UTF-8 tables with quoting, multiline fields, and canonical output. See [CSV API](CSV.md).|
 |`env`|working|dotenv parsing, `env.parse(source, keys, values, result)`, `env.find`, `env.get(name, keys, values, fallback)`, `export` prefix, comments, double quoted escapes, single quoted literals, result[0]=1 invalid key, 2 missing `=`, 3 unterminated quote, 4 more than 256 entries, result[1]=line, 5 invalid input/buffer/allocation, 6 junk after quoted value|
 |`fsp`|working|`fsp.read(path)` returning `Read.Text` or `Read.Failed`, same code as `examples/exported-enums/File.aw`|
 |`time`|working|`time.now`, `time.wall`, `time.elapsed`, `time.deadline`, `time.remaining`, `time.expired`, `time.sleep`, checked monotonic/wall clocks and bounded sleeps, see [time semantics](TIME.md)|
 |`db`, `websocket`, `fetch`|not started|need native runtime support (SQLite/Awldb, sockets and TLS), not expressible in Awl source yet|
 
-`examples/packages-demo` installs copies of `env`, `fsp` and `json` and uses `env` and `json`, `examples/time-demo` installs a copy of `time` and uses its two clocks.
+`examples/packages-demo` installs copies of `env`, `fsp` and `json` and uses `env` and `json`, `examples/time-demo` installs a copy of `time` and uses its two clocks. [`examples/csv-demo`](../examples/csv-demo/) reads CSV from stdin, checks a numeric column, and totals the values.
 
 ## Not implemented
 
