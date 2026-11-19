@@ -9,6 +9,7 @@ python3 compiler/generate_platform.py --check
 python3 compiler/generate_strings.py --check
 python3 compiler/generate_arguments.py --check
 python3 tests/toolkit.py --acc compiler/native/bin/acc
+python3 tests/formatter.py --acc compiler/native/bin/acc
 python3 tests/aesop.py --acc compiler/native/bin/acc --report tests/aesop-checks.json
 python3 tests/aesop.py --sanitize-programs --report tests/aesop-program-sanitizers.json
 python3 tests/checked_arithmetic.py --acc compiler/native/bin/acc
@@ -22,6 +23,7 @@ python3 compiler/test_native.py --sanitize --report tests/aesop-native.json.gz
 ```
 
 - `toolkit.py` checks new/init/add/check/build/run/test on Linux x86-64 without a bundled SDK, including scaffold rollback, local Package copying, manifest errors, output protection, filtering, list/check-only modes, fail-fast, EOF, timeouts, and interrupted-suite cleanup
+- `formatter.py` checks syntax-only formatting, identical C emission, idempotence on shipped sources, bounded input/output, and atomic-write rollback and permission checks
 - `aesop.py` checks declarations, generated native execution, CLI starters, ABI v2, conversion/type tests and rejection cases
 - `checked_arithmetic.py` checks emitted `i64` and `u64` math against Python with UBSan, covering checked intrinsics and the portable C11 fallback at `-O0` and `-O3`
 - `text_runtime.py` checks emitted scalar slicing and indexing against Python, covers embedded NULs and bounds traps, and checks strict signed decimal text and argv parsing against an integer oracle

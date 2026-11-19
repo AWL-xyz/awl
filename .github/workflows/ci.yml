@@ -24,6 +24,8 @@ jobs:
           python3 compiler/generate_arguments.py --check
       - name: Source toolkit without a bundled SDK
         run: python3 tests/toolkit.py --acc compiler/native/bin/acc
+      - name: Aesop formatter parity and safe writes
+        run: python3 tests/formatter.py --acc compiler/native/bin/acc
       - name: Function declarations and generated native execution
         run: python3 tests/aesop.py --acc compiler/native/bin/acc --report tests/aesop-checks.json
       - name: Generated-program sanitizers

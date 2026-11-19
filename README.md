@@ -23,7 +23,7 @@
 | compiler | **Awl Compiler Collection (ACC)**, native C++20 frontend with checked IR, an independent verifier and a C11 backend |
 | source files | `.aw` |
 | manifests | `.awproj` for projects, `.awpkg` for local Packages |
-| public toolkit | `awl new`, `awl init`, `awl add` (local Packages), `awl check`, `awl build`, `awl run`, `awl test` |
+| public toolkit | `awl new`, `awl init`, `awl add` (local Packages), `awl fmt`, `awl check`, `awl build`, `awl run`, `awl test` |
 | development version | `0.26.0-dev`, a development identifier, not a compatibility guarantee |
 | release readiness | experimental source candidate, not production-ready |
 
@@ -84,6 +84,8 @@ awl build Demo --cc "$(command -v cc)"
 `awl new` creates a fresh project with a shared module and a smoke test. Use `awl init` to start in the current directory instead. Neither overwrites existing files. `awl check` and `awl test --check` need no C backend. `--cc` explicitly selects a host C compiler for local execution; without it, builds and execution require a complete, matching SDK. The contributor build above is not a redistributable SDK.
 
 ### toolkit workflow
+
+`awl fmt Demo/main.aw` previews indentation and line-ending cleanup. Use `awl fmt --check Demo/main.aw` to check formatting in CI or `awl fmt --write Demo/main.aw` for atomic replacement on Unix. The formatter checks source syntax without loading imports or invoking a backend.
 
 `check`, `build`, `run`, and `test` all accept the same targets: omit the target for the sole `.awproj` in the current directory, pass `Demo` to look for `Demo.awproj` in immediate child directories, or pass a `.aw` file directly. `awl run` passes arguments after `--` to the program and doesn't keep an executable. `awl test` runs `.test.aw` files beside a project's entry and keeps no executables. Use `--filter`, `--list`, `--check`, or `--fail-fast` to narrow or inspect a suite. Try the [testing example](examples/testing/).
 

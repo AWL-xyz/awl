@@ -49,6 +49,23 @@ awl run path/main.aw -- --name "Ada Lovelace"
 
 `awl` command-name and verb casing are ASCII-insensitive; project names, paths, Package names and aliases remain case-sensitive.
 
+## formatting source
+
+```sh
+awl fmt main.aw                         # preview on stdout, no file writes
+awl fmt --check main.aw Smoke.test.aw   # fail if either file would change
+awl fmt --write main.aw Smoke.test.aw   # apply on Unix
+awl fmt - < main.aw                      # read source from stdin
+```
+
+The formatter uses the Aesop parser, but does not load imports, resolve names, type-check, or invoke a C backend. It indents braces, enum variants, match arms, and parenthesis/bracket continuations with four spaces per level. It removes trailing layout whitespace, uses LF (including a final LF for nonempty input), and keeps blank lines. It does not wrap lines or rewrite tokens, literals, import paths, interior spacing, or comment text other than trailing whitespace.
+
+Pass explicit `.aw` files, not a project name. Stdout mode and `-` require one input; `--check` and `--write` accept up to 64 files. Each input and formatted output is limited to 1 MiB. Use `--` before a filename starting with `-`. Symlinks and non-regular source files are refused in all modes.
+
+On Unix, `--write` stages each changed file next to its original and replaces it atomically. It requires owned, writable sources and refuses hard-linked files. It retains ordinary permission bits, not the original inode or extended metadata. Unchanged files are not rewritten. A multi-file invocation is not a transaction across files; syntax errors leave that file untouched. Do not run `--write` while editing the same file. Windows preview supports stdout and `--check`, not `--write`.
+
+Exit status is `0` on success, `1` on invalid syntax or when `--check` finds a change, and `2` on invalid options or I/O/budget errors. `--diagnostic-format json` emits one syntax report per invalid input on stderr. Do not redirect stdout back into the input file; use `--write` instead.
+
 ## testing a project
 
 Place test files like `Totals.test.aw` next to the project's entry source. Each is an ordinary Awl program. Use the same local modules and Packages as the application, then return `0` from `main` on success or a status from `1` to `255` on failure. Printing a message before a failure return helps explain what went wrong.

@@ -1,13 +1,19 @@
 // Native public ASDK Beta front door. Included by acc.cpp; compiler stays in-process.
 #include "package.h"
+#include "format.h"
 #include <filesystem>
 #include <algorithm>
 #include <set>
 #include <stdexcept>
 #include <utility>
 #include <cerrno>
-#if !defined(_WIN32)
+#include <cstdio>
+#include <cstdlib>
 #include <fcntl.h>
+#if defined(_WIN32)
+#include <io.h>
+#else
+#include <sys/stat.h>
 #include <unistd.h>
 #endif
 namespace Awl_toolkit {
@@ -29,12 +35,17 @@ void help() {
         <<"  awl init NAME               Create NAME.awproj and, if absent, main.aw here\n"
         <<"  awl init NAME --pkg         Create NAME.awpkg and, if absent, NAME.aw (a library package) here\n"
         <<"  awl add FILE.awpkg          Copy a local Package into the current project (no network)\n"
+        <<"  awl fmt [OPTIONS] FILE.aw   Format source without loading imports (use - for stdin)\n"
         <<"  awl check [TARGET]          Check syntax and types without a backend\n"
         <<"  awl build [TARGET]          Build a native executable\n"
         <<"  awl run [TARGET] [options] [-- ARG ...]  Build and run a temporary executable\n"
         <<"  awl test [TARGET]           Run .test.aw files beside the project entry, or one .aw file\n\n"
         <<"TARGET: omit for the sole .awproj here, use NAME for an immediate child\n"
         <<"project, or pass a .aw source path (imports supported).\n\n"
+        <<"Format options (stdout by default):\n"
+        <<"  --check                      Report files that would change, without writing\n"
+        <<"  --write                      Atomically replace each changed file (Unix hosts)\n"
+        <<"  --diagnostic-format text|json Syntax diagnostic format (default text)\n\n"
         <<"Check/build/run/test options:\n"
         <<"  --syntax aesop               Aesop is the only supported syntax\n"
         <<"  --diagnostic-format text|json Source diagnostic format (default text)\n"
@@ -56,6 +67,17 @@ void help() {
         <<"New and init never overwrite files. NAME: 1..64 letters/digits/_/-, starts alphanumeric.\n"
         <<"Build/run/test use the bundled backend unless --cc is specified.\n";
 }
+#if !defined(_WIN32)
+bool write_all(int fd,std::string_view bytes) {
+    while(!bytes.empty()) {
+        const auto n=write(fd,bytes.data(),bytes.size());
+        if(n<0&&errno==EINTR) continue;
+        if(n<=0) return false;
+        bytes.remove_prefix(static_cast<size_t>(n));
+    }
+    return true;
+}
+#endif
 // Exclusive creation, no shell and no truncation of pre-existing files/symlinks.
 void create_new(const fs::path &p,const std::string &bytes) {
 #if defined(_WIN32)
@@ -66,8 +88,7 @@ void create_new(const fs::path &p,const std::string &bytes) {
 #else
     int fd=open(p.c_str(),O_WRONLY|O_CREAT|O_EXCL|O_CLOEXEC,0666);
     if(fd<0) throw std::runtime_error("cannot exclusively create "+utf8(p));
-    size_t offset=0;bool ok=true;
-    while(offset<bytes.size()) {const auto n=write(fd,bytes.data()+offset,bytes.size()-offset);if(n<0&&errno==EINTR) continue;if(n<=0){ok=false;break;}offset+=static_cast<size_t>(n);}
+    const bool ok=write_all(fd,bytes);
     const bool closed=close(fd)==0;
 #endif
     if(!ok||!closed) {
@@ -75,6 +96,7 @@ void create_new(const fs::path &p,const std::string &bytes) {
         throw std::runtime_error("cannot write "+utf8(p));
     }
 }
+#include "format-cli.inc"
 constexpr const char *project_manifest="format: 1\nentry: main.aw\nsyntax: aesop\n";
 fs::path new_project(const fs::path &cwd,const std::string &name) {
     const auto folder=cwd/path(name);
@@ -291,7 +313,9 @@ int run(int argc,char **argv) {
     try {
         if(argc==1||(argc==2&&(command_key(argv[1])=="--help"||std::string(argv[1])=="-h"))) {help();return std::cout?0:2;}
         if(argc==2&&command_key(argv[1])=="--version") {std::cout<<"Awl Software Development Kit [Beta] 0.26.0-dev\n";return std::cout?0:2;}
-        const std::string command=command_key(argv[1]);const auto cwd=fs::current_path();
+        const std::string command=command_key(argv[1]);
+        if(command=="fmt") return format_command(argc,argv);
+        const auto cwd=fs::current_path();
         if(command=="new") {
             if(argc!=3||!project_name(argv[2])) throw std::runtime_error("usage: awl new NAME (1..64 letters/digits/_/-, starts alphanumeric; no reserved device names)");
             const auto folder=new_project(cwd,argv[2]);

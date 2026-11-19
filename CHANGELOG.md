@@ -1,3 +1,7 @@
+# unreleased source formatting
+
+- `awl fmt` previews or checks Aesop indentation and line endings without changing tokens or loading imports. On Unix, `--write` atomically replaces changed sources, preserving ordinary permission bits and leaving unchanged sources alone.
+
 # unreleased project scaffolding and testing
 
 - `awl new NAME` creates a fresh project directory with a shared module, an application, a smoke test, and a build-output `.gitignore`. It refuses to overwrite an existing path. `awl init` still initializes the current directory.

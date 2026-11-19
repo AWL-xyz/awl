@@ -55,7 +55,7 @@ def main():
                 link=folder/alias
                 if link.exists() or link.is_symlink():link.unlink()
                 link.symlink_to(exe.name)
-        info['toolkit']={'name':'Awl Software Development Kit [Beta]','file':public.name,'sha256':info['standalone']['sha256'],'commands':['new','init','add','check','build','run','test']}
+        info['toolkit']={'name':'Awl Software Development Kit [Beta]','file':public.name,'sha256':info['standalone']['sha256'],'commands':['new','init','add','fmt','check','build','run','test']}
         print(public)
         print(exe)
     (folder/'build-info.json').write_text(json.dumps(info,indent=2)+'\n')

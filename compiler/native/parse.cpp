@@ -1,4 +1,5 @@
 #include "parse.h"
+#include "format.h"
 #include "package.h"
 #include <algorithm>
 #include <chrono>
@@ -718,6 +719,7 @@ std::string render(Unit &u,const std::string &filename,bool json) {
 }
 
 }
+#include "format.inc"
 void Awl_package::append_manifest_inputs(const void *opaque,std::vector<std::string> &paths) {
     const auto &manifests=static_cast<const Unit*>(opaque)->package_manifests;
     paths.insert(paths.end(),manifests.begin(),manifests.end());
