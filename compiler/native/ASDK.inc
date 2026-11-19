@@ -1,8 +1,10 @@
 // Native public ASDK Beta front door. Included by acc.cpp; compiler stays in-process.
+#include "package.h"
 #include <filesystem>
 #include <algorithm>
 #include <set>
 #include <stdexcept>
+#include <utility>
 #include <cerrno>
 #if !defined(_WIN32)
 #include <fcntl.h>
@@ -16,16 +18,7 @@ std::string trim(const std::string &s) {
     const auto a=s.find_first_not_of(" \t\r"),b=s.find_last_not_of(" \t\r");
     return a==std::string::npos?std::string():s.substr(a,b-a+1);
 }
-bool project_name(const std::string &s) {
-    if(s.empty()||s.size()>64) return false;
-    auto alnum=[](char c){return (c>='a'&&c<='z')||(c>='A'&&c<='Z')||(c>='0'&&c<='9');};
-    if(!alnum(s[0])) return false;
-    for(char c:s) if(!alnum(c)&&c!='_'&&c!='-') return false;
-    std::string upper=s;for(char &c:upper) if(c>='a'&&c<='z') c-=32;
-    if(upper=="CON"||upper=="PRN"||upper=="AUX"||upper=="NUL") return false;
-    if(upper.size()==4&&(upper.substr(0,3)=="COM"||upper.substr(0,3)=="LPT")&&upper[3]>='1'&&upper[3]<='9') return false;
-    return true;
-}
+bool project_name(const std::string &s) {return Awl_package::valid_name(s)&&Awl_package::ascii_alnum(s.front());}
 std::string command_key(std::string s) {for(char &c:s) if(c>='A'&&c<='Z') c+=32;return s;}
 void help() {
     std::cout<<"Awl Software Development Kit [Beta]\n"
@@ -33,6 +26,7 @@ void help() {
         <<"  awl                         Show this help\n"
         <<"  awl init NAME               Create NAME.awproj and, if absent, main.aw here\n"
         <<"  awl init NAME --pkg         Create NAME.awpkg and, if absent, NAME.aw (a library package) here\n"
+        <<"  awl add FILE.awpkg          Copy a local Package into the current project (no network)\n"
         <<"  awl check [TARGET]          Check syntax and types without a backend\n"
         <<"  awl build [TARGET]          Build a native executable\n"
         <<"  awl run [TARGET] [options] [-- ARG ...]  Build and run a temporary executable\n\n"
@@ -60,14 +54,14 @@ void create_new(const fs::path &p,const std::string &bytes) {
     if(h==INVALID_HANDLE_VALUE) throw std::runtime_error("cannot exclusively create "+utf8(p));
     DWORD wrote=0;const bool ok=WriteFile(h,bytes.data(),static_cast<DWORD>(bytes.size()),&wrote,nullptr)&&wrote==bytes.size();
     const bool closed=CloseHandle(h)!=0;
-    if(!ok||!closed) throw std::runtime_error("cannot write "+utf8(p)+"; initialization may be incomplete");
+    if(!ok||!closed) throw std::runtime_error("cannot write "+utf8(p));
 #else
     int fd=open(p.c_str(),O_WRONLY|O_CREAT|O_EXCL|O_CLOEXEC,0666);
     if(fd<0) throw std::runtime_error("cannot exclusively create "+utf8(p));
     size_t offset=0;bool ok=true;
     while(offset<bytes.size()) {const auto n=write(fd,bytes.data()+offset,bytes.size()-offset);if(n<0&&errno==EINTR) continue;if(n<=0){ok=false;break;}offset+=static_cast<size_t>(n);}
     const bool closed=close(fd)==0;
-    if(!ok||!closed) throw std::runtime_error("cannot write "+utf8(p)+"; initialization may be incomplete");
+    if(!ok||!closed) throw std::runtime_error("cannot write "+utf8(p));
 #endif
 }
 std::vector<fs::path> manifests(const fs::path &folder) {
@@ -124,6 +118,61 @@ Project read_project(const fs::path &file) {
     if(within.empty()||*within.begin()==".."||!fs::is_regular_file(result.entry)) throw std::runtime_error("manifest entry must be a regular source inside the project folder");
     return result;
 }
+fs::path add_package(const Project &project,const fs::path &input) {
+    if(input.extension()!=".awpkg") throw std::runtime_error("usage: awl add FILE.awpkg (a local manifest)");
+    const auto name=utf8(input.stem());
+    const auto folder=fs::canonical(fs::absolute(input).parent_path());
+    const auto manifest_path=folder/input.filename();
+    const auto manifest=Awl_package::read_manifest(manifest_path,name);
+    // The standalone loader resolves use NAME relative to the entry's directory,
+    // including when the project manifest names an entry in a subdirectory.
+    const auto packages=project.entry.parent_path()/"packages";
+    const auto package_status=fs::symlink_status(packages);
+    if(package_status.type()!=fs::file_type::not_found&&!fs::is_directory(package_status))
+        throw std::runtime_error("packages must be a real directory, not a symlink or file");
+    const auto destination=packages/path(name);
+    if(fs::symlink_status(destination).type()!=fs::file_type::not_found)
+        throw std::runtime_error("Package '"+name+"' already exists; refusing to overwrite it");
+
+    // Preflight all selected files before modifying the project. The walk is
+    // bounded and never follows directory links or loads non-source assets.
+    std::vector<std::pair<fs::path,std::string>> sources;
+    size_t seen=0,total=0;bool has_entry=false;
+    const auto entry=path(manifest.entry);
+    for(auto it=fs::recursive_directory_iterator(folder);it!=fs::recursive_directory_iterator();++it) {
+        if(++seen>512) throw std::runtime_error("Package source tree exceeds 512 directory entries");
+        const auto &file=it->path();const auto filename=utf8(file.filename());
+        if(filename.starts_with('.')||filename=="build"||filename=="packages") {
+            it.disable_recursion_pending();continue;
+        }
+        if(it.depth()>8) throw std::runtime_error("Package source tree exceeds eight nested directories");
+        const auto status=it->symlink_status();
+        if(fs::is_symlink(status)) throw std::runtime_error("Package source tree contains a symlink: "+utf8(file));
+        if(fs::is_directory(status)||file.extension()!=".aw") continue;
+        if(sources.size()>=64) throw std::runtime_error("Package exceeds 64 .aw source files");
+        auto bytes=Awl_package::read_file(file,Awl_package::source_limit-total);
+        total+=bytes.size();auto relative=file.lexically_relative(folder);
+        if(relative==entry) has_entry=true;
+        sources.emplace_back(std::move(relative),std::move(bytes));
+    }
+    if(!has_entry) throw std::runtime_error("missing or wrong-case Package entry: "+manifest.entry);
+
+    if(package_status.type()==fs::file_type::not_found) fs::create_directory(packages);
+    if(!fs::is_directory(fs::symlink_status(packages))) throw std::runtime_error("packages must be a real directory");
+    if(!fs::create_directory(destination)) throw std::runtime_error("Package '"+name+"' already exists; refusing to overwrite it");
+    struct Pending {
+        const fs::path &dir;bool complete=false;
+        ~Pending() {if(!complete) {std::error_code ec;fs::remove_all(dir,ec);}}
+    } pending{destination};
+    for(const auto &[relative,bytes]:sources) {
+        const auto file=destination/relative;
+        fs::create_directories(file.parent_path());create_new(file,bytes);
+    }
+    // Write the manifest last so the loader cannot see a package before its sources.
+    create_new(destination/manifest_path.filename(),manifest.bytes);
+    pending.complete=true;
+    return destination;
+}
 int run(int argc,char **argv,int (*compiler)(int,char**)) {
     try {
         if(argc==1||(argc==2&&(command_key(argv[1])=="--help"||std::string(argv[1])=="-h"))) {help();return std::cout?0:2;}
@@ -142,7 +191,7 @@ int run(int argc,char **argv,int (*compiler)(int,char**)) {
                 bool made=false;
                 if(source_status.type()==fs::file_type::not_found) {create_new(source,"exports{\n    @r func hello :: who:text {\n        return \"Hello, \" + who + \"!\";\n    };\n};\n");made=true;}
                 create_new(manifest,"format: 1\nkind: package\nname: "+name+"\nversion: 0.1.0\nentry: "+name+".aw\nsyntax: aesop\n");
-                std::cout<<"Initialized package "<<name<<" in "<<utf8(cwd)<<"\n"<<(made?"Created":"Preserved")<<" "<<name<<".aw\nCreated "<<name<<".awpkg\nInstall by copying this folder to <project>/packages/"<<name<<"/ and writing: use "<<name<<";\n";return std::cout?0:2;
+                std::cout<<"Initialized package "<<name<<" in "<<utf8(cwd)<<"\n"<<(made?"Created":"Preserved")<<" "<<name<<".aw\nCreated "<<name<<".awpkg\nFrom a project directory, install with awl add PATH_TO_MANIFEST.\n";return std::cout?0:2;
             }
             if(argc!=3||!project_name(argv[2])) throw std::runtime_error("usage: awl init NAME (1..64 letters/digits/_/-, starts alphanumeric; no reserved device names) or awl init NAME --pkg");
             const auto manifest=cwd/path(std::string(argv[2])+".awproj"),source=cwd/"main.aw";
@@ -153,6 +202,13 @@ int run(int argc,char **argv,int (*compiler)(int,char**)) {
             if(source_status.type()==fs::file_type::not_found) {create_new(source,"func main {\n    print(\"Hello from Awl!\");\n    return 0;\n};\n");made=true;}
             create_new(manifest,"format: 1\nentry: main.aw\nsyntax: aesop\n");
             std::cout<<"Initialized "<<argv[2]<<" in "<<utf8(cwd)<<"\n"<<(made?"Created":"Preserved")<<" main.aw\nCreated "<<utf8(manifest.filename())<<"\nCheck with: awl check\n";return std::cout?0:2;
+        }
+        if(command=="add") {
+            if(argc!=3) throw std::runtime_error("usage: awl add FILE.awpkg (a local manifest)");
+            const auto project=read_project(discover(cwd,{}));
+            const auto installed=add_package(project,path(argv[2]));
+            std::cout<<"Added Package "<<utf8(installed.filename())<<" at "<<utf8(installed)<<'\n';
+            return std::cout?0:2;
         }
         const bool build=command=="build",run=command=="run",building=build||run;
         if(command!="check"&&!building) throw std::runtime_error("unknown command '"+command+"'; use awl --help");

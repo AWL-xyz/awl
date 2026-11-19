@@ -1,3 +1,7 @@
+# unreleased local Package installation
+
+- `awl add FILE.awpkg` vendors local manifest and source files into the current project without a backend or network. Existing installations are preserved; compiler imports and installer share one bounded manifest reader. There is no registry, lockfile, or dependency solver yet.
+
 # unreleased text runtime
 
 - `string.replace` no longer retains intermediate copies; a changed, nonempty result is allocated once. Exact UTF-8 matching, empty-needle traps, and text heap limits are unchanged. See the [before/after benchmark](docs/PERFORMANCE.md#current-source-replacing-text-in-utf-8-records).

@@ -23,7 +23,7 @@
 | compiler | **Awl Compiler Collection (ACC)**, native C++20 frontend with checked IR, an independent verifier and a C11 backend |
 | source files | `.aw` |
 | manifests | `.awproj` for projects, `.awpkg` for local Packages |
-| public toolkit | `awl init`, `awl check`, `awl build`, `awl run` |
+| public toolkit | `awl init`, `awl add` (local Packages), `awl check`, `awl build`, `awl run` |
 | development version | `0.26.0-dev`, a development identifier, not a compatibility guarantee |
 | release readiness | experimental source candidate, not production-ready |
 
@@ -97,11 +97,15 @@ printf 'owl\nant\nowl\n' | awl run examples/apps/sort/main.aw --cc "$(command -v
 
 ## local Packages
 
+From an initialized project's directory, vendor a Package from this checkout or another local folder:
+
 ```sh
-awl init Greeting --pkg
+awl add /path/to/awl/packages/time/time.awpkg
 ```
 
-local Package imports resolve through `packages/NAME/NAME.awpkg`, project-local file imports use `use path/File.aw as alias;`
+Import it with `use time;` in Awl source, then run `awl check`. `awl add` copies the manifest and sources into `packages/` beside the project entry file without overwriting an existing installation. It needs no network or backend. To start your own library in a separate folder, run `awl init Greeting --pkg` there.
+
+Project-local file imports still use `use path/File.aw as alias;`.
 
 | Package | source implementation |
 | :--- | :--- |

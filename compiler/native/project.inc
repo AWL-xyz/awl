@@ -97,17 +97,14 @@ class Project {
                     // installed package: <root>/packages/NAME/NAME.awpkg names the entry, a missing package is an error, never a local-file fallback
                     const auto name=spelled.substr(4);const auto folder=root/"packages"/name;const auto manifest=folder/(name+".awpkg");
                     std::error_code manifest_error;
-                    if(!std::filesystem::is_regular_file(manifest,manifest_error)||std::filesystem::is_symlink(manifest)) fail(id,node.token,"package '"+name+"' is not installed (expected packages/"+name+"/"+name+".awpkg)","E300");
-                    std::ifstream in(manifest,std::ios::binary);std::string line,entry=name+".aw",kind,found_name;bool format_ok=false;size_t lines=0;
-                    while(std::getline(in,line)&&++lines<=64) {
-                        if(!line.empty()&&line.back()=='\r') line.pop_back();
-                        const auto colon=line.find(": ");if(colon==std::string::npos) continue;
-                        const auto key=line.substr(0,colon),value=line.substr(colon+2);
-                        if(key=="format") format_ok=value=="1"; else if(key=="kind") kind=value; else if(key=="name") found_name=value; else if(key=="entry") entry=value;
-                    }
-                    if(!format_ok||kind!="package"||found_name!=name) fail(id,node.token,"package manifest packages/"+name+"/"+name+".awpkg must declare format: 1, kind: package and name: "+name,"E300");
-                    if(entry.empty()||entry.size()>128||entry.find('/')!=std::string::npos||entry.find('\\')!=std::string::npos||entry.starts_with(".")||!entry.ends_with(".aw")) fail(id,node.token,"package entry must be a plain .aw file name","E300");
-                    target=root;spelled="packages/"+name+"/"+entry;
+                    if(!std::filesystem::is_regular_file(std::filesystem::symlink_status(manifest,manifest_error))||manifest_error)
+                        fail(id,node.token,"package '"+name+"' is not installed (expected packages/"+name+"/"+name+".awpkg)");
+                    const auto resolved=std::filesystem::canonical(manifest,manifest_error);
+                    if(manifest_error||!within(resolved)) fail(id,node.token,"package manifest escapes project root: "+name);
+                    try {
+                        const auto spec=Awl_package::read_manifest(manifest,name);
+                        target=root;spelled="packages/"+name+"/"+spec.entry;
+                    } catch(const std::runtime_error &e) {fail(id,node.token,"invalid package '"+name+"': "+e.what());}
                 }
                 const Path rel=Path(std::u8string(reinterpret_cast<const char8_t*>(spelled.c_str())));
                 unsigned component_count=0;

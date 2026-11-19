@@ -1,6 +1,6 @@
 # Packages
 
-**Implemented in source, development build.** A package is a folder holding a manifest and a library source file, installed by copying it under the project root, there is no registry, network fetch, lockfile or version solving yet.
+**Implemented in source, development build.** A Package is a folder with a `.awpkg` manifest and Awl modules. `awl add` vendors local Package sources into a project. There is no registry, network fetch, lockfile, or version solving.
 
 ## Layout
 
@@ -13,15 +13,36 @@ myapp/
       env.aw             entry, exports{ ... }
 ```
 
-`NAME.awpkg` is `key: value` lines, `format: 1`, `kind: package`, `name: NAME` are required and must match the folder name, `entry:` names a plain `.aw` file in the same folder and defaults to `NAME.aw`, `version:` and `syntax:` are informational for now.
+A `NAME.awpkg` manifest is at most 16 KiB and uses `key: value` lines. Blank lines and `#` comments are allowed. `format: 1`, `kind: package`, and `name: NAME` are required; keys cannot repeat. `entry:` is a plain `.aw` filename beside the manifest and defaults to `NAME.aw`. `version:` and `syntax:` are informational.
 
-## Using a package
+## Installing and importing a Package
 
-`use NAME;` selects `packages/NAME/NAME.awpkg` under the project root, the alias is `NAME` or an explicit `use NAME as other;`, a bare name never falls back to a local file and a missing or malformed package is `E300`, package names are 1..64 letters/digits/_/- and need `as` when they are not valid identifiers, project files keep using `use path/file.aw as alias;`.
+From the directory containing your project's sole `.awproj`, run:
 
-## Creating a package
+```sh
+awl add /path/to/awl/packages/time/time.awpkg
+```
 
-`awl init NAME --pkg` (or `awl init --pkg NAME`) creates `NAME.awpkg` and, if absent, `NAME.aw` with an exported `hello` function, an existing manifest is never overwritten, copy the folder to `<project>/packages/NAME/` to install it.
+Use the installed Package in your entry file:
+
+```text
+use time;
+
+func main {
+    print(time.now());
+    return 0;
+};
+```
+
+`awl add` is offline and does not need a backend. It copies the named manifest and `.aw` sources into `packages/NAME/` beside the project entry file. For an entry at `src/main.aw`, this means `src/packages/NAME/`. It does not overwrite an existing installation or write through a `packages` symlink. The source folder should be dedicated to the Package: `awl add` includes `.aw` files in that folder and its subdirectories, except hidden paths and `build` and `packages` directories. Other assets are not copied. The install rejects visible symlinks and is limited to 512 traversed entries, eight levels of subdirectories, 64 source files, and 1 MiB of source data.
+
+`awl add` validates manifest and file layout, not Awl types or the import graph; run `awl check` after adding the `use`. An ordinary install error cleans up the new Package directory; an interrupted copy may need manual removal. Use trusted local Packages. You can commit the vendored sources with your project, or still copy the Package folder manually.
+
+`use NAME;` resolves `packages/NAME/NAME.awpkg` from the entry source's directory. `use NAME as other;` sets an alias, required when the name is not a valid identifier. Package names are 1–64 letters, digits, underscores or hyphens, excluding reserved device names. A bare name never falls back to a file, and a missing or malformed Package is `E300`. Project-local files still use `use path/file.aw as alias;`.
+
+## Creating a Package
+
+In a separate library directory, run `awl init NAME --pkg` (or `awl init --pkg NAME`). It creates `NAME.awpkg` and, if absent, `NAME.aw` with an exported `hello` function. It never overwrites an existing manifest. From your project directory, run `awl add /path/to/NAME.awpkg` to use the library.
 
 ## Standard packages in this tree (`packages/`)
 
@@ -37,7 +58,7 @@ myapp/
 
 ## Not implemented
 
-dependency resolution between packages, `awl add/install`, lockfiles, a user-wide package directory, packages importing other packages from their own `packages/`, the registry and the `Awldb`/`envman` naming and publication.
+Dependency resolution between Packages, remote `add`/`install`, lockfiles, a user-wide Package directory, separate `packages/` directories per dependency, the registry, and the `Awldb`/`envman` naming and publication.
 
 ## current merge qualification
 

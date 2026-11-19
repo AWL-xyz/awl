@@ -162,7 +162,7 @@ func main[i64] {
 
 functions are private unless explicitly exported, defining-module private context survives exported calls, canonical imports share a module instance, paths and aliases are case-sensitive
 
-`use NAME;` loads a local Package through `packages/NAME/NAME.awpkg`, it does not download from a server, see [Packages](PACKAGES.md)
+`use NAME;` loads a local Package through `packages/NAME/NAME.awpkg` beside the entry source. Use `awl add FILE.awpkg` from a project directory to copy in a Package you already have locally. Neither command downloads from a server; see [Packages](PACKAGES.md).
 
 ## text and builtins
 

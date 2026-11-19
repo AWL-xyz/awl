@@ -29,7 +29,7 @@ cc -std=c11 -O2 /tmp/collections.c -lm -o /tmp/collections
 ```sh
 awl
 awl init Demo
-awl init Greeting --pkg
+awl add /path/to/awl/packages/time/time.awpkg
 awl check
 awl build Demo
 awl build path/main.aw -o program
@@ -37,6 +37,7 @@ awl run path/main.aw -- --name "Ada Lovelace"
 ```
 
 - Bare `awl` displays help. `init Demo` creates `Demo.awproj` and, only if absent, `main.aw` in the current directory. `init Greeting --pkg` or `init --pkg Greeting` creates `Greeting.awpkg` and a Package starter. Initialization never overwrites existing files.
+- `add FILE.awpkg` copies a local Package into the sole project in the current directory, under `packages/` beside its entry file. It does not fetch packages, resolve dependencies, or overwrite an existing installation. See [Package layout and limits](PACKAGES.md).
 - `check`, `build`, and `run` use the same target selection: omit the target for the sole `.awproj` in the current directory, give a project name to search immediate child directories for the exact manifest name, or give a `.aw` file including project-local imports.
 - `check` parses, type-checks and verifies the project without a C backend or executable. Source errors exit with status `1`.
 - `build` keeps the executable. Project outputs default to `<project>/build/<manifest-name>`, single-file outputs default to `<cwd>/<source-stem>`, and default Windows executable names end in `.exe`.
