@@ -15,4 +15,7 @@ jobs:
       - name: Build the source frontend only
         run: python compiler/build_native.py --standalone --strip
       - name: Check Awl source, not a complete installed SDK
-        run: compiler/native/bin/acc.exe check examples/collections/main.aw
+        run: |
+          compiler/native/bin/acc.exe check examples/collections/main.aw
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          compiler/native/bin/awl.exe check examples/collections/main.aw

@@ -33,20 +33,25 @@ void help() {
         <<"  awl                         Show this help\n"
         <<"  awl init NAME               Create NAME.awproj and, if absent, main.aw here\n"
         <<"  awl init NAME --pkg         Create NAME.awpkg and, if absent, NAME.aw (a library package) here\n"
-        <<"  awl build                   Build the sole .awproj project here\n"
-        <<"  awl build NAME              Find NAME.awproj in an immediate child folder\n"
-        <<"  awl build relative/file.aw   Compile a single .aw file (imports supported)\n\n"
-        <<"Build options:\n"
-        <<"  -o FILE                      Executable destination (relative to terminal cwd)\n"
-        <<"  -O 0|1|2|3                   Optimization level (default 2)\n"
+        <<"  awl check [TARGET]          Check syntax and types without a backend\n"
+        <<"  awl build [TARGET]          Build a native executable\n"
+        <<"  awl run [TARGET] [options] [-- ARG ...]  Build and run a temporary executable\n\n"
+        <<"TARGET: omit for the sole .awproj here, use NAME for an immediate child\n"
+        <<"project, or pass a .aw source path (imports supported).\n\n"
+        <<"Check/build/run options:\n"
         <<"  --syntax aesop               Aesop is the only supported syntax\n"
+        <<"  --diagnostic-format text|json Source diagnostic format (default text)\n"
+        <<"Build/run options:\n"
+        <<"  --cc ABSOLUTE_PATH           Use a host C compiler (Linux x86-64 only)\n"
+        <<"  -O 0|1|2|3                   Optimization level (default 2)\n"
         <<"  --build-timeout 1..3600       Backend timeout in seconds (default 120)\n"
-        <<"  --build-memory-mib 512..16384 Backend memory bound (default 4096)\n\n"
+        <<"  --build-memory-mib 512..16384 Backend memory bound (default 4096)\n"
+        <<"Build only: -o FILE             Executable destination (relative to terminal cwd)\n"
+        <<"Run only: --run-timeout 0..86400  Program timeout in seconds (default unlimited)\n\n"
         <<"Project output: <project>/build/<manifest-name> (.exe on Windows).\n"
         <<"Single-file output: <cwd>/<source-stem> (.exe on Windows).\n"
         <<"Init never overwrites existing files. NAME: 1..64 letters/digits/_/-, starts alphanumeric.\n"
-        <<"Compilation needs the complete bundled backend, not Python or a host compiler.\n"
-        <<"Only initialization and compilation are included; no run/install commands yet.\n";
+        <<"Build/run use the bundled backend unless --cc is specified.\n";
 }
 // Exclusive creation, no shell and no truncation of pre-existing files/symlinks.
 void create_new(const fs::path &p,const std::string &bytes) {
@@ -76,8 +81,8 @@ std::vector<fs::path> manifests(const fs::path &folder) {
 fs::path discover(const fs::path &cwd,const std::string &name) {
     if(name.empty()) {
         const auto found=manifests(cwd);
-        if(found.empty()) throw std::runtime_error("no .awproj project in current directory; use awl init NAME or awl build file.aw");
-        if(found.size()!=1) throw std::runtime_error("multiple .awproj projects in current directory; keep one or build an entry .aw file directly");
+        if(found.empty()) throw std::runtime_error("no .awproj project in current directory; use awl init NAME or specify a .aw file");
+        if(found.size()!=1) throw std::runtime_error("multiple .awproj projects in current directory; keep one or specify an entry .aw file directly");
         return found[0];
     }
     if(!project_name(name)) throw std::runtime_error("invalid project name; use a simple NAME or a relative path ending in .aw");
@@ -91,7 +96,7 @@ fs::path discover(const fs::path &cwd,const std::string &name) {
         }
     }
     if(found.empty()) throw std::runtime_error("no immediate child folder contains "+name+".awproj");
-    if(found.size()!=1) throw std::runtime_error("ambiguous project: multiple child folders contain "+name+".awproj; enter the desired folder and use awl build");
+    if(found.size()!=1) throw std::runtime_error("ambiguous project: multiple child folders contain "+name+".awproj; enter the desired folder or specify an entry .aw file");
     return found[0];
 }
 struct Project {fs::path manifest,entry;std::string syntax="aesop";};
@@ -147,51 +152,53 @@ int run(int argc,char **argv,int (*compiler)(int,char**)) {
             bool made=false;
             if(source_status.type()==fs::file_type::not_found) {create_new(source,"func main {\n    print(\"Hello from Awl!\");\n    return 0;\n};\n");made=true;}
             create_new(manifest,"format: 1\nentry: main.aw\nsyntax: aesop\n");
-            std::cout<<"Initialized "<<argv[2]<<" in "<<utf8(cwd)<<"\n"<<(made?"Created":"Preserved")<<" main.aw\nCreated "<<utf8(manifest.filename())<<"\nBuild with: awl build\n";return std::cout?0:2;
+            std::cout<<"Initialized "<<argv[2]<<" in "<<utf8(cwd)<<"\n"<<(made?"Created":"Preserved")<<" main.aw\nCreated "<<utf8(manifest.filename())<<"\nCheck with: awl check\n";return std::cout?0:2;
         }
-        if(command!="build") throw std::runtime_error("unknown command '"+command+"'; use Awl for help (beta includes only init/build)");
-        int i=2;std::string target;
+        const bool build=command=="build",run=command=="run",building=build||run;
+        if(command!="check"&&!building) throw std::runtime_error("unknown command '"+command+"'; use awl --help");
+        int i=2;std::string target,explicit_output;
         if(i<argc&&argv[i][0]!='-') target=argv[i++];
-        std::vector<std::string> flags;std::string override_syntax;bool explicit_output=false;std::set<std::string> seen;
+        std::vector<std::string> flags;std::set<std::string> seen;
         for(;i<argc;++i) {
             const std::string option=argv[i];
+            if(run&&option=="--") break; // Forward the delimiter and all following arguments unchanged.
             if(!seen.insert(option).second) throw std::runtime_error("duplicate option: "+option);
-            if(option!="-o"&&option!="-O"&&option!="--syntax"&&option!="--build-timeout"&&option!="--build-memory-mib") throw std::runtime_error("unknown build option: "+option);
-            if(++i>=argc) throw std::runtime_error("missing value for "+option);
-            const std::string value=argv[i];
-            if(option=="--syntax") {if(value!="aesop") throw std::runtime_error("syntax must be aesop");override_syntax=value;}
-            else {
-                unsigned parsed=0;
-                if(option=="-O"&&!(value.size()==1&&value[0]>='0'&&value[0]<='3')) throw std::runtime_error("optimization must be 0..3");
-                if(option=="--build-timeout"&&!number(value,1,3600,parsed)) throw std::runtime_error("build timeout must be 1..3600");
-                if(option=="--build-memory-mib"&&!number(value,512,16384,parsed)) throw std::runtime_error("build memory must be 512..16384 MiB");
-                if(option=="-o") {if(value.empty()) throw std::runtime_error("empty output path");explicit_output=true;}
-                flags.push_back(option);flags.push_back(value);
-            }
+            const bool common=option=="--syntax"||option=="--diagnostic-format";
+            const bool backend=option=="--cc"||option=="-O"||option=="--build-timeout"||option=="--build-memory-mib";
+            if(!(common||(building&&backend)||(build&&option=="-o")||(run&&option=="--run-timeout"))) throw std::runtime_error("unknown "+command+" option: "+option);
+            if(++i>=argc||(run&&std::string(argv[i])=="--")) throw std::runtime_error("missing value for "+option);
+            const std::string value=argv[i];unsigned parsed=0;
+            if(option=="--syntax"&&value!="aesop") throw std::runtime_error("syntax must be aesop");
+            if(option=="--diagnostic-format"&&value!="text"&&value!="json") throw std::runtime_error("diagnostic format must be text or json");
+            if(option=="--cc"&&value.empty()) throw std::runtime_error("--cc requires an absolute compiler path");
+            if(option=="-O"&&!(value.size()==1&&value[0]>='0'&&value[0]<='3')) throw std::runtime_error("optimization must be 0..3");
+            if(option=="--build-timeout"&&!number(value,1,3600,parsed)) throw std::runtime_error("build timeout must be 1..3600");
+            if(option=="--build-memory-mib"&&!number(value,512,16384,parsed)) throw std::runtime_error("build memory must be 512..16384 MiB");
+            if(option=="--run-timeout"&&!number(value,0,86400,parsed)) throw std::runtime_error("run timeout must be 0..86400");
+            if(option=="-o") {if(value.empty()) throw std::runtime_error("empty output path");explicit_output=value;}
+            else if(option!="--syntax") {flags.push_back(option);flags.push_back(value);}
         }
-        fs::path source,output,manifest;std::string syntax="aesop";
+        fs::path source,manifest;std::string syntax="aesop";
         const bool single=!target.empty()&&path(target).extension()==".aw";
         if(single) {source=fs::canonical(path(target));if(!fs::is_regular_file(source)) throw std::runtime_error("source is not a regular .aw file");}
-        else {const auto project=read_project(discover(cwd,target));source=project.entry;manifest=project.manifest;syntax=project.syntax;output=manifest.parent_path()/"build"/manifest.stem();}
-        if(!override_syntax.empty()) syntax=override_syntax;
+        else {const auto project=read_project(discover(cwd,target));source=project.entry;manifest=project.manifest;syntax=project.syntax;}
+        if(build&&!explicit_output.empty()) {
+            // Protect the selected manifest (even through a hardlink) and .awproj destinations.
+            const auto dest=fs::absolute(path(explicit_output));
+            if(dest.extension()==".awproj"||(!manifest.empty()&&(fs::weakly_canonical(dest)==manifest||(fs::exists(dest)&&fs::equivalent(dest,manifest))))) throw std::runtime_error("refusing to overwrite a .awproj project manifest");
+            if(!fs::is_directory(dest.parent_path())) throw std::runtime_error("output directory does not exist");
+            flags.push_back("-o");flags.push_back(explicit_output);
+        } else if(build&&!single) {
+            auto output=manifest.parent_path()/"build"/manifest.stem();
 #if defined(_WIN32)
-        if(!output.empty()) output+=".exe";
+            output+=".exe";
 #endif
-        if(!single&&!explicit_output) {
-            // Protect manifest and source tree from output-directory symlink escapes.
             const auto parent=output.parent_path();
-            if(fs::is_symlink(parent)|| (fs::exists(parent)&&!fs::is_directory(parent))) throw std::runtime_error("project build output directory must be a real directory, not a symlink");
+            if(fs::is_symlink(parent)||(fs::exists(parent)&&!fs::is_directory(parent))) throw std::runtime_error("project build output directory must be a real directory, not a symlink");
             fs::create_directories(parent);flags.push_back("-o");flags.push_back(utf8(output));
         }
-        // A user-specified output must never overwrite any .awproj manifest, even through a hardlink.
-        if(explicit_output) {
-            for(size_t f=0;f+1<flags.size();f+=2) if(flags[f]=="-o") {
-                const auto dest=fs::absolute(path(flags[f+1]));
-                if(dest.extension()==".awproj"||(!manifest.empty()&&(fs::weakly_canonical(dest)==manifest||(fs::exists(dest)&&fs::equivalent(dest,manifest))))) throw std::runtime_error("refusing to overwrite a .awproj project manifest");
-                const auto parent=dest.parent_path();if(!fs::is_directory(parent)) throw std::runtime_error("output directory does not exist");
-            }
-        }
-        std::vector<std::string> args={argv[0],"build",utf8(source),"--syntax",syntax};args.insert(args.end(),flags.begin(),flags.end());
+        std::vector<std::string> args={argv[0],command,utf8(source),"--syntax",syntax};args.insert(args.end(),flags.begin(),flags.end());
+        args.insert(args.end(),argv+i,argv+argc);
         std::vector<char*> raw;for(auto &a:args) raw.push_back(a.data());raw.push_back(nullptr);
         return compiler(static_cast<int>(args.size()),raw.data());
     } catch(const std::exception &e) {std::cerr<<"Awl: "<<e.what()<<'\n';return 2;}

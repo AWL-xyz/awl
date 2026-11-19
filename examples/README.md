@@ -1,6 +1,6 @@
 # examples
 
-examples use the current Aesop source syntax, contributor builds use `acc check PATH` and `acc emit-c PATH`, `acc build` needs a complete matching SDK resource layout
+Examples use the current Aesop source syntax. After [building the toolkit](../README.md#quick-start-from-source), use `awl check PATH` to check an example and `awl run PATH --cc "$(command -v cc)"` to run it on Linux x86-64 without a bundled SDK. Omit `--cc` if you have a complete matching SDK. Examples that need arguments take them after `--`.
 
 ## language tour
 

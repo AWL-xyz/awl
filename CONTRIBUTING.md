@@ -9,6 +9,7 @@ the contributor workflow currently requires Linux, Python 3, a C++20 compiler, a
 ```sh
 python3 compiler/build_native.py --standalone --strip
 python3 compiler/test_native.py
+python3 tests/toolkit.py
 python3 tests/aesop.py --acc compiler/native/bin/acc
 python3 tests/awl_editor.py --acc compiler/native/bin/acc --report /tmp/aesop-editor.json
 ```

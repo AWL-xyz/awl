@@ -7,12 +7,14 @@
 #include <cstdint>
 #include <cerrno>
 #include <csignal>
+#include <elf.h>
 #include <fcntl.h>
 #include <cstdlib>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <stdexcept>
+#include <utility>
 #include <vector>
 #include <sched.h>
 #include <sys/auxv.h>
@@ -48,7 +50,7 @@ fs::path self(const char *argv0) {
     const auto execfn=reinterpret_cast<const char*>(getauxval(AT_EXECFN));
     if(execfn&&std::strchr(execfn,'/')) return fs::canonical(execfn);
     if(argv0&&std::strchr(argv0,'/')) return fs::canonical(argv0);
-    throw std::runtime_error("cannot locate Awl installation; invoke kcc with its path");
+    throw std::runtime_error("cannot locate Awl installation; invoke awl with its path");
 }
 volatile sig_atomic_t requested_signal=0;
 constexpr int managed_signals[]={SIGINT,SIGTERM,SIGHUP,SIGQUIT,SIGCHLD};
@@ -103,7 +105,7 @@ bool descriptor_limit() {
     const rlimit limit{std::min(old.rlim_cur,hard),hard};return setrlimit(RLIMIT_NOFILE,&limit)==0;
 }
 [[noreturn]] void child_failure() {
-    const char text[]="kcc: cannot configure or execute child process\n";
+    const char text[]="acc: cannot configure or execute child process\n";
     const auto ignored=write(STDERR_FILENO,text,sizeof(text)-1);(void)ignored;_exit(126);
 }
 void kill_group(pid_t pid,int signal) {
@@ -192,29 +194,36 @@ uint64_t little(const unsigned char *bytes,size_t count) {
 }
 struct FileDescriptor {
     int fd;
-    explicit FileDescriptor(const fs::path &path):fd(open(path.c_str(),O_RDONLY|O_CLOEXEC|O_NOFOLLOW)) {
+    explicit FileDescriptor(const fs::path &path):fd(open(path.c_str(),O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_NOFOLLOW)) {
         if(fd<0) throw std::runtime_error("cannot inspect generated executable");
     }
     ~FileDescriptor() {close(fd);}
 };
-void inspect_output(const fs::path &path,mode_t mode) {
+void inspect_output(const fs::path &path,mode_t mode,bool host) {
     FileDescriptor file(path);struct stat stat{};std::array<unsigned char,64> h{};
-    auto invalid=[](){throw std::runtime_error("backend output is not a supported static x86-64 ELF executable");};
+    auto invalid=[host](){throw std::runtime_error(host?"backend output is not a supported x86-64 ELF executable":"backend output is not a supported static x86-64 ELF executable");};
     if(fstat(file.fd,&stat)!=0||!S_ISREG(stat.st_mode)||stat.st_size<64||stat.st_size>256LL*1024*1024||pread(file.fd,h.data(),64,0)!=64) invalid();
-    if(h[0]!=127||h[1]!='E'||h[2]!='L'||h[3]!='F'||h[4]!=2||h[5]!=1||h[6]!=1||little(h.data()+16,2)!=2||little(h.data()+18,2)!=62||little(h.data()+20,4)!=1||little(h.data()+52,2)!=64||little(h.data()+54,2)!=56) invalid();
+    if(h[0]!=127||h[1]!='E'||h[2]!='L'||h[3]!='F'||h[4]!=2||h[5]!=1||h[6]!=1||little(h.data()+18,2)!=EM_X86_64||little(h.data()+20,4)!=1||little(h.data()+52,2)!=64||little(h.data()+54,2)!=56) invalid();
+    const auto elf_type=little(h.data()+16,2);
+    if(elf_type!=ET_EXEC&&(!host||elf_type!=ET_DYN)) invalid();
     const auto size=static_cast<uint64_t>(stat.st_size),offset=little(h.data()+32,8),count=little(h.data()+56,2),entry=little(h.data()+24,8);
     if(!count||count>128||offset<64||offset>size||count*56>size-offset) invalid();
-    bool executable_entry=false;
+    bool executable_entry=false,interpreter=false;
     for(uint64_t i=0;i<count;++i) {
         std::array<unsigned char,56> p{};if(pread(file.fd,p.data(),56,static_cast<off_t>(offset+i*56))!=56) invalid();
         const auto type=little(p.data(),4),flags=little(p.data()+4,4),file_offset=little(p.data()+8,8),address=little(p.data()+16,8),file_size=little(p.data()+32,8),memory_size=little(p.data()+40,8);
-        if(type==2||type==3) invalid(); // No PT_DYNAMIC or PT_INTERP.
-        if(type==1) {
+        if((type==PT_DYNAMIC||type==PT_INTERP)&&!host) invalid();
+        if(type==PT_INTERP) {
+            if(interpreter||file_size<2||file_offset>size||file_size>size-file_offset) invalid();
+            interpreter=true;
+        }
+        if(type==PT_LOAD) {
             if(file_size>memory_size||file_offset>size||file_size>size-file_offset||memory_size>UINT64_MAX-address) invalid();
-            if((flags&1)&&entry>=address&&entry-address<memory_size) executable_entry=true;
+            if((flags&PF_X)&&entry>=address&&entry-address<memory_size) executable_entry=true;
         }
     }
-    if(!executable_entry) invalid();
+    // An ordinary dynamic PIE has an interpreter; a shared library doesn't.
+    if(!executable_entry||(elf_type==ET_DYN&&!interpreter)) invalid();
     if(fchmod(file.fd,mode)!=0) throw std::runtime_error("cannot set generated executable permissions");
 }
 }
@@ -224,18 +233,23 @@ void inspect_output(const fs::path &path,mode_t mode) {
 #endif
 namespace Awl_driver {
 int build(const char *c_source,size_t length,const char *argv0,const std::string &source_path,const std::string &output,const Options &options,bool run) {
+#if !defined(__linux__) || !defined(__x86_64__)
+    if(!options.host_cc.empty()) {std::cerr<<"acc: --cc is supported only on Linux x86-64\n";return 2;}
+#endif
 #if defined(__linux__) && defined(__x86_64__)
     try {
         SignalScope supervision;
-        const auto root=self(argv0).parent_path().parent_path();const auto zig=root/"libexec/zig/zig",lib=root/"libexec/zig/lib";
-        if(!fs::is_regular_file(zig)||!fs::is_directory(lib)) throw std::runtime_error("bundled toolchain missing; use the complete Awl Linux bundle (no system-tool fallback)");
+        const bool host=!options.host_cc.empty();
+        fs::path zig,lib;
+        if(host) {
+            const fs::path compiler=options.host_cc;
+            if(!compiler.is_absolute()||!fs::is_regular_file(compiler)||access(compiler.c_str(),X_OK)!=0)
+                throw std::runtime_error("--cc requires the absolute path to an executable C compiler");
+        } else {
+            const auto root=self(argv0).parent_path().parent_path();zig=root/"libexec/zig/zig";lib=root/"libexec/zig/lib";
+            if(!fs::is_regular_file(zig)||!fs::is_directory(lib)) throw std::runtime_error("bundled toolchain missing; use the complete Awl Linux bundle (no system-tool fallback), or pass --cc /absolute/path/to/cc for a source build");
+        }
         const char *tmpenv=std::getenv("TMPDIR");const fs::path tmpbase=tmpenv&&*tmpenv?fs::absolute(tmpenv):fs::path("/tmp");Temporary temp(tmpbase);
-        fs::path cache;
-        const char *xdg=std::getenv("XDG_CACHE_HOME"),*home=std::getenv("HOME");
-        if(xdg&&*xdg) cache=fs::absolute(xdg)/"Awl/zig-0.15.2";
-        else if(home&&*home) cache=fs::absolute(home)/".cache/Awl/zig-0.15.2";
-        else cache=temp.path/"global-cache";
-        fs::create_directories(cache);
         const auto cfile=temp.path/"program.c";
         {std::ofstream file(cfile,std::ios::binary);file.write(c_source,static_cast<std::streamsize>(length));file.close();if(!file) throw std::runtime_error("cannot write generated C");}
         fs::path destination;
@@ -248,31 +262,47 @@ int build(const char *c_source,size_t length,const char *argv0,const std::string
             if(fs::weakly_canonical(destination)==imported||(fs::exists(destination)&&fs::equivalent(destination,imported))) throw std::runtime_error("refusing to overwrite source with executable");
         }
         Staging staging(destination.parent_path());
-        const std::vector<std::string> environment={"PATH=/no-host-tools","LC_ALL=C","HOME="+temp.path.string(),"TMPDIR="+temp.path.string(),
-            "ZIG_LIB_DIR="+lib.string(),"ZIG_GLOBAL_CACHE_DIR="+cache.string(),"ZIG_LOCAL_CACHE_DIR="+(temp.path/"local-cache").string()};
-        const auto status=execute({zig.string(),"cc","-std=c11","-target","x86_64-linux-musl","-mcpu=baseline","-static","-O"+std::to_string(options.optimization),"-g0","-s",cfile.string(),"-o",staging.path.string()},&environment,true,options.build_timeout_seconds,options.build_memory_mib);
-        if(status.cancellation) {std::cerr<<"kcc: build interrupted\n";return 128+status.cancellation;}
-        if(status.timed_out) {std::cerr<<"kcc: backend wall-time limit exceeded\n";return 124;}
+        const auto optimization="-O"+std::to_string(options.optimization);
+        std::vector<std::string> environment,command;
+        if(host) {
+            // Invoke exactly the selected compiler (no shell). Its assembler/linker may use PATH.
+            command={options.host_cc,"-std=c11",optimization,"-g0","-s",cfile.string(),"-lm","-o",staging.path.string()};
+        } else {
+            fs::path cache;
+            const char *xdg=std::getenv("XDG_CACHE_HOME"),*home=std::getenv("HOME");
+            if(xdg&&*xdg) cache=fs::absolute(xdg)/"Awl/zig-0.15.2";
+            else if(home&&*home) cache=fs::absolute(home)/".cache/Awl/zig-0.15.2";
+            else cache=temp.path/"global-cache";
+            fs::create_directories(cache);
+            environment={"PATH=/no-host-tools","LC_ALL=C","HOME="+temp.path.string(),"TMPDIR="+temp.path.string(),
+                "ZIG_LIB_DIR="+lib.string(),"ZIG_GLOBAL_CACHE_DIR="+cache.string(),"ZIG_LOCAL_CACHE_DIR="+(temp.path/"local-cache").string()};
+            command={zig.string(),"cc","-std=c11","-target","x86_64-linux-musl","-mcpu=baseline","-static",optimization,"-g0","-s",cfile.string(),"-o",staging.path.string()};
+        }
+        const auto status=execute(std::move(command),host?nullptr:&environment,true,options.build_timeout_seconds,options.build_memory_mib);
+        if(status.cancellation) {std::cerr<<"acc: build interrupted\n";return 128+status.cancellation;}
+        if(status.timed_out) {std::cerr<<"acc: backend wall-time limit exceeded\n";return 124;}
         if(status.cleanup_failed) throw std::runtime_error("cannot reap backend descendants");
-        if(status.status) {std::cerr<<"kcc: bundled code generation/linking failed ("<<status.status<<")\n";return 2;}
+        if(status.status) {std::cerr<<"acc: "<<(host?"host C compiler failed":"bundled code generation/linking failed")<<" ("<<status.status<<")\n";return 2;}
         const auto mask=umask(0);umask(mask);
-        inspect_output(staging.path,run?0700:static_cast<mode_t>(0777&~mask));
-        if(requested_signal) {std::cerr<<"kcc: build interrupted before publication\n";return 128+requested_signal;}
+        inspect_output(staging.path,run?0700:static_cast<mode_t>(0777&~mask),host);
+        if(requested_signal) {std::cerr<<"acc: build interrupted before publication\n";return 128+requested_signal;}
         fs::rename(staging.path,destination);staging.path.clear();
         if(run) {
-            const auto program=execute({destination.string()},nullptr,false,options.run_timeout_seconds,0);
-            if(program.cancellation) std::cerr<<"kcc: run interrupted\n";
-            else if(program.timed_out) std::cerr<<"kcc: program wall-time limit exceeded\n";
+            std::vector<std::string> args={destination.string()};
+            args.insert(args.end(),options.program_arguments.begin(),options.program_arguments.end());
+            const auto program=execute(std::move(args),nullptr,false,options.run_timeout_seconds,0);
+            if(program.cancellation) std::cerr<<"acc: run interrupted\n";
+            else if(program.timed_out) std::cerr<<"acc: program wall-time limit exceeded\n";
             else if(program.cleanup_failed) throw std::runtime_error("cannot reap program descendants");
             return program.status;
         }
         std::cout<<destination.string()<<'\n';std::cout.flush();return std::cout?0:2;
-    } catch(const std::exception &e) {std::cerr<<"kcc: "<<e.what()<<'\n';return 2;}
+    } catch(const std::exception &e) {std::cerr<<"acc: "<<e.what()<<'\n';return 2;}
 #elif defined(_WIN32) && (defined(__x86_64__) || defined(_M_X64))
     (void)argv0;return Awl_windows::build(c_source,length,source_path,output,options,run);
 #else
     (void)c_source;(void)length;(void)argv0;(void)source_path;(void)output;(void)options;(void)run;
-    std::cerr<<"kcc: bundled build/run not implemented for this host; preview supports Linux/Windows x86-64 only\n";return 2;
+    std::cerr<<"acc: bundled build/run not implemented for this host; preview supports Linux/Windows x86-64 only\n";return 2;
 #endif
 }
 }

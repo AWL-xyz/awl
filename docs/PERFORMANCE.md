@@ -4,7 +4,33 @@ Awl is intended to compete with rust as a native systems language, outperforming
 
 performance claims need measured equivalent work, consumed results and reproducible optimized builds, safety checks aren't disabled to manufacture wins, all wins and losses belong in the report
 
-## measurement provenance
+## Current source: checked 64-bit arithmetic
+
+ACC emits feature-tested overflow intrinsics for `i64` and `u64` addition, subtraction and multiplication. A supporting C compiler can use the CPU's overflow or carry flag rather than separate range checks. Overflow still traps at every optimization level, including signed-minimum negation. The guarded C11 implementation remains the fallback when the intrinsics are unavailable. Compile emitted C with `-DAWL_PORTABLE_ARITHMETIC` to select that fallback explicitly without disabling checks. Division, remainder and other widths are unchanged.
+
+[`benchmarks/checked_arithmetic.py`](../benchmarks/checked_arithmetic.py) compiles the [same signed arithmetic loop](../benchmarks/workloads/checked-arithmetic/) in Awl, C++ and (when `rustc` is installed) Rust, with equivalent checks in the timed loop. On one Linux x86-64 host with GCC 12.2, the median warm whole-process time for five million iterations was:
+
+| implementation | median |
+| :--- | ---: |
+| Awl before (`20abab5`) | 28.40 ms |
+| Awl with overflow intrinsics | 26.89 ms |
+| Awl with the portable fallback forced | 28.22 ms |
+| C++ with explicit overflow checks | 26.90 ms |
+| Rust with overflow checks enabled | not measured (`rustc` not installed) |
+
+That's about **5.3% less wall time** than the original Awl build and effectively tied with checked C++ on this workload. These are nine shuffled samples after warmup, with compilation excluded and both output values checked against a Python oracle on every run. See the [raw report](../benchmarks/checked-arithmetic.json). This is a microbenchmark, not a claim about application performance or relative Rust speed.
+
+Reproduce from the repository root:
+
+```sh
+python3 compiler/build_native.py --standalone --strip
+python3 tests/checked_arithmetic.py
+python3 benchmarks/checked_arithmetic.py --report /tmp/awl-checked-arithmetic.json
+```
+
+Pass `--before /path/to/acc` to add a pre-optimization Aesop compiler to the comparison. The same harness includes checked Rust automatically if `rustc` is on `PATH`. The correctness gate covers signed/unsigned boundary and seeded cases at `-O0` and `-O3`, both default and forced portable, under UBSan.
+
+## Historical measurement provenance
 
 this table records the completed pre-rebrand performance experiment, original binaries, reports, source harnesses and photos are immutable in `history/pre-rename-evidence.tar.xz`, the current Awl SDK has fresh correctness/distribution qualification, these timings are not newly measured distribution benchmarks, renaming earns no workload point
 

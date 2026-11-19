@@ -142,7 +142,13 @@ int build(const char *c_source,size_t length,const std::string &source_path,cons
         if(status){std::cerr<<"kcc: bundled backend failed/interrupted or wall-time limit exceeded ("<<status<<")\n";return status==124||status==130?status:2;}
         inspect(staging.path);if(cancelled) return 130;
         if(!MoveFileExW(staging.path.c_str(),destination.c_str(),MOVEFILE_REPLACE_EXISTING|MOVEFILE_WRITE_THROUGH)) fail("cannot publish executable");staging.path.clear();
-        if(run){status=execute({destination.wstring()},nullptr,options.run_timeout_seconds,0);if(status==124)std::cerr<<"kcc: program wall-time limit exceeded\n";return status;}
+        if(run) {
+            std::vector<std::wstring> args={destination.wstring()};
+            for(const auto &arg:options.program_arguments) args.push_back(wide(arg));
+            status=execute(args,nullptr,options.run_timeout_seconds,0);
+            if(status==124) std::cerr<<"acc: program wall-time limit exceeded\n";
+            return status;
+        }
         auto utf8=destination.u8string();std::cout.write(reinterpret_cast<const char*>(utf8.data()),utf8.size());std::cout<<'\n';std::cout.flush();return std::cout?0:2;
     }catch(const std::exception &e){std::cerr<<"kcc: "<<e.what()<<'\n';return 2;}
 }

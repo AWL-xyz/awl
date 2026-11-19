@@ -10,15 +10,19 @@ native Windows-host acceptance is deferred, cross-compilation and Wine execution
 
 ```sh
 python3 compiler/build_native.py --standalone --strip
-compiler/native/bin/acc check examples/collections/main.aw
+compiler/native/bin/awl check examples/collections/main.aw
+compiler/native/bin/awl run examples/collections/main.aw --cc "$(command -v cc)"
+```
+
+On Linux x86-64, `--cc` runs the compiler at the supplied absolute path (e.g. `/usr/bin/cc`) with its normal host environment. Use a trusted GCC or Clang installation with C headers, linker tools and `libm`. Output targets the build host and may be dynamically linked. The default remains the bundled backend; Awl does not silently search `PATH` or use the `CC` environment variable. A complete, matching SDK needs neither a host compiler nor Python to build Awl programs.
+
+`acc` is the Awl Compiler Collection driver. `acc check` and `acc emit-c` require no backend. For a manual C11 build, use:
+
+```sh
 compiler/native/bin/acc emit-c examples/collections/main.aw > /tmp/collections.c
 cc -std=c11 -O2 /tmp/collections.c -lm -o /tmp/collections
 /tmp/collections
 ```
-
-Python and host compilers are contributor dependencies for these commands, installed complete SDKs are intended to contain their own backend/linker/resources without requiring those contributor dependencies
-
-`acc` is the Awl Compiler Collection driver, its internal commands include `check`, `emit-ast`, `emit-checked-ast`, `emit-c`, `build` and `run`, backend-backed `build`/`run` require a matching complete resource layout
 
 ## public toolkit
 
@@ -26,21 +30,19 @@ Python and host compilers are contributor dependencies for these commands, insta
 awl
 awl init Demo
 awl init Greeting --pkg
-awl build
+awl check
 awl build Demo
 awl build path/main.aw -o program
+awl run path/main.aw -- --name "Ada Lovelace"
 ```
 
-- bare `awl` displays help, public beta verbs are `init` and `build`
-- `init Demo` creates `Demo.awproj` and, only if absent, `main.aw` in the current directory
-- `init Greeting --pkg` or `init --pkg Greeting` creates `Greeting.awpkg` and `Greeting.aw` in the current directory
-- initialization never overwrites existing files, project and Package initialization are separate operations
-- `build` selects the sole `.awproj` in the current directory
-- `build Demo` searches immediate child folders for the exact `Demo.awproj`
-- a `.aw` target compiles directly, including project-local imports
-- project outputs default to `<project>/build/<manifest-name>`, single-file outputs default to the terminal working directory and source stem, Windows executable names have `.exe`
+- Bare `awl` displays help. `init Demo` creates `Demo.awproj` and, only if absent, `main.aw` in the current directory. `init Greeting --pkg` or `init --pkg Greeting` creates `Greeting.awpkg` and a Package starter. Initialization never overwrites existing files.
+- `check`, `build`, and `run` use the same target selection: omit the target for the sole `.awproj` in the current directory, give a project name to search immediate child directories for the exact manifest name, or give a `.aw` file including project-local imports.
+- `check` parses, type-checks and verifies the project without a C backend or executable. Source errors exit with status `1`.
+- `build` keeps the executable. Project outputs default to `<project>/build/<manifest-name>`, single-file outputs default to `<cwd>/<source-stem>`, and default Windows executable names end in `.exe`.
+- `run` builds a temporary executable, forwards arguments after `--` to it, and returns its exit status. It inherits the caller's working directory and standard streams. Use redirected input with supervised `run`; for interactive terminal input, build and run the executable directly. Process supervision is not a security sandbox; run only trusted code.
 
-`awl` command-name casing and `init`/`build` verb casing are ASCII-insensitive, project names, paths, Package names and aliases remain case-sensitive
+`awl` command-name and verb casing are ASCII-insensitive; project names, paths, Package names and aliases remain case-sensitive.
 
 ## project manifest
 
@@ -54,17 +56,21 @@ Aesop is also the default when the syntax key is omitted, `syntax: next` and `sy
 
 see [Packages](PACKAGES.md) for the distinct `.awpkg` manifest and local import layout
 
-## build options
+## command options
 
-| option | meaning |
-| :--- | :--- |
-| `-o FILE` | output executable, relative to the terminal working directory |
-| `-O 0\|1\|2\|3` | optimization level, default `2` |
-| `--syntax aesop` | explicit assertion of the only supported syntax |
-| `--build-timeout 1..3600` | backend timeout in seconds, default `120` |
-| `--build-memory-mib 512..16384` | backend memory bound, default `4096` |
+| option | commands | meaning |
+| :--- | :--- | :--- |
+| `--syntax aesop` | check, build, run | explicit assertion of the only supported syntax |
+| `--diagnostic-format text\|json` | check, build, run | source diagnostic format on stderr; default `text` |
+| `-o FILE` | build | executable destination, relative to the caller's working directory |
+| `-O 0\|1\|2\|3` | build, run | optimization level, default `2` |
+| `--cc ABSOLUTE_PATH` | build, run | opt in to a host C compiler on Linux x86-64 |
+| `--build-timeout 1..3600` | build, run | backend timeout in seconds, default `120` |
+| `--build-memory-mib 512..16384` | build, run | backend memory bound, default `4096` |
+| `--run-timeout 0..86400` | run | program timeout in seconds, default `0` (unlimited) |
+| `-- ARG ...` | run | pass the remaining arguments to the program, unchanged |
 
-`-o` and `-O` are different options, no public registry, server-based `add`/`install` or public `run` verb is claimed
+Options follow the optional target. `-o` and `-O` are different options. The driver returns `124` when a backend or program exceeds its wall-time limit. Registry publishing and server-based `add`/`install` are not implemented.
 
 omitting a function result requests body-based inference, see [Aesop return inference](AESOP.md#return-type-inference), owned resource results remain explicit
 
@@ -73,10 +79,10 @@ omitting a function result requests body-based inference, see [Aesop return infe
 - [Aesop syntax reference](AESOP.md)
 - [built-in API and conversions](API.md)
 - [capability assessment](CAPABILITY-ASSESSMENT.md)
-- current source gates: `compiler/test_native.py`, `compiler/generate_runtime.py --check`, `compiler/generate_platform.py --check`, `tests/aesop.py`, `tests/aesop_time.py`, see [current test gates](../tests/README.md)
+- [current source gates](../tests/README.md), including `tests/toolkit.py` for Linux source builds without a bundled backend
 - older checkpoints bind their recorded compiler/source hashes, not the current source by implication
 
-a source-current complete Linux SDK archive was built locally and its report is `tests/sdk-source-current.json`, offline acceptance, relocation/backend-failure testing and native Windows qualification remain separate release work
+`tests/sdk-source-current.json` records a complete Linux SDK built at an earlier source checkpoint. It does not qualify the new toolkit commands in an SDK archive. Exact-archive and native Windows qualification remain separate release work.
 
 ## frontend embedding
 

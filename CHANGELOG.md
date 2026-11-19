@@ -1,3 +1,11 @@
+# unreleased toolkit workflow and checked arithmetic
+
+- Emitted `i64` and `u64` add/subtract/multiply use overflow intrinsics when the C compiler supports them, with the previous guarded C11 fallback. Checks and traps stay enabled. A reproducible signed arithmetic microbenchmark measures about 5.3% lower runtime than the previous Awl compiler on one Linux x86-64 host; see [performance evidence](docs/PERFORMANCE.md#current-source-checked-64-bit-arithmetic).
+
+- `awl check` and `awl run` share `awl build`'s project and source selection. `run` forwards arguments after `--`, propagates the program status, and removes the temporary executable.
+- On Linux x86-64, `awl build` and `awl run` can explicitly use a host C compiler with `--cc /absolute/path/to/cc`. The bundled backend remains the default; there is no implicit host fallback.
+- Source-only CI exercises the project workflow, imports, a working stdin utility, exit status, timeouts and protected outputs. This is not a new SDK release or Windows host qualification.
+
 # unreleased mutable borrows and diagnostics
 
 ## Aesop source revision, not a published SDK release

@@ -23,7 +23,7 @@
 | compiler | **Awl Compiler Collection (ACC)**, native C++20 frontend with checked IR, an independent verifier and a C11 backend |
 | source files | `.aw` |
 | manifests | `.awproj` for projects, `.awpkg` for local Packages |
-| public toolkit | `awl`, currently `init` and `build` |
+| public toolkit | `awl init`, `awl check`, `awl build`, `awl run` |
 | development version | `0.26.0-dev`, a development identifier, not a compatibility guarantee |
 | release readiness | experimental source candidate, not production-ready |
 
@@ -65,39 +65,33 @@ see the [Aesop syntax reference](docs/AESOP.md) for declaration grammar, modifie
 
 ## quick start from source
 
-**contributor prerequisites:** Python 3, a C++20 compiler and a C compiler for the generated-program example below, Linux is the currently exercised host
+**Prerequisites (Linux x86-64):** Python 3, a C++20 compiler, and a host C compiler with development headers and linker tools (such as GCC or Clang). Run the first two lines from the repository root:
 
 ```sh
 python3 compiler/build_native.py --standalone --strip
+export PATH="$PWD/compiler/native/bin:$PATH"
 
-compiler/native/bin/acc check examples/collections/main.aw
-compiler/native/bin/acc emit-c examples/collections/main.aw > /tmp/awl-collections.c
-cc -std=c11 -O2 /tmp/awl-collections.c -lm -o /tmp/awl-collections
-/tmp/awl-collections
+cd "$(mktemp -d)"
+awl init Demo
+awl check
+awl run --cc "$(command -v cc)"           # Hello from Awl!
+awl build --cc "$(command -v cc)"
+./build/Demo
 ```
 
-this builds a contributor compiler, not a complete redistributable SDK, `acc check` and `acc emit-c` work without the bundled backend
+`awl init` writes starter files in the current directory without overwriting existing files. `awl check` needs no C backend. `--cc` explicitly selects a host compiler for a local build; without it, `build` and `run` still require a complete, matching SDK. The contributor build above is not a redistributable SDK.
 
 ### toolkit workflow
 
-```sh
-compiler/native/bin/awl init Demo
-compiler/native/bin/awl init Greeting --pkg
-```
+`check`, `build`, and `run` all accept the same targets: omit the target for the sole `.awproj` in the current directory, pass `Demo` to look for `Demo.awproj` in immediate child directories, or pass a `.aw` file directly. `awl run` passes arguments after `--` to the program and doesn't keep an executable.
 
-`init` writes Aesop starters without overwriting existing files, project initialization uses the current directory rather than creating a named child directory
-
-with a complete, matching SDK backend installed alongside the driver, project builds use:
+For example, from the repository root, run the shipped sort utility with redirected input:
 
 ```sh
-awl build
-awl build Demo
-awl build relative/main.aw -o program
+printf 'owl\nant\nowl\n' | awl run examples/apps/sort/main.aw --cc "$(command -v cc)" -- --unique
 ```
 
-`awl build` selects the sole current-directory project manifest, `awl build Demo` searches immediate child folders for `Demo.awproj`, a `.aw` target compiles directly
-
-`awl` command-name casing and `init`/`build` verb casing are ASCII-insensitive, source paths, import paths, Package names and aliases remain case-sensitive, `-o` and `-O` are distinct
+`awl` command-name and verb casing are ASCII-insensitive; project names, paths, Package names, and aliases remain case-sensitive. `-o` and `-O` are distinct.
 
 [toolkit details →](docs/ASDK.md)
 
@@ -159,9 +153,10 @@ python3 tests/aesop.py --acc compiler/native/bin/acc
 python3 tests/aesop_time.py --acc compiler/native/bin/acc --sanitize --report tests/aesop-time.json
 python3 compiler/generate_runtime.py --check
 python3 compiler/generate_platform.py --check
+python3 tests/toolkit.py
 ```
 
-current source evidence is recorded in `tests/aesop-native.json.gz`, `tests/aesop-checks.json`, `tests/aesop-program-sanitizers.json`, `tests/aesop-time.json`, `tests/aesop-migration.json` and `tests/aesop-editor.json`, these cover their stated source/native/editor scopes, not a complete standalone SDK or native Windows release
+See the [current test gates](tests/README.md). Checked-in evidence is bound to the compiler and sources recorded in each report; it does not qualify a new SDK or native Windows release.
 
 older reports and test utilities may describe retired compiler versions, they are historical evidence rather than acceptance for the current source tree
 

@@ -18,10 +18,14 @@ jobs:
         run: python3 compiler/generate_runtime.py --check
       - name: Check embedded platform helpers
         run: python3 compiler/generate_platform.py --check
+      - name: Source toolkit without a bundled SDK
+        run: python3 tests/toolkit.py --acc compiler/native/bin/acc
       - name: Function declarations and generated native execution
         run: python3 tests/aesop.py --acc compiler/native/bin/acc --report tests/aesop-checks.json
       - name: Generated-program sanitizers
         run: python3 tests/aesop.py --sanitize-programs --report tests/aesop-program-sanitizers.json
+      - name: Checked arithmetic at both optimization levels and on the portable path
+        run: python3 tests/checked_arithmetic.py --acc compiler/native/bin/acc
       - name: Local time Package with generated-program sanitizers
         run: python3 tests/aesop_time.py --acc compiler/native/bin/acc --sanitize --report tests/aesop-time.json
       - name: Offline editor interpreter and bundled examples
