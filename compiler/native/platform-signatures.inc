@@ -2,6 +2,14 @@
 // independent verifier each validate argument/result use against this schema.
 // These are not user-declared functions or a general foreign-call escape hatch.
 struct PlatformSignature { std::vector<std::string> parameters; std::string result; };
+enum class BitRhs { None, Word, Count };
+const std::unordered_map<std::string,BitRhs> bit_methods={
+    {"bits_and",BitRhs::Word},{"bits_or",BitRhs::Word},{"bits_xor",BitRhs::Word},
+    {"bits_not",BitRhs::None},{"bits_popcount",BitRhs::None},
+    {"bits_shl",BitRhs::Count},{"bits_shr",BitRhs::Count},
+    {"bits_rotl",BitRhs::Count},{"bits_rotr",BitRhs::Count}
+};
+bool bit_word(const std::string &type) {return type=="u8"||type=="u16"||type=="u32"||type=="u64";}
 const std::unordered_map<std::string,PlatformSignature> platform_signatures=[] {
     std::unordered_map<std::string,PlatformSignature> table={
     {"tcp_listen_loopback",{{"i64","i64"},"i64"}},
@@ -118,13 +126,20 @@ const std::unordered_map<std::string,PlatformSignature> platform_signatures=[] {
         table.emplace("view_get_"+e,PlatformSignature{{view,"i64"},e});
         table.emplace("view_slice_"+e,PlatformSignature{{view,"i64","i64"},view});
         for(const auto &[method,sig]:methods) table.emplace("vector_"+method+"_"+e,sig);
+        if(bit_word(e)) for(const auto &[method,rhs]:bit_methods) {
+            PlatformSignature sig{{e},method=="bits_popcount"?"i64":e};
+            if(rhs!=BitRhs::None) sig.parameters.push_back(rhs==BitRhs::Word?e:"i64");
+            table.emplace(method+"_"+e,std::move(sig));
+        }
     }
     return table;
 }();
+bool bit_specialization(const std::string &name) {return name.starts_with("bits_")&&platform_signatures.contains(name);}
 
 // Public surface names use namespace.method with lowercase method names.
 // Internal IR keeps the stable ABI names above; the parser translates surface calls.
-const std::unordered_map<std::string,std::string> builtin_internal_to_surface={
+const std::unordered_map<std::string,std::string> builtin_internal_to_surface=[] {
+    std::unordered_map<std::string,std::string> names={
     {"arg_count","arg.count"},
     {"arg_i64","arg.i64"},
     {"arg_i64_valid","arg.i64valid"},
@@ -264,14 +279,17 @@ const std::unordered_map<std::string,std::string> builtin_internal_to_surface={
     {"window_set_pixel","window.pixel"},
     {"window_set_title","window.title"},
     {"window_width","window.width"}
-};
+    };
+    for(const auto &op:bit_methods) names.emplace(op.first,"bits."+op.first.substr(5));
+    return names;
+}();
 const std::unordered_map<std::string,std::string> builtin_surface_to_internal=[] {
     std::unordered_map<std::string,std::string> table;
     for(const auto &[internal,surface]:builtin_internal_to_surface) table.emplace(surface,internal);
     return table;
 }();
 const std::unordered_set<std::string> builtin_internal_prefixes={
-    "spool_","map_","set_","vector_","view_","string_","int_vector_","window_","buffer_","file_","tcp_","arg_","env_","stdin_","stdout_","stderr_","process_","platform_","clock_","wall_clock_","sleep_","array_"
+    "bits_","spool_","map_","set_","vector_","view_","string_","int_vector_","window_","buffer_","file_","tcp_","arg_","env_","stdin_","stdout_","stderr_","process_","platform_","clock_","wall_clock_","sleep_","array_"
 };
 bool builtin_internal_name(const std::string &name) {
     if(name.starts_with("kn_")) return false;

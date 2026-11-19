@@ -15,8 +15,8 @@ def render():
         names+=['k_print_'+ty]+['k_'+ty+'_'+op for op in ['add','sub','mul','div','rem']]
     names+=['k_convert_'+src+'_'+dst for dst in kcc.INTEGERS for src in kcc.INTEGERS]
     names+=['k_convert_f64_'+dst for dst in kcc.INTEGERS]
-    for name in names:
-        body=kcc.integer_runtime({name})
+    helpers=[(name,kcc.integer_runtime({name})) for name in names]+list(kcc.bit_runtime())
+    for name,body in helpers:
         assert body!='\n' and ')Awl"' not in body
         lines.append('{"'+name+'",R"Awl('+body+')Awl"},')
     return '\n'.join(lines+['};',''])

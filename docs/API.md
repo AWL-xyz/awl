@@ -34,12 +34,39 @@ mixed integer and `f64` arithmetic remains strict, `i64 * f64` asks for `f64.con
 
 type tests are static predicates, they do not introduce a dynamic `any` type, the operand is evaluated once before the constant result is produced
 
+## unsigned bit operations
+
+For any word type `T` (`u8`, `u16`, `u32`, `u64`) of width `N`:
+
+| Call | Result | Behavior |
+| :--- | :--- | :--- |
+| `bits.and(a, b)`, `bits.or(a, b)`, `bits.xor(a, b)` | `T` | Bitwise AND, OR, XOR. Both operands must be `T`. |
+| `bits.not(a)` | `T` | Invert exactly `N` bits. |
+| `bits.shl(a, n)` | `T` | Shift left, discarding bits shifted out. |
+| `bits.shr(a, n)` | `T` | Shift right, filling with zero bits. |
+| `bits.rotl(a, n)`, `bits.rotr(a, n)` | `T` | Rotate bits within the word. |
+| `bits.popcount(a)` | `i64` | Count set bits, from `0` to `N`. |
+
+Every shift or rotate takes an `i64` count with `0 <= n < N`. A count of zero returns the original word. Negative counts and counts at or above the width cause an arithmetic trap, not a modulo reduction. Signed words and mixed-width word operands are rejected; use an unsigned suffix or an explicit checked conversion. These are ordinary eager calls, not the short-circuit boolean `and` and `or` operators, and they do not change overflow behavior for arithmetic such as `+` and `*`.
+
+```text
+func main {
+    print(bits.shl(255u8, 1));            -- 254
+    print(bits.rotl(128u8, 1));           -- 1
+    print(bits.popcount(bits.not(0u32))); -- 32
+    return 0;
+};
+```
+
+The native backend emits only the word helpers used by the program. The offline editor subset supports the same word widths and count rules.
+
 ## grouped calls
 
 | group | surface examples |
 | :--- | :--- |
 | arrays | `array.length(a)` |
 | arguments | `arg.count()`, `arg.text(i)`, `arg.i64(i)`, `arg.textvalid(i)`, `arg.i64valid(i)` |
+| bit operations | `bits.and(a,b)`, `bits.or(a,b)`, `bits.xor(a,b)`, `bits.not(a)`, `bits.shl(a,n)`, `bits.shr(a,n)`, `bits.rotl(a,n)`, `bits.rotr(a,n)`, `bits.popcount(a)` |
 | buffers | `buffer.new(n)`, `buffer.size(b)`, `buffer.get(b,i)`, `buffer.set(b,i,v)`, `buffer.findbyte(b,i,n,v)`, `buffer.free(b)`, `buffer.text(b,i,n)`, `buffer.textvalid(b,i,n)`, `buffer.writetext(b,i,s)` |
 | clocks | `clock.millis()`, `clock.wall()`, `clock.sleep(ms)` |
 | environment | `env.size(name)`, `env.read(name,b,i,n)` |

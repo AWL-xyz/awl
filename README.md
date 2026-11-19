@@ -56,6 +56,7 @@ func main[i64] {
 - `@p count: 3;` declares a binding, `count: count - 1;` assigns it
 - braced functions/control flow and mandatory semicolons are part of Aesop, enums and matches retain their documented `end;` forms
 - `vector.length(value)` queries vector length
+- [`bits.xor(a, b)`, `bits.shl(word, count)`, and related calls](docs/API.md#unsigned-bit-operations) work on exact-width unsigned integers
 
 `@b` explicitly borrows a resource parameter, an unmarked parameter does not acquire borrow permission, scoped resources must still follow the ownership rules, resource results require an explicit result/ownership annotation
 

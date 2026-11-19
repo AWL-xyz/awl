@@ -311,4 +311,76 @@ constexpr RuntimeHelper c_helpers[]={
 )Awl"},
 {"k_convert_f64_u64",R"Awl(static uint64_t k_convert_f64_u64(double a) { if (isnan(a) || a <= 0.0) return 0; if (a >= (double)UINT64_MAX) return UINT64_MAX; return (uint64_t)trunc(a); }
 )Awl"},
+{"k_bits_and_u8",R"Awl(static uint8_t k_bits_and_u8(uint8_t a, uint8_t b) { return (uint8_t)(a & b); }
+)Awl"},
+{"k_bits_or_u8",R"Awl(static uint8_t k_bits_or_u8(uint8_t a, uint8_t b) { return (uint8_t)(a | b); }
+)Awl"},
+{"k_bits_xor_u8",R"Awl(static uint8_t k_bits_xor_u8(uint8_t a, uint8_t b) { return (uint8_t)(a ^ b); }
+)Awl"},
+{"k_bits_not_u8",R"Awl(static uint8_t k_bits_not_u8(uint8_t a) { return (uint8_t)(~(uint64_t)a); }
+)Awl"},
+{"k_bits_shl_u8",R"Awl(static uint8_t k_bits_shl_u8(uint8_t a, int64_t n) { if ((uint64_t)n >= 8) k_trap(); return (uint8_t)((uint64_t)a << n); }
+)Awl"},
+{"k_bits_shr_u8",R"Awl(static uint8_t k_bits_shr_u8(uint8_t a, int64_t n) { if ((uint64_t)n >= 8) k_trap(); return (uint8_t)((uint64_t)a >> n); }
+)Awl"},
+{"k_bits_rotl_u8",R"Awl(static uint8_t k_bits_rotl_u8(uint8_t a, int64_t n) { if ((uint64_t)n >= 8) k_trap(); if (n == 0) return a; return (uint8_t)(((uint64_t)a << n) | ((uint64_t)a >> (8-n))); }
+)Awl"},
+{"k_bits_rotr_u8",R"Awl(static uint8_t k_bits_rotr_u8(uint8_t a, int64_t n) { if ((uint64_t)n >= 8) k_trap(); if (n == 0) return a; return (uint8_t)(((uint64_t)a >> n) | ((uint64_t)a << (8-n))); }
+)Awl"},
+{"k_bits_popcount_u8",R"Awl(static int64_t k_bits_popcount_u8(uint8_t a) { uint64_t word=a; int64_t count=0; while (word) { word &= word-1; ++count; } return count; }
+)Awl"},
+{"k_bits_and_u16",R"Awl(static uint16_t k_bits_and_u16(uint16_t a, uint16_t b) { return (uint16_t)(a & b); }
+)Awl"},
+{"k_bits_or_u16",R"Awl(static uint16_t k_bits_or_u16(uint16_t a, uint16_t b) { return (uint16_t)(a | b); }
+)Awl"},
+{"k_bits_xor_u16",R"Awl(static uint16_t k_bits_xor_u16(uint16_t a, uint16_t b) { return (uint16_t)(a ^ b); }
+)Awl"},
+{"k_bits_not_u16",R"Awl(static uint16_t k_bits_not_u16(uint16_t a) { return (uint16_t)(~(uint64_t)a); }
+)Awl"},
+{"k_bits_shl_u16",R"Awl(static uint16_t k_bits_shl_u16(uint16_t a, int64_t n) { if ((uint64_t)n >= 16) k_trap(); return (uint16_t)((uint64_t)a << n); }
+)Awl"},
+{"k_bits_shr_u16",R"Awl(static uint16_t k_bits_shr_u16(uint16_t a, int64_t n) { if ((uint64_t)n >= 16) k_trap(); return (uint16_t)((uint64_t)a >> n); }
+)Awl"},
+{"k_bits_rotl_u16",R"Awl(static uint16_t k_bits_rotl_u16(uint16_t a, int64_t n) { if ((uint64_t)n >= 16) k_trap(); if (n == 0) return a; return (uint16_t)(((uint64_t)a << n) | ((uint64_t)a >> (16-n))); }
+)Awl"},
+{"k_bits_rotr_u16",R"Awl(static uint16_t k_bits_rotr_u16(uint16_t a, int64_t n) { if ((uint64_t)n >= 16) k_trap(); if (n == 0) return a; return (uint16_t)(((uint64_t)a >> n) | ((uint64_t)a << (16-n))); }
+)Awl"},
+{"k_bits_popcount_u16",R"Awl(static int64_t k_bits_popcount_u16(uint16_t a) { uint64_t word=a; int64_t count=0; while (word) { word &= word-1; ++count; } return count; }
+)Awl"},
+{"k_bits_and_u32",R"Awl(static uint32_t k_bits_and_u32(uint32_t a, uint32_t b) { return (uint32_t)(a & b); }
+)Awl"},
+{"k_bits_or_u32",R"Awl(static uint32_t k_bits_or_u32(uint32_t a, uint32_t b) { return (uint32_t)(a | b); }
+)Awl"},
+{"k_bits_xor_u32",R"Awl(static uint32_t k_bits_xor_u32(uint32_t a, uint32_t b) { return (uint32_t)(a ^ b); }
+)Awl"},
+{"k_bits_not_u32",R"Awl(static uint32_t k_bits_not_u32(uint32_t a) { return (uint32_t)(~(uint64_t)a); }
+)Awl"},
+{"k_bits_shl_u32",R"Awl(static uint32_t k_bits_shl_u32(uint32_t a, int64_t n) { if ((uint64_t)n >= 32) k_trap(); return (uint32_t)((uint64_t)a << n); }
+)Awl"},
+{"k_bits_shr_u32",R"Awl(static uint32_t k_bits_shr_u32(uint32_t a, int64_t n) { if ((uint64_t)n >= 32) k_trap(); return (uint32_t)((uint64_t)a >> n); }
+)Awl"},
+{"k_bits_rotl_u32",R"Awl(static uint32_t k_bits_rotl_u32(uint32_t a, int64_t n) { if ((uint64_t)n >= 32) k_trap(); if (n == 0) return a; return (uint32_t)(((uint64_t)a << n) | ((uint64_t)a >> (32-n))); }
+)Awl"},
+{"k_bits_rotr_u32",R"Awl(static uint32_t k_bits_rotr_u32(uint32_t a, int64_t n) { if ((uint64_t)n >= 32) k_trap(); if (n == 0) return a; return (uint32_t)(((uint64_t)a >> n) | ((uint64_t)a << (32-n))); }
+)Awl"},
+{"k_bits_popcount_u32",R"Awl(static int64_t k_bits_popcount_u32(uint32_t a) { uint64_t word=a; int64_t count=0; while (word) { word &= word-1; ++count; } return count; }
+)Awl"},
+{"k_bits_and_u64",R"Awl(static uint64_t k_bits_and_u64(uint64_t a, uint64_t b) { return (uint64_t)(a & b); }
+)Awl"},
+{"k_bits_or_u64",R"Awl(static uint64_t k_bits_or_u64(uint64_t a, uint64_t b) { return (uint64_t)(a | b); }
+)Awl"},
+{"k_bits_xor_u64",R"Awl(static uint64_t k_bits_xor_u64(uint64_t a, uint64_t b) { return (uint64_t)(a ^ b); }
+)Awl"},
+{"k_bits_not_u64",R"Awl(static uint64_t k_bits_not_u64(uint64_t a) { return (uint64_t)(~(uint64_t)a); }
+)Awl"},
+{"k_bits_shl_u64",R"Awl(static uint64_t k_bits_shl_u64(uint64_t a, int64_t n) { if ((uint64_t)n >= 64) k_trap(); return (uint64_t)((uint64_t)a << n); }
+)Awl"},
+{"k_bits_shr_u64",R"Awl(static uint64_t k_bits_shr_u64(uint64_t a, int64_t n) { if ((uint64_t)n >= 64) k_trap(); return (uint64_t)((uint64_t)a >> n); }
+)Awl"},
+{"k_bits_rotl_u64",R"Awl(static uint64_t k_bits_rotl_u64(uint64_t a, int64_t n) { if ((uint64_t)n >= 64) k_trap(); if (n == 0) return a; return (uint64_t)(((uint64_t)a << n) | ((uint64_t)a >> (64-n))); }
+)Awl"},
+{"k_bits_rotr_u64",R"Awl(static uint64_t k_bits_rotr_u64(uint64_t a, int64_t n) { if ((uint64_t)n >= 64) k_trap(); if (n == 0) return a; return (uint64_t)(((uint64_t)a >> n) | ((uint64_t)a << (64-n))); }
+)Awl"},
+{"k_bits_popcount_u64",R"Awl(static int64_t k_bits_popcount_u64(uint64_t a) { uint64_t word=a; int64_t count=0; while (word) { word &= word-1; ++count; } return count; }
+)Awl"},
 };

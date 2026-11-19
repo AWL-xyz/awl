@@ -100,7 +100,7 @@ see [Packages](PACKAGES.md) for the distinct `.awpkg` manifest and local import 
 | option | commands | meaning |
 | :--- | :--- | :--- |
 | `--syntax aesop` | check, build, run, test | explicit assertion of the only supported syntax |
-| `--diagnostic-format text\|json` | check, build, run, test | source diagnostic format on stderr; default `text` |
+| `--diagnostic-format text\|json` | fmt, check, build, run, test | source diagnostic format on stderr; default `text` |
 | `-o FILE` | build | executable destination, relative to the caller's working directory |
 | `-O 0\|1\|2\|3` | build, run, test | optimization level, default `2` |
 | `--cc ABSOLUTE_PATH` | build, run, test | opt in to a host C compiler on Linux x86-64 |
